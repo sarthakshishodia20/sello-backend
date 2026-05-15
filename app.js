@@ -43,7 +43,7 @@ app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOAD_DIR |
 
 // ─── Request Logger ─────────────────────────────────────────────────────────
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+//   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
 });
 

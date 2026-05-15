@@ -14,6 +14,7 @@ async function getAllMerchants(req, res) {
     const page = Number(req.query.page || 1);
     const offset = (page - 1) * limit;
 
+    /*
     console.log('[MerchantController] Fetching with params:', {
       masterbrandId: req.selloUser.masterbrandId,
       search: req.query.search,
@@ -21,6 +22,7 @@ async function getAllMerchants(req, res) {
       limit,
       offset
     });
+    */
 
     const result = await merchantService.getAllMerchants(req.selloUser.masterbrandId, {
       search: req.query.search || '',
