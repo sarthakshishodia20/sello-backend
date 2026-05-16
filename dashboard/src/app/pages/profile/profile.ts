@@ -9,13 +9,14 @@ import { MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [NgIf, FormsModule, ButtonModule, CardModule, InputTextModule, TextareaModule, TagModule, ProgressSpinnerModule, DialogModule],
+  imports: [NgIf, FormsModule, ButtonModule, CardModule, InputTextModule, TextareaModule, TagModule, ProgressSpinnerModule, DialogModule, SelectModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
@@ -28,6 +29,15 @@ export class ProfileComponent implements OnInit {
   saving = signal(false);
   logoutVisible = signal(false);
   merchantProfile = signal<any | null>(null);
+
+  cities = [
+    { name: 'Delhi', code: 'Delhi' },
+    { name: 'Mumbai', code: 'Mumbai' },
+    { name: 'Bangalore', code: 'Bangalore' },
+    { name: 'Hyderabad', code: 'Hyderabad' },
+    { name: 'Chennai', code: 'Chennai' },
+    { name: 'Kolkata', code: 'Kolkata' }
+  ];
 
   // Form for either merchant or admin profile editing
   form: any = {
@@ -77,7 +87,7 @@ export class ProfileComponent implements OnInit {
               email: merchant.contact_email || '',
               phone: merchant.phone || '',
               address: merchant.address || '',
-              city_name: merchant.city_name || '',
+              city_name: merchant.city_name || 'Delhi',
               delivery_time: merchant.delivery_time || '30 mins',
               delivery_mode: merchant.delivery_mode || 'BOTH',
               theme_color: merchant.theme_color || '#000000'

@@ -188,6 +188,82 @@
   color: #94a3b8;
 }
 
+/* ── PrimeNG Select Override ── */
+::ng-deep .yelo-dropdown {
+  width: 100%;
+}
+
+::ng-deep .yelo-dropdown .p-select {
+  width: 100%;
+  background: var(--primary-light) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  transition: all 0.2s;
+}
+
+::ng-deep .yelo-dropdown .p-select .p-select-label {
+  padding: 14px 16px 14px 44px !important;
+  font-size: 0.95rem !important;
+  color: var(--text-dark) !important;
+  font-weight: 600 !important;
+}
+
+::ng-deep .yelo-dropdown .p-select:not(.p-disabled).p-focus {
+  border-color: var(--primary) !important;
+  background: var(--white) !important;
+  box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+::ng-deep .p-select-panel {
+  background: var(--white) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
+  overflow: hidden;
+}
+
+::ng-deep .p-select-option {
+  padding: 12px 16px !important;
+  font-weight: 600 !important;
+  color: var(--text-dark) !important;
+  transition: all 0.2s;
+}
+
+::ng-deep .p-select-option:hover {
+  background: var(--primary-light) !important;
+}
+
+::ng-deep .p-select-option.p-select-option-selected {
+  background: var(--text-dark) !important;
+  color: var(--white) !important;
+}
+
+/* Dark Mode Overrides for Select */
+:host-context(body.dark-mode) ::ng-deep .yelo-dropdown .p-select {
+  background: var(--surface-100) !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .yelo-dropdown .p-select .p-select-label {
+  color: var(--white) !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .p-select-panel {
+  background: var(--bg-card) !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .p-select-option {
+  color: var(--white) !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .p-select-option:hover {
+  background: var(--surface-100) !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .p-select-option.p-select-option-selected {
+  background: var(--primary) !important;
+  color: var(--text-dark) !important;
+}
+
 /* ── Status Column ── */
 .status-stack {
   display: flex;
@@ -264,6 +340,90 @@
   background: #ef4444;
   color: var(--white);
   border-color: #ef4444;
+}
+
+/* ── Mode Toggle Group ── */
+.mode-toggle-group {
+  display: flex;
+  gap: 12px;
+  background: var(--primary-light);
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+.mode-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mode-btn i {
+  font-size: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.mode-btn span {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text-dark);
+}
+
+.mode-btn:hover i {
+  transform: translateY(-2px);
+}
+
+.mode-btn.active {
+  background: var(--white);
+  color: #0f172a !important; /* Explicit dark color for light mode active text */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  font-weight: 900;
+}
+
+.mode-btn.active i {
+  color: #f59e0b; /* Vibrant Amber */
+}
+
+/* ── Dark Mode Toggle ── */
+:host-context(body.dark-mode) .mode-toggle-group {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+:host-context(body.dark-mode) .mode-btn {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+:host-context(body.dark-mode) .mode-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+:host-context(body.dark-mode) .mode-btn.active {
+  background: #ffffff !important; /* White background for "light mode" feel in dark theme */
+  color: #000000 !important; /* Black text for maximum contrast on white background */
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+  border: 2px solid #f59e0b !important;
+}
+
+:host-context(body.dark-mode) .mode-btn.active i {
+  color: #f59e0b;
 }
 
 /* ── Loading ── */

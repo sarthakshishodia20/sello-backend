@@ -87,7 +87,15 @@
             <label>City</label>
             <div class="input-wrapper">
               <i class="pi pi-building"></i>
-              <input type="text" [(ngModel)]="form.city_name" placeholder="e.g. Delhi, Mumbai" />
+              <p-select 
+                [options]="cities" 
+                [(ngModel)]="form.city_name" 
+                optionLabel="name" 
+                optionValue="code" 
+                placeholder="Select a city"
+                styleClass="yelo-dropdown"
+                [style]="{'width':'100%'}"
+              ></p-select>
             </div>
           </div>
 
@@ -101,13 +109,34 @@
 
           <div class="field-box">
             <label>Delivery Mode</label>
-            <div class="input-wrapper select-wrap">
-              <i class="pi pi-truck"></i>
-              <select [(ngModel)]="form.delivery_mode">
-                <option value="BOTH">Home Delivery & Takeaway</option>
-                <option value="HOME_DELIVERY">Home Delivery Only</option>
-                <option value="TAKE_AWAY">Takeaway Only</option>
-              </select>
+            <div class="mode-toggle-group">
+              <button 
+                type="button" 
+                class="mode-btn" 
+                [class.active]="form.delivery_mode === 'HOME_DELIVERY'"
+                (click)="form.delivery_mode = 'HOME_DELIVERY'"
+              >
+                <i class="pi pi-truck"></i>
+                <span>Delivery Only</span>
+              </button>
+              <button 
+                type="button" 
+                class="mode-btn" 
+                [class.active]="form.delivery_mode === 'TAKE_AWAY'"
+                (click)="form.delivery_mode = 'TAKE_AWAY'"
+              >
+                <i class="pi pi-shopping-bag"></i>
+                <span>Takeaway Only</span>
+              </button>
+              <button 
+                type="button" 
+                class="mode-btn" 
+                [class.active]="form.delivery_mode === 'BOTH'"
+                (click)="form.delivery_mode = 'BOTH'"
+              >
+                <i class="pi pi-check-square"></i>
+                <span>Both</span>
+              </button>
             </div>
           </div>
 
@@ -146,7 +175,7 @@
               <i class="pi pi-globe"></i>
               <span>Masterbrand</span>
             </div>
-            <strong>{{ auth.user()?.masterbrand_name || 'Global' }}</strong>
+            <strong>{{ auth.user()?.masterbrandName || 'Global' }}</strong>
           </div>
 
           <div class="status-row">
@@ -154,7 +183,7 @@
               <i class="pi pi-id-card"></i>
               <span>Merchant ID</span>
             </div>
-            <code>{{ auth.user()?.merchant_id || 'N/A' }}</code>
+            <code>{{ auth.user()?.merchantId || 'N/A' }}</code>
           </div>
         </div>
 
