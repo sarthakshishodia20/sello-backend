@@ -1,0 +1,196 @@
+<div class="profile-page-new">
+  <!-- ══ Header Section ══ -->
+  <header class="profile-header">
+    <div class="header-content">
+      <div class="title-box">
+        <i class="pi pi-user-edit"></i>
+        <h1>Account Settings</h1>
+      </div>
+      <div class="header-actions">
+        <button 
+          class="btn-save" 
+          [disabled]="saving()" 
+          (click)="save()"
+        >
+          <i class="pi" [class.pi-check]="!saving()" [class.pi-spin]="saving()" [class.pi-spinner]="saving()"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="profile-content-grid">
+    <!-- ══ Left Column: Forms ══ -->
+    <div class="form-column">
+      <!-- Section 1: Personal Info -->
+      <div class="glass-card">
+        <div class="section-header">
+          <div class="header-left">
+            <h3>Personal Information</h3>
+            <p>Your identity across the Sello platform</p>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <div class="field-box">
+            <label>Full Name</label>
+            <div class="input-wrapper">
+              <i class="pi pi-user"></i>
+              <input type="text" [(ngModel)]="form.name" placeholder="John Doe" />
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label>Email Address</label>
+            <div class="input-wrapper">
+              <i class="pi pi-envelope"></i>
+              <input type="email" [(ngModel)]="form.email" placeholder="john@example.com" />
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label>Phone Number</label>
+            <div class="input-wrapper">
+              <i class="pi pi-phone"></i>
+              <input type="text" [(ngModel)]="form.phone" placeholder="+91 00000 00000" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Store Profile (Only for Merchants) -->
+      <div class="glass-card mt-24" *ngIf="auth.isMerchant()">
+        <div class="section-header">
+          <div class="header-left">
+            <h3>Store Profile</h3>
+            <p>Manage your business details and branding</p>
+          </div>
+        </div>
+        
+        <div class="form-grid full">
+          <div class="field-box">
+            <label>Store Description</label>
+            <div class="input-wrapper area">
+              <textarea [(ngModel)]="form.description" rows="4" placeholder="Briefly describe your store..."></textarea>
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label>Business Address</label>
+            <div class="input-wrapper">
+              <i class="pi pi-map-marker"></i>
+              <input type="text" [(ngModel)]="form.address" placeholder="Physical location" />
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label>City</label>
+            <div class="input-wrapper">
+              <i class="pi pi-building"></i>
+              <input type="text" [(ngModel)]="form.city_name" placeholder="e.g. Delhi, Mumbai" />
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label>Average Delivery Time</label>
+            <div class="input-wrapper">
+              <i class="pi pi-clock"></i>
+              <input type="text" [(ngModel)]="form.delivery_time" placeholder="e.g. 30 mins" />
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label>Delivery Mode</label>
+            <div class="input-wrapper select-wrap">
+              <i class="pi pi-truck"></i>
+              <select [(ngModel)]="form.delivery_mode">
+                <option value="BOTH">Home Delivery & Takeaway</option>
+                <option value="HOME_DELIVERY">Home Delivery Only</option>
+                <option value="TAKE_AWAY">Takeaway Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-box">
+            <label>Branding Color</label>
+            <div class="color-picker-box">
+              <input type="color" [(ngModel)]="form.theme_color" />
+              <div class="color-info">
+                <strong>{{ form.theme_color }}</strong>
+                <span>Used for your store's digital identity</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Right Column: Status & Security ══ -->
+    <div class="status-column">
+      <div class="glass-card">
+        <div class="section-header">
+          <h3>Account Status</h3>
+        </div>
+        
+        <div class="status-stack">
+          <div class="status-row">
+            <div class="status-label">
+              <i class="pi pi-shield"></i>
+              <span>Access Role</span>
+            </div>
+            <p-tag [value]="auth.user()?.role" severity="info"></p-tag>
+          </div>
+
+          <div class="status-row">
+            <div class="status-label">
+              <i class="pi pi-globe"></i>
+              <span>Masterbrand</span>
+            </div>
+            <strong>{{ auth.user()?.masterbrand_name || 'Global' }}</strong>
+          </div>
+
+          <div class="status-row">
+            <div class="status-label">
+              <i class="pi pi-id-card"></i>
+              <span>Merchant ID</span>
+            </div>
+            <code>{{ auth.user()?.merchant_id || 'N/A' }}</code>
+          </div>
+        </div>
+
+        <div class="security-note">
+          <i class="pi pi-info-circle"></i>
+          <p>Role and organization changes require administrator approval.</p>
+        </div>
+      </div>
+
+      <div class="glass-card mt-24 danger-zone">
+        <div class="section-header">
+          <h3>Logout</h3>
+        </div>
+        <p>Safely sign out of your current session.</p>
+        <button class="btn-logout" (click)="confirmLogout()">
+          <i class="pi pi-power-off"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LOGOUT CONFIRMATION DIALOG ══ -->
+<p-dialog [(visible)]="logoutVisible" [modal]="true" [style]="{width: '380px'}" [showHeader]="false" styleClass="yelo-confirm-dialog" [draggable]="false" [resizable]="false">
+  <div class="text-center" style="padding: 40px 32px; text-align: center;">
+    <h3 style="font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 12px;">Logout</h3>
+    <p style="font-size: 15px; color: #64748b; margin-bottom: 32px; line-height: 1.5;">Are you sure you want to logout from your account?</p>
+    
+    <div style="display: flex; gap: 12px;">
+      <button style="flex: 1; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-weight: 700; cursor: pointer; transition: all 0.2s;" (click)="logoutVisible.set(false)">Cancel</button>
+      <button style="flex: 1; padding: 14px; border-radius: 12px; border: none; background: #000; color: #fff; font-weight: 700; cursor: pointer; transition: all 0.2s;" (click)="logout()">Yes, Logout</button>
+    </div>
+  </div>
+</p-dialog>
+
+<div class="loading-overlay" *ngIf="loading()">
+  <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+</div>

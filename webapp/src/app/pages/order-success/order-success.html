@@ -1,0 +1,31 @@
+<div class="success-shell animate-fade">
+  <div class="container">
+    <div class="success-card card-premium">
+      <div class="success-visual">
+        <div class="check-circle">
+          <i class="pi pi-check"></i>
+        </div>
+        <div class="confetti-glow"></div>
+      </div>
+
+      <div class="success-text">
+        <h1>Order Placed Successfully!</h1>
+        <p class="text-muted">Thank you for shopping with us. Your order has been received and is being processed.</p>
+        
+        <div class="order-id-pill" *ngIf="orderNo">
+          <span>Order Reference</span>
+          <strong>#{{ orderNo() }}</strong>
+        </div>
+      </div>
+
+      <div class="success-actions">
+        <button class="btn-premium btn-primary" routerLink="/orders">
+          <i class="pi pi-list"></i> Track My Orders
+        </button>
+        <button class="btn-premium btn-outline" routerLink="/">
+          <i class="pi pi-shopping-bag"></i> Continue Shopping
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

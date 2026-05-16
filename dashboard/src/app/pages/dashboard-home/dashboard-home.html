@@ -1,0 +1,89 @@
+<div class="dashboard-home-new">
+  <div class="dashboard-container">
+    <!-- ══ Header Section ══ -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <div class="greeting-box">
+          <h1>{{ getGreeting() }}, Selo</h1>
+          <p>Here's what's happening with your business today.</p>
+        </div>
+        <div class="header-meta">
+          <div class="date-chip">
+            <i class="pi pi-calendar"></i>
+            <span>{{ today | date:'longDate' }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ══ Stats Grid ══ -->
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let card of statCards()">
+        <div class="card-inner">
+          <div class="card-info">
+            <label>{{ card.label }}</label>
+            <div class="value">{{ card.value }}</div>
+          </div>
+          <div class="card-icon" [style.background]="card.bg" [style.color]="card.accent">
+            <i [class]="card.icon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content-grid">
+      <!-- Activity Section -->
+      <div class="activity-section glass-card">
+        <div class="section-header">
+          <div class="header-left">
+            <h3>Recent Orders</h3>
+            <p>Summary of latest transactions across the platform.</p>
+          </div>
+          <div class="header-right">
+            <button class="btn-view-all" routerLink="/orders">
+              <span>View All</span>
+              <i class="pi pi-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <p-table [value]="overview()?.recentOrders || []" [loading]="loading()" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th *ngIf="overview()?.mode === 'admin'">Merchant</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Time</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-order let-i="rowIndex">
+              <tr [class.odd-row]="i % 2 !== 0">
+                <td><strong class="order-id">#{{ order.order_no || order.id }}</strong></td>
+                <td>{{ order.customer_name }}</td>
+                <td *ngIf="overview()?.mode === 'admin'" class="capitalize">{{ order.merchant_name }}</td>
+                <td>
+                  <p-tag [value]="order.order_status" [severity]="orderSeverity(order.order_status)"></p-tag>
+                </td>
+                <td class="amount-cell">{{ fmtCurrency(order.total_amount) }}</td>
+                <td class="time-cell">{{ fmtDate(order.created_at) }}</td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="6" class="empty-cell">
+                  <div class="empty-state">
+                    <i class="pi pi-shopping-cart"></i>
+                    <p>No recent orders found.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="detail-page">
+  <!-- ══ TOP TABS ══ -->
+  <div class="top-nav-tabs">
+    <button 
+      *ngFor="let tab of tabs" 
+      class="nav-tab" 
+      [class.active]="activeTab() === tab.id"
+      (click)="setTab(tab.id)"
+    >
+      {{ tab.label }}
+    </button>
+  </div>
+
+  <div class="detail-body">
+    <div class="back-link">
+      <a routerLink="/merchants"><i class="pi pi-arrow-left"></i> Back to Merchants</a>
+      <h3>{{ merchant()?.merchant_name }}</h3>
+    </div>
+
+    <!-- ══ MERCHANT TAB ══ -->
+    <div class="tab-content" *ngIf="activeTab() === 'merchant'">
+      <div class="merchant-form-grid">
+        <div class="field-group">
+          <label>ID</label>
+          <input pInputText [disabled]="true" [value]="merchant()?.merchant_id" />
+        </div>
+
+        <div class="field-group">
+          <label>NAME *</label>
+          <input pInputText [(ngModel)]="form.name" placeholder="Enter Name" />
+        </div>
+
+        <div class="field-group">
+          <label>EMAIL *</label>
+          <input pInputText [(ngModel)]="form.contact_email" placeholder="email@example.com" />
+        </div>
+
+        <div class="field-group">
+          <label>PHONE *</label>
+          <input pInputText [(ngModel)]="form.phone" placeholder="+91..." />
+        </div>
+
+        <div class="field-group">
+          <label>ADDRESS *</label>
+          <input pInputText [(ngModel)]="form.address" placeholder="Store Address" />
+        </div>
+
+        <div class="field-group">
+          <label>SLUG *</label>
+          <input pInputText [(ngModel)]="form.slug" />
+        </div>
+      </div>
+
+      <div class="payment-methods">
+        <h4>Payment Methods</h4>
+        <p>By default payment methods activated by admin will be preselected</p>
+        
+        <div class="payment-grid">
+          <div class="payment-card">
+            <span>Stripe</span>
+            <p-toggleSwitch></p-toggleSwitch>
+          </div>
+          <div class="payment-card">
+            <span>Cash</span>
+            <p-toggleSwitch></p-toggleSwitch>
+          </div>
+          <div class="payment-card">
+            <span>Pay on Delivery</span>
+            <p-toggleSwitch></p-toggleSwitch>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CATALOGUE TAB ══ -->
+    <div class="tab-content catalogue-tab" *ngIf="activeTab() === 'catalogue'">
+      <app-products></app-products>
+    </div>
+  </div>
+</div>

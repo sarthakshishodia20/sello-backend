@@ -1,0 +1,77 @@
+<div class="orders-shell section-padding animate-fade">
+  <div class="container">
+    <div class="orders-header mb-8">
+      <h1 class="text-gradient">My Orders</h1>
+      <p class="text-muted">Track your recent purchases and delivery status.</p>
+    </div>
+
+    <div class="loading-state" *ngIf="loading()">
+      <div class="skeleton-order" *ngFor="let i of [1,2,3]"></div>
+    </div>
+
+    <div class="orders-list" *ngIf="!loading() && orders().length > 0">
+      <div class="order-card card-premium mb-4" *ngFor="let order of orders()">
+        <div class="order-card-header">
+          <div class="header-info">
+            <span class="order-id">#{{ order.order_no }}</span>
+            <span class="order-date">{{ order.created_at | date:'mediumDate' }}</span>
+          </div>
+          <div class="status-badge-wrap" [style.background]="'var(--accent)'" [style.color]="'#fff'">
+            {{ order.order_status }}
+          </div>
+        </div>
+
+
+        <div class="order-card-body">
+          <div class="merchant-line">
+            <i class="pi pi-shop"></i>
+            <span>{{ order.merchant_name }}</span>
+          </div>
+
+          <div class="items-summary mt-2">
+            <div class="item-row" *ngFor="let item of order.items">
+              {{ item.quantity }}x {{ item.product_name_snapshot }}
+            </div>
+          </div>
+        </div>
+
+        <div class="order-card-footer">
+          <div class="order-total">
+            <span>Amount Paid</span>
+            <span class="amount">₹{{ order.total_amount | number:'1.0-0' }}</span>
+          </div>
+          <div class="order-actions" *ngIf="order.order_status === 'PLACED' || order.order_status === 'CONFIRMED'">
+            <button class="btn-premium btn-outline danger-text" (click)="openCancelDialog(order.id)">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Cancel Modal -->
+    <div class="custom-modal-overlay" *ngIf="showCancelDialog()">
+      <div class="custom-modal">
+        <i class="pi pi-exclamation-triangle modal-icon"></i>
+        <h2 class="modal-title">Cancel Order?</h2>
+        <p class="modal-desc">Are you sure you want to cancel this order? This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button class="btn-premium btn-outline flex-1" (click)="closeCancelDialog()">Keep Order</button>
+          <button class="btn-premium btn-primary flex-1 danger-bg" (click)="confirmCancel()">Yes, Cancel</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Empty State -->
+    <div class="empty-orders-state animate-fade" *ngIf="!loading() && orders().length === 0">
+      <div class="empty-visual">
+        <i class="pi pi-history"></i>
+        <div class="glow"></div>
+      </div>
+      <h3>No orders yet</h3>
+      <p>Your order history is empty. Start shopping to see your orders here.</p>
+      <button class="btn-premium btn-primary mt-8" routerLink="/">Browse Marketplace</button>
+    </div>
+  </div>
+</div>

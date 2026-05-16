@@ -1,0 +1,97 @@
+<div class="settings-page">
+  <div class="settings-container">
+  <div class="page-header-card">
+    <div class="header-title-box">
+      <div class="icon-wrap"><i class="pi pi-bell"></i></div>
+      <div>
+        <h1>Notification Terminology</h1>
+        <p>Customize system messages and notification templates across the platform.</p>
+      </div>
+    </div>
+
+    <!-- Language Switcher -->
+    <div class="header-actions">
+      <div class="flex align-items-center gap-3 bg-obsidian-soft p-2 border-round-2xl border-1 border-obsidian">
+        <span class="text-xs font-bold text-500 uppercase tracking-widest pl-2">Language</span>
+        <div class="lang-switcher-pill shadow-1">
+          <button 
+            *ngFor="let opt of langOptions" 
+            (click)="changeLang(opt.value)"
+            [class.active]="langService.currentLang() === opt.value"
+            class="lang-opt-btn"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div class="card p-0 overflow-hidden shadow-2 border-round-xl">
+      <p-table [value]="templates()" [loading]="loading()" responsiveLayout="scroll" styleClass="p-datatable-sm">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Event Type</th>
+            <th>Title Template</th>
+            <th>Body Template</th>
+            <th class="text-center">Status</th>
+            <th style="width: 80px"></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-template>
+          <tr>
+            <td>
+              <span class="font-bold text-sm text-primary">{{template.event_type}}</span>
+            </td>
+            <td class="text-sm font-medium">{{template.title_template}}</td>
+            <td class="text-sm">
+              <span class="text-overflow-ellipsis opacity-70">{{template.body_template}}</span>
+            </td>
+            <td class="text-center">
+              <p-tag [severity]="template.is_active ? 'success' : 'secondary'" [value]="template.is_active ? 'Active' : 'Disabled'" [rounded]="true"></p-tag>
+            </td>
+            <td>
+              <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" (click)="editTemplate(template)"></p-button>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5" class="text-center p-6">
+              <i class="pi pi-inbox text-4xl text-400 mb-3 block"></i>
+              <span class="text-secondary">No notification templates found.</span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<p-dialog [(visible)]="editDialogVisible" [header]="'Edit Template: ' + selectedTemplate().event_type" [modal]="true" [style]="{width: '550px'}" styleClass="p-fluid custom-dialog">
+  <ng-template pTemplate="content">
+    <div class="field mt-3">
+      <label for="title">Title Template</label>
+      <input pInputText id="title" [(ngModel)]="selectedTemplate().title_template" placeholder="Enter title template..." />
+      <small class="hint-text">Variables: {{'{{order_no}}'}}, {{'{{customer_name}}'}}, {{'{{product_name}}'}}</small>
+    </div>
+    
+    <div class="field mt-4">
+      <label for="body">Body Template</label>
+      <textarea pInputTextarea id="body" [(ngModel)]="selectedTemplate().body_template" rows="6" placeholder="Enter notification message..."></textarea>
+      <small class="hint-text">This content will be sent as the main notification body.</small>
+    </div>
+
+    <div class="field-checkbox flex align-items-center gap-3 mt-4 mb-2">
+      <p-toggleSwitch [(ngModel)]="selectedTemplate().is_active" id="active"></p-toggleSwitch>
+      <label for="active" class="m-0 font-semibold cursor-pointer">Enable this notification template</label>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2 p-2">
+      <button pButton label="Cancel" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="editDialogVisible = false"></button>
+      <button pButton label="Save Template" icon="pi pi-check" class="p-button-primary px-4 shadow-1" (click)="saveTemplate()"></button>
+    </div>
+  </ng-template>
+</p-dialog>

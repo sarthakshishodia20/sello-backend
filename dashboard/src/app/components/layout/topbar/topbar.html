@@ -1,0 +1,28 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="toggle-btn" (click)="toggleSidebar.emit()">
+      <i class="fa-solid fa-bars-staggered"></i>
+    </button>
+    <div class="breadcrumb">
+      <span class="logo-text">sello<span class="dot">.</span></span>
+      <span class="separator">/</span>
+      <strong>{{ lang.translate('nav.overview') }}</strong>
+    </div>
+  </div>
+
+  <!-- ══ CENTRE: Webapp Link ══ -->
+  <div class="topbar-center">
+    <a [href]="storeLink" target="_blank" class="webapp-pill">
+      <i class="fa-solid fa-store"></i>
+      <span>{{ auth.isMerchant() ? lang.translate('topbar.view_live') : lang.translate('topbar.storefront') }}</span>
+      <i class="fa-solid fa-arrow-up-right-from-square webapp-icon-sm"></i>
+    </a>
+  </div>
+
+  <div class="topbar-right">
+    <div class="divider"></div>
+    <div class="notif-btn">
+      <i class="fa-regular fa-bell"></i>
+    </div>
+  </div>
+</header>

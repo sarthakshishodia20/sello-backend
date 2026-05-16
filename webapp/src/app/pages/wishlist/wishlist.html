@@ -1,0 +1,79 @@
+<div class="wishlist-container animate-fade">
+  <div class="container">
+    <div class="wishlist-header">
+      <h1>My Wishlist</h1>
+      <p>Save your favorite stores and products for later</p>
+    </div>
+
+    <div class="wishlist-tabs glass">
+      <button [class.active]="activeTab() === 'stores'" (click)="setTab('stores')">
+        <i class="pi pi-briefcase"></i> Stores ({{ stores().length }})
+      </button>
+      <button [class.active]="activeTab() === 'products'" (click)="setTab('products')">
+        <i class="pi pi-box"></i> Products ({{ products().length }})
+      </button>
+    </div>
+
+    <div class="loading-state" *ngIf="loading()">
+      <p-progressSpinner styleClass="w-3rem h-3rem" strokeWidth="4" fill="transparent" animationDuration=".5s"></p-progressSpinner>
+    </div>
+
+    <div class="wishlist-content" *ngIf="!loading()">
+      
+      <!-- Stores Tab -->
+      <div class="stores-grid" *ngIf="activeTab() === 'stores'">
+        <div class="empty-wishlist" *ngIf="stores().length === 0">
+          <i class="pi pi-heart"></i>
+          <h3>No favorite stores yet</h3>
+          <p>Explore the marketplace and save stores you love!</p>
+          <button pButton label="Discover Stores" routerLink="/"></button>
+        </div>
+
+        <div class="store-card glass" *ngFor="let store of stores()" [routerLink]="['/store', store.store_slug]">
+          <div class="store-image">
+            <img [src]="store.image_url || 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?q=80&w=2070&auto=format&fit=crop'" alt="store">
+            <button class="remove-btn" (click)="removeStore(store.id, $event)" title="Remove">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+          <div class="store-info">
+            <h3>{{ store.store_name }}</h3>
+            <p><i class="pi pi-map-marker"></i> {{ store.city_name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Tab -->
+      <div class="products-list" *ngIf="activeTab() === 'products'">
+        <div class="empty-wishlist" *ngIf="products().length === 0">
+          <i class="pi pi-shopping-cart"></i>
+          <h3>No saved products</h3>
+          <p>Keep track of items you're interested in!</p>
+          <button pButton label="Go Shopping" routerLink="/"></button>
+        </div>
+
+        <div class="product-item glass" *ngFor="let p of products()">
+          <div class="p-img">
+            <img [src]="p.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1760&auto=format&fit=crop'" alt="product">
+          </div>
+          <div class="p-details">
+            <div class="p-header">
+              <h4>{{ p.name }}</h4>
+              <button class="remove-p-btn" (click)="removeProduct(p.catalogue_id, $event)" title="Remove">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+            <p class="store-name">from {{ p.store_name }}</p>
+            <div class="p-footer">
+              <span class="price">{{ fmtPrice(p.price) }}</span>
+              <button class="add-btn" (click)="addToCart(p, $event)" [disabled]="p.is_out_of_stock">
+                <i class="pi pi-plus"></i> Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

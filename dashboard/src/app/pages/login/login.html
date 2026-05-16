@@ -1,0 +1,105 @@
+<div class="login-page" [class.dark-mode]="true">
+  <div class="bg-mesh"></div>
+
+  <div class="auth-container">
+    <div class="sleek-card">
+      <div class="card-header">
+        <div class="brand-badge">
+          <span class="dot"></span>
+          SELLO PLATFORM
+        </div>
+        <h1>{{ tab() === 'login' ? 'Welcome Back' : 'Get Started' }}</h1>
+        <p>{{ tab() === 'login' ? 'Sign in to manage your grocery ecosystem' : 'Create an account to grow your business' }}</p>
+      </div>
+
+      <!-- Mode Switcher -->
+      <div class="mode-tabs">
+        <button [class.active]="mode() === 'admin'" (click)="setMode('admin')">Admin</button>
+        <button [class.active]="mode() === 'merchant'" (click)="setMode('merchant')">Merchant</button>
+      </div>
+
+      <div class="tab-switcher">
+        <button [class.active]="tab() === 'login'" (click)="setTab('login')">Login</button>
+        <button [class.active]="tab() === 'signup'" (click)="setTab('signup')">Sign Up</button>
+      </div>
+
+      <form (ngSubmit)="submit()" class="auth-form">
+        
+        <!-- Signup Specific Fields -->
+        <div class="form-group" *ngIf="tab() === 'signup'">
+          <label>Full Name</label>
+          <div class="input-wrap">
+            <i class="pi pi-user"></i>
+            <input type="text" name="owner_name" [(ngModel)]="owner_name" placeholder="John Doe">
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="tab() === 'signup' && mode() === 'admin'">
+          <label>Masterbrand Name</label>
+          <div class="input-wrap">
+            <i class="pi pi-globe"></i>
+            <input type="text" name="masterbrand_name" [(ngModel)]="masterbrand_name" placeholder="Your Global Brand">
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="tab() === 'signup' && mode() === 'merchant'">
+          <label>Store Name</label>
+          <div class="input-wrap">
+            <i class="pi pi-shop"></i>
+            <input type="text" name="merchant_name" [(ngModel)]="merchant_name" placeholder="Quick Grocery Store">
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="tab() === 'signup' && mode() === 'merchant'">
+          <label>Inherit From Masterbrand</label>
+          <p-select 
+            name="masterbrand_id" 
+            [(ngModel)]="masterbrand_id" 
+            [options]="masterbrands()" 
+            optionLabel="name" 
+            optionValue="id"
+            placeholder="Select Masterbrand"
+            styleClass="sleek-select"
+            appendTo="body"
+          ></p-select>
+        </div>
+
+        <!-- Common Fields -->
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <i class="pi pi-envelope"></i>
+            <input type="email" name="email" [(ngModel)]="email" placeholder="name@company.com">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrap">
+            <i class="pi pi-lock"></i>
+            <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="password" placeholder="••••••••">
+            <button type="button" class="eye-btn" (click)="showPassword = !showPassword">
+              <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="error-box" *ngIf="error()">
+          <i class="pi pi-exclamation-circle"></i>
+          {{ error() }}
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loading()">
+          <span *ngIf="!loading()">{{ tab() === 'login' ? 'Sign In' : 'Create Account' }}</span>
+          <i *ngIf="loading()" class="pi pi-spin pi-spinner"></i>
+        </button>
+      </form>
+
+      <div class="card-footer">
+        <p *ngIf="tab() === 'login'">Don't have an account? <a (click)="setTab('signup')">Sign up here</a></p>
+        <p *ngIf="tab() === 'signup'">Already have an account? <a (click)="setTab('login')">Login here</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+

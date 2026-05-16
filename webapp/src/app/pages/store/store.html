@@ -1,0 +1,166 @@
+<main class="store-page" *ngIf="!loading(); else storeLoader">
+  <!-- Blinkit-style Promo Banner -->
+
+  <div class="promo-banner-row" *ngIf="!loading()">
+    <div class="container promo-inner">
+      <div class="promo-card fast-delivery">
+        <i class="pi pi-clock"></i>
+        <span>Delivery in <strong>15-20 mins</strong></span>
+      </div>
+      <div class="promo-card safe-checkout">
+        <i class="pi pi-shield"></i>
+        <span>100% Safe Checkout</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Store Banner -->
+  <div class="store-banner-bar" [style.background]="(store()?.theme_color || 'var(--accent)') + '15'">
+
+    <div class="container banner-inner">
+      <div class="banner-logo" [style.background]="store()?.theme_color || '#38bdf8'">
+        {{ store()?.store_name?.[0] }}
+      </div>
+      <div class="banner-info">
+        <h1>{{ store()?.store_name }}</h1>
+        <p class="banner-desc">{{ store()?.description || 'Curated products from a verified merchant.' }}</p>
+        <div class="banner-chips">
+          <span class="b-chip"><i class="pi pi-verified"></i> Verified Merchant</span>
+          <span class="b-chip"><i class="pi pi-truck"></i> Home Delivery</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Layout -->
+  <div class="container store-layout">
+
+    <!-- Left: Category Menu -->
+    <aside class="cat-menu" *ngIf="categories().length">
+      <div class="cat-menu-sticky">
+        <p class="menu-label">Menu</p>
+        <ul class="cat-list">
+          <li>
+            <button
+              class="cat-item"
+              [class.active]="selectedCategoryId() === null"
+              (click)="selectCategory(null)"
+            >All Items</button>
+          </li>
+          <li *ngFor="let cat of categories()">
+            <button
+              class="cat-item"
+              [class.active]="selectedCategoryId() === cat.id"
+              (click)="selectCategory(cat.id)"
+            >{{ cat.name }}</button>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Middle: Products -->
+    <div class="products-area">
+      <!-- Search + Meta -->
+      <div class="products-toolbar">
+        <div class="prod-search">
+          <i class="pi pi-search"></i>
+          <input type="text" placeholder="Search products..." (input)="onSearch($event)" />
+        </div>
+        <span class="prod-count">{{ products().length }} of {{ totalProducts() }} items</span>
+      </div>
+
+      <!-- Loader -->
+      <div class="prod-loading" *ngIf="productsLoading()">
+        <div class="prod-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+      </div>
+
+      <!-- Product List -->
+      <div class="prod-list" *ngIf="!productsLoading()">
+        <div
+          class="prod-row"
+          *ngFor="let p of products()"
+          [class.out-of-stock]="!canAddToCart(p)"
+        >
+          <!-- Text Side -->
+          <div class="prod-details">
+            <div class="prod-top">
+              <span class="prod-cat-tag">{{ p.category_name || 'General' }}</span>
+            </div>
+            <h3 class="prod-name">{{ p.name }}</h3>
+            <p class="prod-desc">{{ p.short_description || 'Premium quality product.' }}</p>
+            <div class="prod-price">₹{{ p.price | number:'1.0-0' }}</div>
+          </div>
+
+          <!-- Image + Action Side -->
+          <div class="prod-right">
+            <div class="prod-img-wrap" (click)="openLightbox(p.image_url)">
+              <img *ngIf="p.image_url" [src]="p.image_url" [alt]="p.name" class="prod-img" />
+              <div *ngIf="!p.image_url" class="prod-img-placeholder"><i class="pi pi-image"></i></div>
+              <span class="oos-badge" *ngIf="!canAddToCart(p)">Out of Stock</span>
+              <button
+                class="wish-btn"
+                [class.wished]="wishlisted()[p.catalogue_id]"
+                (click)="toggleWishlist(p.catalogue_id, $event)"
+              ><i class="pi" [class.pi-heart]="!wishlisted()[p.catalogue_id]" [class.pi-heart-fill]="wishlisted()[p.catalogue_id]"></i></button>
+            </div>
+            <!-- Add / Qty -->
+            <div class="prod-action">
+              <div class="qty-ctrl" *ngIf="cart.getItemQty(p.catalogue_id) > 0">
+                <button (click)="cart.updateQty(p.catalogue_id, -1)"><i class="pi pi-minus"></i></button>
+                <span>{{ cart.getItemQty(p.catalogue_id) }}</span>
+                <button (click)="cart.updateQty(p.catalogue_id, 1)" [disabled]="!canAddToCart(p)"><i class="pi pi-plus"></i></button>
+              </div>
+              <button
+                class="add-btn"
+                *ngIf="cart.getItemQty(p.catalogue_id) === 0"
+                [disabled]="!canAddToCart(p)"
+                (click)="addToCart(p)"
+              >ADD</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty -->
+        <div class="no-products" *ngIf="products().length === 0">
+          <i class="pi pi-box"></i>
+          <p>No products found. Try adjusting your filters.</p>
+        </div>
+      </div>
+
+      <!-- Load More -->
+      <div class="load-more-wrap" *ngIf="hasMore() && products().length > 0">
+        <button class="load-more-btn" (click)="loadMore()" [disabled]="loadingMore()">
+          <i class="pi pi-spin pi-spinner" *ngIf="loadingMore()"></i>
+          <span>{{ loadingMore() ? 'Loading...' : 'Load More Products' }}</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Store Loading Skeleton -->
+<ng-template #storeLoader>
+  <div class="store-skeleton">
+    <div class="sk-banner"></div>
+    <div class="container" style="padding-top: 2rem;">
+      <div class="sk-row" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Lightbox -->
+<div class="lb-overlay" *ngIf="selectedImage()" (click)="selectedImage.set(null)">
+  <div class="lb-box" (click)="$event.stopPropagation()">
+    <button class="lb-close" (click)="selectedImage.set(null)"><i class="pi pi-times"></i></button>
+    <img [src]="selectedImage()" class="lb-img" />
+  </div>
+</div>
+
+<!-- Store Footer -->
+<footer class="store-footer">
+  <div class="container footer-row">
+    <span class="footer-brand">sello<span>.</span></span>
+    <span class="footer-copy">© 2026 {{ store()?.store_name }}. Powered by Sello.</span>
+  </div>
+</footer>

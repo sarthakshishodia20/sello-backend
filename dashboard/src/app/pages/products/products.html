@@ -1,0 +1,360 @@
+<div class="catalogue-shell">
+
+  <!-- ═══ PANE 1: Categories ═══ -->
+  <aside class="cat-pane">
+    <div class="pane-header">
+      <span class="pane-title">Category ({{ categories().length }})</span>
+      <button *ngIf="auth.isAdmin()" class="icon-btn-plain" (click)="openCatCreate()" title="Add category">
+        <i class="pi pi-plus"></i>
+      </button>
+    </div>
+
+    <div class="cat-all-btn" [class.active]="selectedCategoryId() === null" (click)="selectCategory(null)">
+      <i class="pi pi-box mr-2"></i> All Products
+    </div>
+
+    <div class="cat-list scrollable" cdkDropList (cdkDropListDropped)="onCategoryDrop($event)">
+      <div
+        *ngFor="let c of categories()"
+        class="cat-row"
+        cdkDrag
+        [class.active]="selectedCategoryId() === c.id"
+        [class.disabled-item]="!c.is_active"
+        (click)="selectCategory(c.id)"
+      >
+        <span class="cat-row-name">{{ c.name }}</span>
+        
+        <div class="hover-dropdown-container">
+          <button class="cat-more-btn"><i class="pi pi-ellipsis-v"></i></button>
+          <div class="hover-dropdown-menu">
+            <div class="menu-item" (click)="openCatEdit(c)">
+              <i class="pi pi-pencil"></i>
+              <span>Edit Category</span>
+            </div>
+            <div class="menu-item" (click)="toggleCategoryStatus(c)">
+              <i [class]="c.is_active ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              <span>{{ c.is_active ? 'Disable Category' : 'Enable Category' }}</span>
+            </div>
+            <div class="menu-item delete-item" (click)="deleteCategory(c)">
+              <i class="pi pi-trash"></i>
+              <span>Delete Category</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ PANE 2: Product List ═══ -->
+  <section class="product-pane">
+    <div class="pane-header">
+      <span class="pane-title">Product ({{ totalRecords() }})</span>
+      <div class="header-actions">
+        <button class="icon-btn-plain" (click)="openMasterCreate()"><i class="pi pi-plus"></i></button>
+      </div>
+    </div>
+
+    <div class="product-search-bar">
+      <i class="pi pi-search search-icon"></i>
+      <input 
+        pInputText 
+        type="text" 
+        placeholder="Search ID, Name or SKU..." 
+        (input)="onSearch($event)" 
+        class="product-search-input" />
+    </div>
+
+    <div class="product-list-wrapper">
+      <div *ngIf="loading()" class="list-loading-overlay">
+        <p-progressSpinner styleClass="w-2rem h-2rem"></p-progressSpinner>
+      </div>
+
+      <div class="product-list scrollable" cdkDropList (cdkDropListDropped)="onProductDrop($event)">
+      <div
+        *ngFor="let p of products()"
+        class="product-row"
+        cdkDrag
+        [class.selected]="selectedProduct()?.id === p.id"
+        [class.disabled-item]="!(viewMode() === 'master' ? p.is_active : p.effective_is_active)"
+        (click)="selectProduct(p)"
+      >
+        <span class="product-row-name">{{ p.effective_name ?? p.name }}</span>
+        
+        <div class="hover-dropdown-container">
+          <button class="cat-more-btn"><i class="pi pi-ellipsis-v"></i></button>
+          <div class="hover-dropdown-menu">
+            <div class="menu-item" (click)="viewMode() === 'master' ? openMasterEdit(p) : openMerchantEdit(p)">
+              <i class="pi pi-pencil"></i>
+              <span>Edit Product</span>
+            </div>
+            <div class="menu-item" (click)="viewMode() === 'master' ? toggleMasterStatus(p) : toggleMerchantStatus(p)">
+              <i [class]="asBoolean(viewMode() === 'master' ? p.is_active : p.effective_is_active) ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+              <span>{{ asBoolean(viewMode() === 'master' ? p.is_active : p.effective_is_active) ? 'Disable Product' : 'Enable Product' }}</span>
+            </div>
+            <div class="menu-item" *ngIf="viewMode() === 'master'" (click)="duplicateProduct(p)">
+              <i class="pi pi-copy"></i>
+              <span>Duplicate Product</span>
+            </div>
+            <div class="menu-item delete-item" *ngIf="viewMode() === 'master'" (click)="deleteProduct(p)">
+              <i class="pi pi-trash"></i>
+              <span>Delete Product</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- ═══ PANE 3: Product Detail ═══ -->
+  <section class="detail-pane">
+    <div class="detail-content scrollable" *ngIf="selectedProduct() as p">
+      <div class="detail-header">
+        <span class="detail-title">Product Details <span class="red-dot"></span></span>
+        <button class="icon-btn-plain" (click)="selectedProduct.set(null)">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="detail-body">
+        <div class="detail-card-info">
+          <div class="detail-img-box" (click)="openLightbox(p.effective_image_url || p.image_url)">
+             <img 
+               [src]="p.effective_image_url || p.image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" 
+               (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+             />
+          </div>
+          <div class="detail-main-info">
+            <div class="detail-name">{{ p.effective_name ?? p.name }}</div>
+            <div class="detail-price">{{ fmtCurrency(p.effective_price ?? p.price) }}</div>
+            <div class="detail-stock-badge" *ngIf="!isUnlimited(p.effective_stock_qty ?? p.stock_qty)">
+              <i class="pi pi-box"></i> Stock: {{ p.effective_stock_qty ?? p.stock_qty }}
+            </div>
+            <div class="detail-summary">{{ (p.effective_short_description ?? p.short_description) || 'No description available.' }}</div>
+          </div>
+        </div>
+
+        <div class="detail-toggle-section">
+          <div class="toggle-row mode-toggle-row" *ngIf="viewMode() !== 'master' && settingsService.settings().brandCustom">
+            <span class="mode-label" [class.active]="!p.merchant_product_id">Brand</span>
+            <label class="yelo-toggle">
+              <input 
+                type="checkbox" 
+                [checked]="p.merchant_product_id" 
+                (change)="toggleControlMode(p)" 
+              />
+              <span class="yelo-slider"></span>
+            </label>
+            <span class="mode-label" [class.active]="p.merchant_product_id">Custom <i class="pi pi-info-circle"></i></span>
+          </div>
+
+          <div class="toggle-row">
+            <span>Enable/Disable Product</span>
+            <label class="yelo-toggle">
+              <input
+                type="checkbox"
+                [checked]="asBoolean(viewMode() === 'master' ? p.is_active : p.effective_is_active)"
+                (change)="viewMode() === 'master' ? toggleMasterStatus(p) : toggleMerchantStatus(p)"
+              />
+              <span class="yelo-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row" *ngIf="viewMode() !== 'master' && settingsService.settings().outOfStock">
+            <span class="text-danger font-bold"><i class="pi pi-exclamation-circle"></i> Mark Out of Stock</span>
+            <label class="yelo-toggle danger">
+              <input
+                type="checkbox"
+                [checked]="asBoolean(p.is_out_of_stock)"
+                (change)="toggleOutOfStock(p)"
+              />
+              <span class="yelo-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="detail-description-section">
+          <div class="section-label">Long Description</div>
+          <div class="section-text">{{ (p.effective_description ?? p.description) || 'No long description provided.' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-empty" *ngIf="!selectedProduct()">
+      <div class="empty-center-box">
+        <i class="pi pi-box"></i>
+        <p>Select a product to view details</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ═══ Edit Product Drawer ═══ -->
+<p-drawer
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  position="right"
+  [style]="{ width: 'min(95vw, 600px)' }"
+  [header]="form.id ? 'Edit Product' : 'Add Product'"
+  styleClass="yelo-product-drawer"
+  [modal]="true"
+>
+  <div class="drawer-layout">
+    <div class="dialog-col">
+      <div class="dialog-field">
+        <label>{{ langService.translate('products.name') }}</label>
+        <input pInputText [(ngModel)]="form.name" [placeholder]="langService.translate('products.name')" />
+      </div>
+
+      <div class="dialog-field" *ngIf="viewMode() === 'master'">
+        <label>{{ langService.translate('products.sku') }}</label>
+        <input pInputText [(ngModel)]="form.sku" [placeholder]="langService.translate('products.sku')" />
+      </div>
+
+      <div class="dialog-field">
+        <label>{{ langService.translate('products.price') }} *</label>
+        <div class="price-input-wrap">
+          <span class="price-prefix">₹</span>
+          <input pInputText type="number" [(ngModel)]="form.price" placeholder="0.00" />
+        </div>
+      </div>
+
+      <div class="dialog-field">
+        <label>{{ langService.translate('products.category') }}</label>
+        <p-select
+          [options]="categories()"
+          optionLabel="name"
+          optionValue="id"
+          [(ngModel)]="form.category_id"
+          placeholder="Select Category"
+          styleClass="w-full"
+        ></p-select>
+      </div>
+
+
+
+      <div class="dialog-field">
+        <label>{{ langService.translate('products.description') }}</label>
+        <textarea pInputTextarea [(ngModel)]="form.short_description" rows="3" [placeholder]="langService.translate('products.description')"></textarea>
+      </div>
+    </div>
+
+    <div class="dialog-col dialog-right-panel">
+      <div class="right-panel-header">
+        <span>Product Details</span>
+        <div class="right-panel-sub">Grouped fields related to Catalog discoverability.</div>
+      </div>
+
+      <div class="dialog-field">
+        <div class="label-row">
+          <label>AI Description</label>
+          <button class="ai-regen-btn" (click)="generateAiDescription()" [disabled]="aiLoading()">
+            <i class="pi pi-sparkles"></i> AI Generate
+          </button>
+        </div>
+        <textarea pInputTextarea [(ngModel)]="form.ai_description" rows="4" class="ai-textarea" placeholder="AI-generated description..."></textarea>
+      </div>
+
+      <div class="dialog-field" style="margin-top: 16px;">
+        <label>Image URL</label>
+        <input pInputText [(ngModel)]="form.image_url" placeholder="Paste image URL here" />
+      </div>
+
+      <div class="inventory-box">
+        <div class="inv-label-group">
+          <i class="pi pi-box"></i>
+          <span>Track Inventory</span>
+        </div>
+        <label class="yelo-toggle">
+          <input type="checkbox" [(ngModel)]="form.inventory_enabled" (change)="onInventoryToggle()" />
+          <span class="yelo-slider"></span>
+        </label>
+      </div>
+
+      <div class="dialog-field mt-3" *ngIf="form.inventory_enabled">
+        <label>Available Quantity</label>
+        <p-inputNumber [(ngModel)]="form.stock_qty" [min]="0" placeholder="e.g. 100" styleClass="w-full"></p-inputNumber>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="drawer-footer-actions">
+      <button class="yelo-btn-secondary" (click)="dialogVisible.set(false)">{{ langService.translate('products.cancel') }}</button>
+      <button class="yelo-btn-primary" [disabled]="saving()" (click)="save()">
+        <i class="pi pi-check" *ngIf="!saving()"></i>
+        <i class="pi pi-spinner pi-spin" *ngIf="saving()"></i>
+        {{ saving() ? 'Saving...' : langService.translate('products.save') }}
+      </button>
+    </div>
+  </ng-template>
+</p-drawer>
+
+<!-- ═══ Category Dialog ═══ -->
+<p-dialog
+  [(visible)]="catDialogVisible"
+  [header]="catForm.id ? 'Edit Category' : 'New Category'"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  styleClass="yelo-product-dialog"
+>
+  <div class="dialog-field">
+    <label>Name</label>
+    <input pInputText [(ngModel)]="catForm.name" placeholder="e.g. Beverages" />
+  </div>
+  <div class="dialog-field mt-3">
+    <label>Description</label>
+    <textarea pInputTextarea [(ngModel)]="catForm.description" rows="3" placeholder="Optional description"></textarea>
+  </div>
+  <ng-template pTemplate="footer">
+    <button class="yelo-btn-secondary" (click)="catDialogVisible.set(false)">Cancel</button>
+    <button class="yelo-btn-primary" [disabled]="catSaving()" (click)="saveCategory()">
+      {{ catForm.id ? 'Save Changes' : 'Create' }}
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- ═══ Image Lightbox ═══ -->
+<p-dialog
+  [(visible)]="lightboxVisible"
+  [modal]="true"
+  [dismissableMask]="true"
+  [showHeader]="false"
+  styleClass="yelo-lightbox"
+  [contentStyle]="{ padding: '0', overflow: 'hidden' }"
+>
+  <div class="lightbox-wrapper">
+    <img [src]="lightboxImage()" class="lightbox-img" />
+    <button class="lightbox-close" (click)="lightboxVisible.set(false)">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
+</p-dialog>
+
+<!-- ═══ Custom Confirmation Dialog ═══ -->
+<p-dialog
+  [(visible)]="confirmVisible"
+  [modal]="true"
+  [header]="'Confirm Action'"
+  [style]="{ width: '400px' }"
+  styleClass="yelo-confirm-dialog"
+  [closable]="false"
+>
+  <div class="confirm-body">
+    <div class="confirm-icon">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    <div class="confirm-text">
+      {{ confirmMessage() }}
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="confirm-actions">
+      <button class="yelo-btn-secondary" (click)="confirmVisible.set(false)">Cancel</button>
+      <button class="yelo-btn-primary danger-btn" (click)="confirmExecute()">Yes, Delete</button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+

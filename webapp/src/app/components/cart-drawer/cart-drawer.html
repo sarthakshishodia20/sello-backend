@@ -1,0 +1,81 @@
+<p-drawer
+  [visible]="cart.isOpen()"
+  (visibleChange)="cart.isOpen.set($event)"
+  position="right"
+  [modal]="true"
+  styleClass="premium-cart-drawer dark"
+  [style]="{ width: 'min(95vw, 420px)' }"
+>
+  <ng-template pTemplate="header">
+    <div class="cart-drawer-header">
+      <div class="header-main">
+        <h3>Your Cart</h3>
+        <span class="item-count">{{ cart.totalItems() }} items</span>
+      </div>
+      <div class="merchant-badge" *ngIf="cart.merchant()">
+        <i class="pi pi-verified"></i>
+        {{ cart.merchant()?.name }}
+      </div>
+    </div>
+  </ng-template>
+
+  <div class="cart-body-wrapper">
+    <div class="cart-items-list" *ngIf="cart.items().length; else emptyCart">
+      <div class="cart-item-premium" *ngFor="let item of cart.items()">
+        <div class="item-visual">
+          <div class="item-img-placeholder"><i class="pi pi-image"></i></div>
+        </div>
+        <div class="item-info">
+          <div class="item-name-row">
+            <span class="item-name">{{ item.name }}</span>
+            <button class="item-remove" (click)="cart.updateQty(item.catalogue_id, -item.quantity)">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+          <div class="item-meta">Unit: {{ fmtPrice(item.price) }}</div>
+          
+          <div class="item-footer">
+            <div class="qty-selector">
+              <button (click)="cart.updateQty(item.catalogue_id, -1)"><i class="pi pi-minus"></i></button>
+              <span>{{ item.quantity }}</span>
+              <button (click)="cart.updateQty(item.catalogue_id, 1)"><i class="pi pi-plus"></i></button>
+            </div>
+            <div class="item-total">{{ fmtPrice(item.price * item.quantity) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyCart>
+      <div class="empty-cart-state animate-fade">
+        <div class="empty-visual">
+          <i class="pi pi-shopping-bag"></i>
+          <div class="glow"></div>
+        </div>
+        <h3>Your cart is empty</h3>
+        <p>Explore our stores to add premium products to your collection.</p>
+        <button class="btn-premium btn-primary mt-8" (click)="close()" routerLink="/">Start Shopping</button>
+      </div>
+    </ng-template>
+  </div>
+
+  <div class="cart-drawer-footer" *ngIf="cart.items().length">
+    <div class="footer-summary">
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <span>{{ fmtPrice(cart.totalPrice()) }}</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>{{ fmtPrice(cart.totalPrice()) }}</span>
+      </div>
+    </div>
+    
+    <div class="footer-actions">
+      <button class="btn-premium btn-outline" (click)="cart.clear()">Clear</button>
+      <button class="btn-premium btn-primary flex-1" routerLink="/checkout" (click)="close()">
+        Checkout <i class="pi pi-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</p-drawer>

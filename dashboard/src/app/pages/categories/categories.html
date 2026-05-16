@@ -1,0 +1,149 @@
+<div class="page-grid">
+  <section class="page-intro">
+    <div>
+      <h1>Categories</h1>
+      <p>Root categories aur subcategories ko masterbrand level par manage karo.</p>
+    </div>
+
+    <div class="intro-actions">
+      <button pButton type="button" label="Reload" severity="secondary" [outlined]="true" (click)="load()"></button>
+      <button pButton type="button" label="Add Root Category" icon="pi pi-plus" (click)="openCreate()"></button>
+    </div>
+  </section>
+
+  <div class="loading-wrap" *ngIf="loading()">
+    <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+  </div>
+
+  <div class="category-layout" *ngIf="!loading()">
+    <p-card class="soft-card">
+      <ng-template pTemplate="title">Tree Preview</ng-template>
+      <ng-template pTemplate="subtitle">
+        Phase 1 me nested categories ka simple visual structure.
+      </ng-template>
+
+      <div class="tree-stack" *ngIf="tree().length; else emptyTree">
+        <div class="tree-node" *ngFor="let root of tree()">
+          <div class="tree-root">
+            <div>
+              <strong>{{ root.name }}</strong>
+              <span>{{ root.description || 'Root category' }}</span>
+            </div>
+            <div class="tree-actions">
+              <button pButton type="button" icon="pi pi-plus" severity="secondary" [text]="true" (click)="openCreate(root.id)"></button>
+              <button pButton type="button" icon="pi pi-pencil" severity="secondary" [text]="true" (click)="openEdit(root)"></button>
+            </div>
+          </div>
+
+          <div class="tree-children" *ngIf="root.children?.length">
+            <div class="tree-child" *ngFor="let child of root.children">
+              <div>
+                <strong>{{ child.name }}</strong>
+                <span>{{ child.description || 'Subcategory' }}</span>
+              </div>
+              <button pButton type="button" icon="pi pi-pencil" severity="secondary" [text]="true" (click)="openEdit(child)"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptyTree>
+        <div class="empty-note">Abhi tak koi category create nahi hui hai.</div>
+      </ng-template>
+    </p-card>
+
+    <p-card class="soft-card">
+      <ng-template pTemplate="title">Category Table</ng-template>
+      <ng-template pTemplate="subtitle">
+        Parent relation, sort order aur active state yahan se inspect karo.
+      </ng-template>
+
+      <p-table [value]="categories()" [tableStyle]="{ 'min-width': '100%' }">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Parent</th>
+            <th>Sort</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-category>
+          <tr>
+            <td>
+              <strong>{{ category.name }}</strong>
+              <div class="table-subtext">{{ category.description || 'No description' }}</div>
+            </td>
+            <td>{{ category.parent_name || 'Root' }}</td>
+            <td>{{ category.sort_order }}</td>
+            <td>
+              <p-tag [value]="category.is_active ? 'Active' : 'Archived'" [severity]="statusSeverity(category.is_active)"></p-tag>
+            </td>
+            <td class="table-actions">
+              <button pButton type="button" icon="pi pi-pencil" severity="secondary" [text]="true" (click)="openEdit(category)"></button>
+              <button
+                pButton
+                type="button"
+                icon="pi pi-plus"
+                severity="secondary"
+                [text]="true"
+                (click)="openCreate(category.id)"
+              ></button>
+              <button pButton type="button" icon="pi pi-trash" severity="danger" [text]="true" (click)="archive(category)"></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+</div>
+
+<p-dialog
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: 'min(92vw, 42rem)' }"
+  [header]="form.id ? 'Edit Category' : 'Create Category'"
+>
+  <div class="form-grid">
+    <div class="field-stack">
+      <label for="parentCategory">Parent Category</label>
+      <select id="parentCategory" [(ngModel)]="form.parent_id">
+        <option [ngValue]="null">Root Category</option>
+        <option *ngFor="let category of categories()" [ngValue]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="field-stack">
+      <label for="categoryName">Category Name</label>
+      <input id="categoryName" pInputText [(ngModel)]="form.name" placeholder="Healthy Snacks" />
+    </div>
+
+    <div class="field-stack">
+      <label for="sortOrder">Sort Order</label>
+      <input id="sortOrder" pInputText type="number" [(ngModel)]="form.sort_order" />
+    </div>
+
+    <div class="field-stack">
+      <label for="activeState">Status</label>
+      <select id="activeState" [(ngModel)]="form.is_active">
+        <option [ngValue]="true">Active</option>
+        <option [ngValue]="false">Archived</option>
+      </select>
+    </div>
+
+    <div class="field-stack field-full">
+      <label for="categoryDescription">Description</label>
+      <textarea id="categoryDescription" [(ngModel)]="form.description" placeholder="Explain what belongs in this category"></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton type="button" label="Cancel" severity="secondary" [text]="true" (click)="dialogVisible.set(false)"></button>
+    <button pButton type="button" label="Save" [loading]="saving()" (click)="save()"></button>
+  </ng-template>
+</p-dialog>

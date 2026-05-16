@@ -1,0 +1,207 @@
+<div class="content-container animate-fade">
+  <!-- ══ Header Section ══ -->
+  <div class="page-header-card">
+    <div class="header-title-box">
+      <div class="icon-wrap"><i class="pi pi-shopping-bag"></i></div>
+      <div>
+        <h1>Orders Management</h1>
+        <p>Monitor and process incoming orders across all merchants</p>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <div class="search-box-pill">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Search Order ID..." (input)="onSearch($event)">
+      </div>
+
+      <div class="date-filter-box">
+        <p-datepicker 
+          [(ngModel)]="filterDate" 
+          [showIcon]="true" 
+          iconDisplay="input"
+          placeholder="Select Date" 
+          (onSelect)="onDateSelect()"
+          appendTo="body"
+          [showButtonBar]="true"
+          styleClass="premium-datepicker"
+        ></p-datepicker>
+      </div>
+
+      <div class="action-btns-group">
+        <button class="btn-action-icon" (click)="load()" pTooltip="Refresh List">
+          <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+        </button>
+
+        <button 
+          class="btn-delete-bulk" 
+          (click)="deleteSelected()" 
+          *ngIf="selectedOrders().length > 0"
+        >
+          <i class="pi pi-trash"></i>
+          <span>Delete ({{ selectedOrders().length }})</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Stats Section ══ -->
+  <div class="stats-grid" *ngIf="stats()">
+    <div class="stat-card">
+      <div class="card-inner">
+        <div class="card-info">
+          <label>Total Orders</label>
+          <div class="value">{{ stats().total_orders }}</div>
+        </div>
+        <div class="card-icon bg-blue-glow"><i class="pi pi-shopping-bag"></i></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="card-inner">
+        <div class="card-info">
+          <label>Pending</label>
+          <div class="value text-warn">{{ stats().pending_orders }}</div>
+        </div>
+        <div class="card-icon bg-warn-glow"><i class="pi pi-clock"></i></div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="card-inner">
+        <div class="card-info">
+          <label>Delivered</label>
+          <div class="value text-success">{{ stats().delivered_orders }}</div>
+        </div>
+        <div class="card-icon bg-success-glow"><i class="pi pi-check-circle"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Status Tabs ══ -->
+  <div class="order-tabs-wrapper">
+    <div class="order-tabs-nav">
+      <button 
+        *ngFor="let tab of tabs" 
+        [class.active]="activeTab() === tab.value"
+        (click)="setTab(tab.value)"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Orders Table ══ -->
+  <section class="table-outer-card responsive-table-wrap">
+    <p-table 
+      [value]="orders()" 
+      [(selection)]="selectedOrders"
+      [lazy]="true" 
+      (onLazyLoad)="onPageChange($event)" 
+      [paginator]="true" 
+      [rows]="limit" 
+      [totalRecords]="totalRecords()" 
+      [loading]="loading()"
+      [tableStyle]="{ 'min-width': '1200px' }"
+      styleClass="p-datatable-orders"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 4rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+          <th>Order ID</th>
+          <th>Status</th>
+          <th>Merchant</th>
+          <th>Order Time</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th style="width: 150px">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-order let-i="rowIndex">
+        <tr class="order-row-premium" [class.odd-row]="i % 2 !== 0">
+          <td><p-tableCheckbox [value]="order"></p-tableCheckbox></td>
+          <td>
+            <a class="order-id-link" (click)="openDetail(order)">
+              #{{ order.order_no }}
+              <i class="pi pi-external-link"></i>
+            </a>
+          </td>
+          <td>
+            <div class="status-pill-wrap">
+              <span class="status-indicator" [class]="order.order_status.toLowerCase()"></span>
+              <p-tag [value]="order.order_status" [severity]="severity(order.order_status)"></p-tag>
+            </div>
+          </td>
+          <td class="merchant-cell-name">{{ order.merchant_name || 'N/A' }}</td>
+          <td class="time-cell">{{ fmtDate(order.created_at) }}</td>
+          <td>
+            <div class="customer-info-box">
+              <span class="c-name">{{ order.customer_name }}</span>
+              <span class="c-phone">{{ order.customer_phone }}</span>
+            </div>
+          </td>
+          <td class="amount-cell-bold">{{ fmtCurrency(order.total_amount) }}</td>
+          <td>
+            <div class="payment-badge-status" [class.paid]="order.payment_status === 'PAID'">
+              <span class="pay-method">{{ order.payment_method }}</span>
+              <span class="pay-status-text">{{ order.payment_status }}</span>
+            </div>
+          </td>
+          <td>
+            <p-select 
+              [options]="orderStatuses" 
+              [(ngModel)]="order.order_status" 
+              (onChange)="setStatus(order, $event.value)"
+              placeholder="Update"
+              appendTo="body"
+              styleClass="status-select-premium"
+            ></p-select>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9">
+            <div class="empty-state-orders">
+              <div class="empty-icon"><i class="pi pi-inbox"></i></div>
+              <h3>No Orders Found</h3>
+              <p>Try adjusting your search or filters to see results.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<!-- ══ Order Detail Dialog ══ -->
+<p-dialog 
+  [(visible)]="detailVisible" 
+  [modal]="true" 
+  [header]="'Order Details: #' + (detailOrder()?.order_no || '')" 
+  [style]="{ width: '700px' }"
+  styleClass="order-detail-dialog-premium"
+>
+  <div class="detail-container-scroll" *ngIf="detailOrder()">
+    <div class="premium-detail-card">
+      <div class="card-label"><i class="pi pi-user"></i> Customer Info</div>
+      <div class="detail-grid-3">
+        <div class="dg-item"><label>Name</label><span>{{ detailOrder().customer_name }}</span></div>
+        <div class="dg-item"><label>Phone</label><span>{{ detailOrder().customer_phone }}</span></div>
+        <div class="dg-item"><label>Email</label><span>{{ detailOrder().customer_email || 'N/A' }}</span></div>
+      </div>
+      <div class="dg-item mt-12"><label>Address</label><span class="address-text">{{ detailOrder().customer_address }}</span></div>
+    </div>
+    <div class="premium-detail-card mt-16">
+      <div class="card-label"><i class="pi pi-info-circle"></i> Summary</div>
+      <div class="detail-grid-3">
+        <div class="dg-item"><label>Merchant</label><span>{{ detailOrder().merchant_name }}</span></div>
+        <div class="dg-item"><label>Status</label><p-tag [value]="detailOrder().order_status" [severity]="severity(detailOrder().order_status)"></p-tag></div>
+        <div class="dg-item"><label>Total Amount</label><span class="price-highlight">{{ fmtCurrency(detailOrder().total_amount) }}</span></div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<p-confirmDialog styleClass="yelo-confirm-dialog"></p-confirmDialog>

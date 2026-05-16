@@ -1,12 +1,36 @@
+# Dependency directories
 node_modules/
+
+# Build outputs
+dist/
+.angular/
+tmp/
+out/
+build/
+
+# Environment files and sensitive info
 .env
+.env.*
+*.pem
+*.key
+
+# Logs
 *.log
-otp_inbox.txt
-scratch/
-test-*.js
-list-models.js
-seed_notifications.js
-package-lock.json
-uploads/
-env.example
-README.md
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project specific ignores
+**/scratch/
+**/uploads/
+**/otp_inbox.txt
+**/test-*.js
+**/list-models.js
+**/seed_notifications.js
+
+# Ensure .gitignore itself is tracked (standard practice)
+!.gitignore

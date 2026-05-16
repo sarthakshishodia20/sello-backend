@@ -1,0 +1,360 @@
+.wishlist-container {
+  padding: 40px 0;
+  min-height: 90vh;
+}
+
+.wishlist-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.wishlist-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #fff; /* Solid white for maximum impact */
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.wishlist-header p {
+  color: #e2e8f0; /* Lighter slate */
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.wishlist-tabs {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 20px;
+  margin-bottom: 40px;
+  max-width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.wishlist-tabs button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  background: transparent;
+  color: #94a3b8; /* Muted slate */
+  border-radius: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+.wishlist-tabs button i {
+  font-size: 1.1rem;
+}
+
+.wishlist-tabs button.active {
+  background: #fff; /* White background for active tab */
+  color: #000;      /* Black text for contrast */
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+  font-weight: 700;
+}
+
+.wishlist-tabs button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+/* PrimeNG Buttons Override */
+:host ::ng-deep .p-button {
+  background: #fff !important;
+  color: #000 !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 14px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+:host ::ng-deep .p-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2) !important;
+}
+
+.add-btn {
+  padding: 10px 20px;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+}
+
+.add-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 100px 0;
+}
+
+/* Stores Grid */
+.stores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.store-card {
+
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.store-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary-color);
+}
+
+.store-image {
+  height: 180px;
+  position: relative;
+}
+
+.store-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: crop;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+}
+
+.store-info {
+  padding: 16px;
+}
+
+.store-info h3 {
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.store-info p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Products List */
+.products-list {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-item {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.p-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.p-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.p-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.p-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.p-header h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.remove-p-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 4px;
+  transition: color 0.3s ease;
+}
+
+.remove-p-btn:hover {
+  color: #ef4444;
+}
+
+.store-name {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.p-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-weight: 800;
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.add-btn {
+  padding: 8px 16px;
+  background: var(--primary-color);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.add-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(201, 162, 0, 0.4);
+}
+
+.add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty State */
+.empty-wishlist {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.empty-wishlist i {
+  font-size: 5rem;
+  color: var(--primary-color);
+  opacity: 0.3;
+}
+
+.empty-wishlist h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.empty-wishlist p {
+  color: #94a3b8;
+  max-width: 350px;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+
+@media (max-width: 600px) {
+  .product-item {
+    gap: 12px;
+    padding: 10px;
+    align-items: center;
+    border-radius: 16px;
+  }
+  .p-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+  }
+  .p-header h4 {
+    font-size: 0.9rem;
+    margin-right: 15px;
+  }
+  .store-name {
+    font-size: 0.75rem;
+  }
+  .price {
+    font-size: 0.95rem;
+  }
+  .add-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .product-item {
+    gap: 10px;
+    padding: 8px;
+  }
+  .p-img {
+    width: 50px;
+    height: 50px;
+  }
+  .p-header h4 {
+    font-size: 0.85rem;
+  }
+}
+
+

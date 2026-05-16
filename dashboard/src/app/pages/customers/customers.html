@@ -1,0 +1,155 @@
+<div class="content-container">
+  <!-- ══ Header Section ══ -->
+  <div class="page-header-card">
+    <div class="header-title-box">
+      <div class="icon-wrap"><i class="pi pi-users"></i></div>
+      <div>
+        <h1>Customers</h1>
+        <p>Manage and view your registered customer base</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Search -->
+      <div class="search-box-pill">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Search Customer..." (input)="onSearch($event)">
+      </div>
+
+      <!-- Date Filter -->
+      <div class="date-filter-box">
+        <p-datepicker 
+          [(ngModel)]="filterDate" 
+          [showIcon]="true" 
+          iconDisplay="input"
+          placeholder="Registration Date" 
+          (onSelect)="onDateSelect()"
+          appendTo="body"
+          [showButtonBar]="true"
+          styleClass="premium-datepicker"
+        ></p-datepicker>
+      </div>
+
+      <button class="btn-action-icon" (click)="loadCustomers()" pTooltip="Refresh">
+        <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Customers Table ══ -->
+  <section class="table-section">
+    <p-table 
+      [value]="customers()" 
+      [loading]="loading()"
+      [paginator]="true" 
+      [rows]="10"
+      [tableStyle]="{ 'min-width': '1000px' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Customer ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Registration Date</th>
+          <th>Platform</th>
+          <th style="width: 150px">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-customer let-i="rowIndex">
+        <tr [style.background-color]="rainbowColors[i % rainbowColors.length]">
+          <td><strong>#{{ customer.id }}</strong></td>
+          <td class="capitalize">{{ customer.name }}</td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.phone || '-' }}</td>
+          <td>{{ fmtDate(customer.created_at) }}</td>
+          <td>
+            <p-tag [value]="customer.last_used_platform" [severity]="getPlatformSeverity(customer.last_used_platform)"></p-tag>
+          </td>
+          <td>
+            <div class="action-btns-group">
+              <button class="btn-table-action" (click)="openView(customer)" pTooltip="View Details">
+                <i class="pi pi-eye"></i>
+              </button>
+              <button class="btn-table-action" (click)="openEdit(customer)" pTooltip="Edit Customer">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button class="btn-table-action delete" (click)="deleteCustomer(customer)" pTooltip="Delete">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="empty-cell">
+            <div class="empty-state">
+              <i class="pi pi-users"></i>
+              <p>No customers found matching your filters.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<!-- ══ View Dialog ══ -->
+<p-dialog 
+  [(visible)]="viewVisible" 
+  [modal]="true" 
+  [header]="'Customer Profile: ' + (selectedCustomer()?.name || '')" 
+  [style]="{ width: '500px' }"
+  styleClass="customer-detail-dialog"
+>
+  <div class="detail-content" *ngIf="selectedCustomer()">
+    <div class="profile-header">
+      <div class="avatar-box">{{ selectedCustomer().name.charAt(0).toUpperCase() }}</div>
+      <div class="name-box">
+        <h3>{{ selectedCustomer().name }}</h3>
+        <span>Customer ID: #{{ selectedCustomer().id }}</span>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item"><span>Email</span><strong>{{ selectedCustomer().email }}</strong></div>
+      <div class="info-item"><span>Phone</span><strong>{{ selectedCustomer().phone || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Registered On</span><strong>{{ fmtDate(selectedCustomer().created_at) }}</strong></div>
+      <div class="info-item"><span>Last Platform</span><strong>{{ selectedCustomer().last_used_platform }}</strong></div>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ══ Edit Dialog ══ -->
+<p-dialog 
+  [(visible)]="editVisible" 
+  [modal]="true" 
+  header="Edit Customer Details" 
+  [style]="{ width: '450px' }"
+  styleClass="customer-edit-dialog"
+>
+  <div class="edit-form" *ngIf="selectedCustomer()">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" pInputText [(ngModel)]="selectedCustomer().name">
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" pInputText [(ngModel)]="selectedCustomer().email">
+    </div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="text" pInputText [(ngModel)]="selectedCustomer().phone">
+    </div>
+
+    <div class="form-actions">
+      <button pButton label="Cancel" class="p-button-text" (click)="editVisible.set(false)"></button>
+      <button pButton label="Save Changes" (click)="saveCustomer()"></button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>

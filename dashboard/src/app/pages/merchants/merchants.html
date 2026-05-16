@@ -1,0 +1,255 @@
+<div class="content-container">
+  <!-- ══ Header Section ══ -->
+  <div class="merchants-header-new">
+    <div class="header-left">
+      <div class="title-box">
+        <i class="pi pi-briefcase"></i>
+        <h1>Merchants</h1>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Search -->
+      <div class="search-box-pill">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Search Merchants..." (input)="onSearch($event)">
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-box">
+        <p-select 
+          [options]="statusOptions" 
+          [ngModel]="selectedStatus()" 
+          (onChange)="onStatusChange($event.value)"
+          styleClass="premium-dropdown"
+          placeholder="Select Status"
+        ></p-select>
+      </div>
+
+      <div class="action-btns-group">
+        <button class="btn-action-icon" (click)="load()" pTooltip="Refresh">
+          <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+        </button>
+
+        <button class="btn-action-icon add" (click)="openCreate()" pTooltip="Add Merchant">
+          <i class="pi pi-plus"></i>
+        </button>
+
+        <button 
+          class="btn-delete-bulk" 
+          (click)="confirmBulkDelete()" 
+          *ngIf="selectedMerchants().length > 0"
+        >
+          <i class="pi pi-trash"></i>
+          <span>Delete ({{ selectedMerchants().length }})</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Merchants Table ══ -->
+  <section class="table-section responsive-table-wrap">
+    <p-table 
+      [value]="merchants()" 
+      [loading]="loading()"
+      [paginator]="true" 
+      [rows]="limit" 
+      [totalRecords]="totalRecords()" 
+      [lazy]="true" 
+      (onLazyLoad)="onPageChange($event)"
+      [tableStyle]="{ 'min-width': '1000px' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 50px">
+            <input type="checkbox" [checked]="isAllSelected()" (change)="selectAll($event)">
+          </th>
+          <th>Merchant ID</th>
+          <th>Merchant Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th style="text-align: center;">Active Status</th>
+          <th style="width: 100px">Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-merchant let-i="rowIndex">
+        <tr [class.odd-row]="i % 2 !== 0">
+          <td>
+            <input type="checkbox" [checked]="isSelected(merchant)" (change)="toggleSelection(merchant)">
+          </td>
+          <td>
+            <a class="id-link" (click)="previewCatalogue(merchant)">#{{ merchant.merchant_id }}</a>
+          </td>
+          <td class="capitalize"><strong>{{ merchant.merchant_name }}</strong></td>
+          <td>{{ merchant.email || merchant.contact_email || '-' }}</td>
+          <td>{{ merchant.phone || '-' }}</td>
+          <td style="text-align: center;">
+            <div class="status-toggle-wrapper">
+              <label class="premium-switch">
+                <input type="checkbox" [(ngModel)]="merchant.is_active" (change)="toggle(merchant)">
+                <span class="slider"></span>
+              </label>
+              <span class="status-label" [class.active]="merchant.is_active">
+                {{ merchant.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="action-btns-group">
+              <button class="btn-table-action" (click)="openDetail(merchant, i)" pTooltip="View Info">
+                <i class="pi pi-eye"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="empty-cell">
+            <div class="empty-state">
+              <i class="pi pi-briefcase"></i>
+              <p>No merchants found matching your filters.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<!-- ══ Create Merchant Dialog ══ -->
+<p-dialog 
+  header="Add New Merchant" 
+  [(visible)]="createVisible" 
+  [modal]="true" 
+  [style]="{width: '500px'}" 
+  styleClass="merchants-create-dialog"
+>
+  <div class="premium-form">
+    <div class="form-group">
+      <label>Store Name <span class="required">*</span></label>
+      <input type="text" pInputText [(ngModel)]="createForm.name" placeholder="e.g. Fresh Foods Ltd">
+    </div>
+    <div class="form-group">
+      <label>Business Email <span class="required">*</span></label>
+      <input type="email" pInputText [(ngModel)]="createForm.email" placeholder="contact@store.com">
+    </div>
+    <div class="form-row">
+      <div class="form-group flex-1">
+        <label>Phone Number</label>
+        <input type="text" pInputText [(ngModel)]="createForm.phone" placeholder="+91 000-000-0000">
+      </div>
+      <div class="form-group flex-1">
+        <label>Password <span class="required">*</span></label>
+        <input type="password" pInputText [(ngModel)]="createForm.password" placeholder="••••••••">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Store Address</label>
+      <textarea pTextarea [(ngModel)]="createForm.address" rows="3" placeholder="Complete physical address..."></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button pButton label="Cancel" class="p-button-text" (click)="createVisible.set(false)"></button>
+      <button pButton label="Create Merchant" [loading]="saving()" (click)="saveMerchant()"></button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ══ Detail Dialog ══ -->
+<p-dialog 
+  [(visible)]="detailDialogVisible" 
+  [modal]="true" 
+  [showHeader]="false" 
+  [style]="{width: '550px'}"
+  [contentStyle]="{padding: '0'}"
+  styleClass="merchants-detail-dialog"
+>
+  <div class="detail-card" [style.background-color]="detailDialogColor()">
+    <button class="close-btn" (click)="detailDialogVisible.set(false)">
+      <i class="pi pi-times"></i>
+    </button>
+
+    <div class="detail-header">
+      <h3>Merchant Profile</h3>
+      <p>Comprehensive overview of store and performance.</p>
+    </div>
+
+    <div class="detail-grid" *ngIf="selectedMerchantDetail() as m">
+      <div class="info-item"><span>Merchant ID</span><strong>#{{ m.merchant_id }}</strong></div>
+      <div class="info-item"><span>Store Name</span><strong>{{ m.merchant_name }}</strong></div>
+      <div class="info-item"><span>Business Email</span><strong>{{ m.contact_email || m.email || 'N/A' }}</strong></div>
+      <div class="info-item"><span>Phone</span><strong>{{ m.phone || '-' }}</strong></div>
+      <div class="info-item"><span>Owner</span><strong>{{ m.owner_name || 'Not Assigned' }}</strong></div>
+      <div class="info-item"><span>Joined On</span><strong>{{ m.created_at | date:'longDate' }}</strong></div>
+      
+      <div class="delivery-info-box">
+        <div class="d-item">
+          <label>Delivery Mode</label>
+          <span class="d-value capitalize">{{ m.delivery_mode || 'Standard' }}</span>
+        </div>
+        <div class="d-item">
+          <label>Delivery Time</label>
+          <span class="d-value">{{ m.delivery_time || '24-48 Hours' }}</span>
+        </div>
+      </div>
+      
+      <div class="revenue-highlight">
+        <label>Total Delivered Revenue</label>
+        <div class="revenue-amount">{{ fmtCurrency(m.delivered_revenue) }}</div>
+      </div>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ══ Catalogue Preview Drawer ══ -->
+<p-drawer 
+  [(visible)]="previewVisible" 
+  position="right" 
+  [style]="{width: '600px'}"
+  header="Catalogue Preview"
+>
+  <div class="preview-content" *ngIf="previewMerchant()">
+    <div class="preview-header">
+      <h3>{{ previewMerchant().merchant_name }}</h3>
+      <p>Browsing inherited master products</p>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-card" *ngFor="let p of previewProducts()">
+        <div class="p-img">
+          <img [src]="p.image || 'assets/no-image.png'" alt="p">
+        </div>
+        <div class="p-info">
+          <h4>{{ p.name }}</h4>
+          <p>{{ p.description }}</p>
+          <div class="p-meta">
+            <span class="price">{{ fmtCurrency(p.price) }}</span>
+            <p-tag [value]="p.is_available ? 'Available' : 'Hidden'" [severity]="p.is_available ? 'success' : 'warn'"></p-tag>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-drawer>
+
+<!-- ══ Confirmation ══ -->
+<p-dialog 
+  [(visible)]="deleteDialogVisible" 
+  [modal]="true" 
+  [showHeader]="false"
+  [style]="{width: '400px'}"
+  styleClass="merchants-confirm-dialog"
+>
+  <div class="confirm-content">
+    <i class="pi pi-exclamation-triangle warning-icon"></i>
+    <p>Are you sure you want to delete {{ selectedMerchants().length }} merchant(s)? This action cannot be undone.</p>
+    
+    <div class="confirm-actions">
+      <button pButton label="Cancel" class="p-button-text" (click)="deleteDialogVisible.set(false)"></button>
+      <button pButton label="Delete" class="p-button-danger" [loading]="loading()" (click)="proceedWithDelete()"></button>
+    </div>
+  </div>
+</p-dialog>

@@ -1,0 +1,567 @@
+<div class="shell" [class.dark-mode]="isDarkMode()">
+  <p-toast position="bottom-left"></p-toast>
+
+  <!-- ══ SIDEBAR (Premium Obsidian) ══ -->
+  <aside class="side-panel desktop-nav">
+
+    <!-- Logo Section -->
+    <div class="brand-block" (click)="goToHome()" style="cursor: pointer;">
+      <div class="sello-logo-wrap">
+        <span class="sello-text">Sello</span>
+        <span class="sello-dot"></span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-section">
+      <div class="nav-group-label">{{ langService.translate('nav.main_menu') }}</div>
+      <a
+        *ngFor="let item of navItems()"
+        [routerLink]="item.route"
+        routerLinkActive="nav-link-active"
+        class="nav-link"
+      >
+        <div class="nav-icon-box">
+           <!-- SVG Icons for premium feel -->
+           <svg *ngIf="item.key === 'overview'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+           <svg *ngIf="item.key === 'analytics'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+           <svg *ngIf="item.key === 'products'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+           <svg *ngIf="item.key === 'merchants'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="10" rx="2"/><path d="M22 10V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4"/><path d="M12 18v-6"/><path d="M17 12l-5 5-5-5"/></svg>
+           <svg *ngIf="item.key === 'customers'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+           <svg *ngIf="item.key === 'orders'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+           <svg *ngIf="item.key === 'settings'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+           <svg *ngIf="item.key === 'profile'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+           <svg *ngIf="item.key === 'activity'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
+        </div>
+        <span>{{ item.label }}</span>
+        <div class="active-indicator"></div>
+      </a>
+
+      <!-- Guide Link (Desktop) -->
+      <a class="nav-link" (click)="helpOpen.set(true)" style="cursor: pointer; margin-top: 4px;">
+        <div class="nav-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
+        <span>Guide</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="nav-footer">
+      <div class="user-card-premium" (click)="settingsOpen.set(true)" style="cursor: pointer;">
+        <div class="u-avatar-box">
+          {{ (auth.user()?.name || 'S').slice(0,1) }}
+        </div>
+        <div class="u-info">
+          <div class="u-name">{{ auth.user()?.name || 'User' }}</div>
+          <div class="u-role">{{ auth.isAdmin() ? 'Super Admin' : 'Merchant Admin' }}</div>
+        </div>
+        <div style="margin-left: auto; color: #94a3b8;"><i class="pi pi-cog"></i></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN CONTENT ══ -->
+  <div class="content-shell">
+
+    <!-- ══ TOPBAR (Refined White) ══ -->
+    <header class="dashboard-topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" (click)="sidebarOpen.set(true)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- ══ CENTRE: CUSTOMER STOREFRONT PILL (Always Visible) ══ -->
+      <div class="topbar-center-pill">
+        <a [href]="storeLink" target="_blank" class="storefront-pill">
+          <span class="gold-dot"></span>
+          <span class="pill-text">Customer Storefront</span>
+          <i class="pi pi-external-link ml-1" style="font-size: 10px;"></i>
+        </a>
+      </div>
+
+      <div class="topbar-right">
+        <div class="header-role-badge mr-3 d-none d-md-flex">
+          {{ auth.isAdmin() ? 'Masterbrand' : 'Merchant' }}
+        </div>
+
+        <!-- Extensions (Admin Only) -->
+        <div class="ext-btn-wrap" *ngIf="auth.isAdmin()">
+          <button class="ext-toggle-btn" (click)="extensionsOpen.set(!extensionsOpen()); $event.stopPropagation()" [class.active]="extensionsOpen()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+            <span class="ext-btn-label">Extensions</span>
+          </button>
+
+          <!-- Extensions Floating Panel -->
+          <div class="ext-panel" *ngIf="extensionsOpen()" (click)="$event.stopPropagation()">
+            <div class="ext-panel-header">
+              <div class="ext-panel-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+                Extensions
+              </div>
+              <span class="ext-panel-sub">Webapp feature controls</span>
+            </div>
+
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(239,68,68,0.1); color: #ef4444;">
+                <i class="pi pi-box"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>Out of Stock</label>
+                <span>Enable out-of-stock management</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().outOfStock" (ngModelChange)="toggleExtOutOfStock($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(251,191,36,0.1); color: #f59e0b;">
+                <i class="pi pi-palette"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>Custom Brand</label>
+                <span>Enable custom merchant branding</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().brandCustom" (ngModelChange)="toggleExtCustomBrand($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(16,185,129,0.1); color: #10b981;">
+                <i class="pi pi-wallet"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>COD Available</label>
+                <span>Enable COD payment on webapp</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().codEnabled" (ngModelChange)="toggleExtCOD($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(139,92,246,0.1); color: #8b5cf6;">
+                <i class="pi pi-sparkles"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>Floating Icons</label>
+                <span>Enable doodle background icons</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().floatingIcons" (ngModelChange)="toggleExtFloatingIcons($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
+
+          </div>
+        </div>
+
+        <button class="yelo-help-btn-icon mr-2" (click)="helpOpen.set(true)">
+          <i class="pi pi-mobile" style="font-size: 1.2rem;"></i>
+        </button>
+        <button class="yelo-logout-btn-icon" (click)="logoutConfirmVisible.set(true)">
+          <i class="pi pi-sign-out" style="font-size: 1.1rem;"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <main class="dashboard-body" style="position: relative;">
+      <app-loader [absolute]="true"></app-loader>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<!-- ══ MOBILE SIDEBAR ══ -->
+<p-drawer [(visible)]="sidebarOpen" position="left" styleClass="mobile-sidebar">
+  <ng-template pTemplate="header">
+     <div style="display: flex; flex-direction: column; gap: 8px;">
+       <div class="sello-logo-wrap" style="font-size: 1.5rem;" (click)="goToHome(); sidebarOpen.set(false)" style="cursor: pointer;">
+          <span class="sello-text">Sello</span>
+          <span class="sello-dot"></span>
+        </div>
+        <div class="sidebar-role-badge-mini">
+          {{ auth.isAdmin() ? 'Masterbrand' : 'Merchant' }}
+        </div>
+     </div>
+  </ng-template>
+  <div class="mobile-nav-content" style="height: calc(100% - 60px); display: flex; flex-direction: column;">
+      <nav class="mobile-nav-list" style="flex: 1;">
+        <a
+          *ngFor="let item of navItems()"
+          [routerLink]="item.route"
+          routerLinkActive="nav-link-active"
+          class="mobile-nav-link"
+          (click)="closeDrawer()"
+        >
+          <span>{{ item.label }}</span>
+        </a>
+
+        <!-- Guide Link (Mobile) -->
+        <a class="mobile-nav-link" (click)="helpOpen.set(true); closeDrawer()" style="cursor: pointer;">
+          <span>Guide</span>
+        </a>
+      </nav>
+
+      <!-- Mobile Sidebar Footer -->
+      <div style="padding: 20px; border-top: 1px solid #f1f5f9;">
+        <div class="user-card-premium mb-3" (click)="settingsOpen.set(true); sidebarOpen.set(false)" style="cursor: pointer;">
+          <div class="u-avatar-box">{{ (auth.user()?.name || 'S').slice(0,1) }}</div>
+          <div class="u-info">
+            <div class="u-name">{{ auth.user()?.name || 'User' }}</div>
+            <div class="u-role">Settings & Language</div>
+          </div>
+          <i class="pi pi-chevron-right" style="color: #94a3b8;"></i>
+        </div>
+      </div>
+  </div>
+</p-drawer>
+
+<!-- ══ SETTINGS DRAWER ══ -->
+<p-drawer [(visible)]="settingsOpen" position="right" [style]="{ width: '400px' }" header="Platform Settings">
+  <div class="settings-drawer-body">
+    <!-- Profile Info -->
+    <div class="user-profile-header">
+      <div class="user-avatar-large">
+        <i class="pi pi-user"></i>
+      </div>
+      <div class="user-meta-large">
+        <h3>{{ auth.user()?.name }}</h3>
+        <p>{{ auth.user()?.role | uppercase }}</p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="settings-nav-group">
+      <a class="settings-nav-item" routerLink="/profile" (click)="settingsOpen.set(false)">
+        <i class="pi pi-user-edit"></i>
+        <span>Edit Profile</span>
+      </a>
+      <div class="settings-nav-item" (click)="logoutConfirmVisible.set(true); settingsOpen.set(false)">
+        <i class="pi pi-sign-out text-danger"></i>
+        <span class="text-danger">Sign Out</span>
+      </div>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- Theme Selection -->
+    <div class="personalization-section">
+      <div class="setting-group-label">Personalization</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <label>Dark Mode</label>
+          <span>Switch to dark theme</span>
+        </div>
+        <p-toggleswitch 
+          [ngModel]="isDarkMode()" 
+          (ngModelChange)="toggleDarkMode()">
+        </p-toggleswitch>
+      </div>
+    </div>
+  </div>
+</p-drawer>
+
+<!-- ══ LOGOUT CONFIRMATION DIALOG ══ -->
+<p-dialog [(visible)]="logoutConfirmVisible" [modal]="true" [style]="{width: '380px'}" [showHeader]="false" styleClass="yelo-confirm-dialog" [draggable]="false" [resizable]="false">
+  <div class="confirm-content">
+    <div class="confirm-icon">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    <h3>Logout</h3>
+    <p>Are you sure you want to logout from your account?</p>
+    
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="logoutConfirmVisible.set(false)">Cancel</button>
+      <button class="btn-danger" (click)="logout()">Yes, Logout</button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ══ HELP / PLATFORM OVERVIEW DRAWER ══ -->
+<p-drawer [(visible)]="helpOpen" position="right" [style]="{ width: helpWidth() }" header="Sello Platform Overview">
+  <div class="help-content">
+    <div class="help-hero-banner">
+      <div class="hero-logo" (click)="goToHome(); helpOpen.set(false)">Sello<span>.</span></div>
+      <h4>Understanding the Sello Ecosystem</h4>
+      <p>A comprehensive admin guide for managing merchants, products, orders, and analytics on Sello.</p>
+    </div>
+
+    <div class="help-sections">
+
+      <!-- Section 1: Architecture -->
+      <div class="help-card">
+        <div class="card-header-icon bg-indigo"><i class="pi pi-database"></i></div>
+        <h5>System Architecture</h5>
+        <div class="help-two-col">
+          <div class="help-item-row">
+            <div class="dot indigo"></div>
+            <div>
+              <strong>Masterbrand:</strong>
+              <p>The global identity that controls all settings, master catalogues, and universal categories. Changes here affect all linked merchants automatically.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot blue"></div>
+            <div>
+              <strong>Merchant:</strong>
+              <p>Independent business units under a Masterbrand. They manage their own orders, customers, and store-specific products with local pricing overrides.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot pink"></div>
+            <div>
+              <strong>Customer Storefront:</strong>
+              <p>The public-facing webapp where customers browse products, place orders, and track delivery — linked directly to a Merchant's catalogue.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot orange"></div>
+            <div>
+              <strong>Admin Dashboard:</strong>
+              <p>This panel — giving Masterbrand admins full visibility across all merchants, a consolidated order view, analytics, and product management.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Products & Catalog -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon bg-orange"><i class="pi pi-clone"></i></div>
+        <h5>Catalog & Inventory</h5>
+        <div class="help-two-col">
+          <div class="help-item-row">
+            <div class="dot orange"></div>
+            <div>
+              <strong>Master Products:</strong>
+              <p>Created by Masterbrand. Serve as the canonical source for pricing, images, and descriptions pushed to all merchants.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot blue"></div>
+            <div>
+              <strong>Inherited Products:</strong>
+              <p>Products pushed from the Masterbrand to a Merchant. They stay synced with master prices and images by default.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot pink"></div>
+            <div>
+              <strong>Delinked / Overridden:</strong>
+              <p>When a merchant modifies a product (price, description, stock), it becomes "Delinked" from master data to preserve store-specific changes.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot indigo"></div>
+            <div>
+              <strong>Toggle Visibility:</strong>
+              <p>Products can be individually shown or hidden on the storefront using the toggle switch. Hidden products won't appear to customers.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Order Lifecycle -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon bg-green"><i class="pi pi-shopping-cart"></i></div>
+        <h5>Order Lifecycle</h5>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 16px 0;">Every order goes through distinct stages from placement to delivery. Use the Status dropdown in the Orders table to update the current stage.</p>
+        <div class="help-timeline">
+          <div class="timeline-step">
+            <span class="step-label placed">PLACED</span>
+            <p class="step-desc">New order received from customer storefront. Awaiting merchant acknowledgment.</p>
+          </div>
+          <div class="timeline-step">
+            <span class="step-label confirmed">CONFIRMED</span>
+            <p class="step-desc">Merchant has accepted and acknowledged the order. Inventory is now reserved.</p>
+          </div>
+          <div class="timeline-step">
+            <span class="step-label preparing">PREPARING</span>
+            <p class="step-desc">Order is being processed or packed for dispatch by the merchant's team.</p>
+          </div>
+          <div class="timeline-step">
+            <span class="step-label dispatched">DISPATCHED</span>
+            <p class="step-desc">Handled over to delivery partner; out for delivery to the customer's address.</p>
+          </div>
+          <div class="timeline-step">
+            <span class="step-label delivered">DELIVERED</span>
+            <p class="step-desc">Order successfully received and confirmed by the customer. Revenue counted.</p>
+          </div>
+          <div class="timeline-step">
+            <span class="step-label cancelled">CANCELLED</span>
+            <p class="step-desc">Order rejected by merchant or cancelled by customer before dispatch.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Merchant Management -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon bg-cyan"><i class="pi pi-briefcase"></i></div>
+        <h5>Merchant Management</h5>
+        <div class="help-two-col">
+          <div class="help-item-row">
+            <div class="dot indigo"></div>
+            <div>
+              <strong>Create Merchant:</strong>
+              <p>Use the + button in the Merchants page to onboard a new business. They'll receive login credentials and have their own isolated catalogue.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot blue"></div>
+            <div>
+              <strong>Active / Inactive Toggle:</strong>
+              <p>Deactivate a merchant to temporarily hide their storefront and prevent new orders, without deleting any data.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot orange"></div>
+            <div>
+              <strong>Catalogue Preview:</strong>
+              <p>Click any Merchant ID to open a side panel showing their inherited product catalogue with current prices and availability.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot pink"></div>
+            <div>
+              <strong>Revenue Tracking:</strong>
+              <p>Each merchant's detail card shows total delivered revenue — only orders with DELIVERED status count towards revenue.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Analytics -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon bg-purple"><i class="pi pi-chart-bar"></i></div>
+        <h5>Analytics Dashboard</h5>
+        <div class="help-item-row">
+          <div class="dot indigo"></div>
+          <div>
+            <strong>Order Trends:</strong>
+            <p>Visualizes order volume over time across all merchants, helping identify peak days and seasonal patterns.</p>
+          </div>
+        </div>
+        <div class="help-item-row">
+          <div class="dot blue"></div>
+          <div>
+            <strong>Revenue Breakdown:</strong>
+            <p>Aggregated revenue split by merchant, period, and payment method. Includes delivered-only totals for accurate financials.</p>
+          </div>
+        </div>
+        <div class="help-item-row">
+          <div class="dot orange"></div>
+          <div>
+            <strong>Top Products:</strong>
+            <p>Shows the most frequently ordered products across all stores, identifying bestsellers for promotional focus.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 6: Personalization -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon bg-pink"><i class="pi pi-palette"></i></div>
+        <h5>Personalization & Settings</h5>
+        <div class="help-two-col">
+          <div class="help-item-row">
+            <div class="dot indigo"></div>
+            <div>
+              <strong>Dark Mode:</strong>
+              <p>Toggle Dark Mode from the Settings panel — click your profile card at the bottom of the sidebar to access it.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot orange"></div>
+            <div>
+              <strong>Profile Settings:</strong>
+              <p>Update your admin name, email, and password from the Profile page accessible via the sidebar.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 7: Platform Operations -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon bg-yellow"><i class="pi pi-cog"></i></div>
+        <h5>Platform Operations</h5>
+        <div class="help-stack">
+          <div class="help-item-row">
+            <div class="dot yellow"></div>
+            <div>
+              <strong>Multi-Language:</strong>
+              <p>Seamlessly switch between English, Hindi, and Punjabi across the entire dashboard to manage your business with ease.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot blue"></div>
+            <div style="flex: 1;">
+              <strong>Notification Terminology:</strong>
+              <p ngNonBindable>Placeholders like <code>{{customer_name}}</code>, <code>{{order_no}}</code>, and <code>{{product_name}}</code> are dynamically replaced with actual data.</p>
+              
+              <div class="terminology-expanded mt-12">
+                <div class="term-cat">
+                  <h6><i class="pi pi-shopping-bag"></i> Order Lifecycle</h6>
+                  <ul>
+                    <li><code>ORDER_PLACED</code>: Customer completes checkout.</li>
+                    <li><code>ORDER_CONFIRMED</code>: Merchant acknowledges order.</li>
+                    <li><code>ORDER_PREPARING</code>: Packing started.</li>
+                    <li><code>ORDER_DISPATCHED</code>: Out for delivery.</li>
+                    <li><code>ORDER_DELIVERED</code>: Delivery confirmation.</li>
+                    <li><code>ORDER_CANCELLED</code>: Rejection notice.</li>
+                  </ul>
+                </div>
+                <div class="term-cat">
+                  <h6><i class="pi pi-shield"></i> Account & Security</h6>
+                  <ul>
+                    <li><code>MERCHANT_SIGNUP</code>: New registration alert.</li>
+                    <li><code>PASSWORD_RESET</code>: Security token delivery.</li>
+                    <li><code>LOGIN_ALERT</code>: Unauthorized access detection.</li>
+                  </ul>
+                </div>
+                <div class="term-cat">
+                  <h6><i class="pi pi-box"></i> Inventory & Store</h6>
+                  <ul>
+                    <li><code>STOCK_LOW</code>: Inventory alert (below threshold).</li>
+                    <li><code>OUT_OF_STOCK</code>: Immediate restock requirement.</li>
+                    <li><code>PRICE_UPDATE</code>: Price synchronization notification.</li>
+                  </ul>
+                </div>
+                <div class="term-cat">
+                  <h6><i class="pi pi-refresh"></i> Returns & Refunds</h6>
+                  <ul>
+                    <li><code>RETURN_REQUESTED</code>: Customer initiated return.</li>
+                    <li><code>REFUND_PROCESSED</code>: Payment refund successful.</li>
+                    <li><code>RETURN_PICKED_UP</code>: Logistic partner picked return.</li>
+                  </ul>
+                </div>
+                <div class="term-cat">
+                  <h6><i class="pi pi-megaphone"></i> Marketing</h6>
+                  <ul>
+                    <li><code>PROMO_CAMPAIGN</code>: Global promotional alert.</li>
+                    <li><code>COUPON_EXPIRY</code>: Expiring discount reminder.</li>
+                    <li><code>WELCOME_OFFER</code>: First-purchase greeting.</li>
+                  </ul>
+                </div>
+                <div class="term-cat">
+                  <h6><i class="pi pi-server"></i> System</h6>
+                  <ul>
+                    <li><code>SYSTEM_UPDATE</code>: New features or maintenance.</li>
+                    <li><code>STORAGE_LIMIT</code>: Cloud storage threshold alert.</li>
+                    <li><code>API_KEY_EXPIRY</code>: Integration token renewal.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot green"></div>
+            <div>
+              <strong>Security & Auditing:</strong>
+              <p>Maintain total accountability with real-time activity tracking for every search, filter, and data update by Admins or Merchants.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /help-sections -->
+
+    <div class="help-footer-box">
+      <button class="btn-close-help" (click)="helpOpen.set(false)">✔️ Got it — Close Overview</button>
+    </div>
+  </div>
+</p-drawer>

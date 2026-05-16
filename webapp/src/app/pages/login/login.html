@@ -1,0 +1,59 @@
+<div class="auth-wrapper centered-auth">
+  <!-- Only Form Section -->
+
+  <!-- Right Side: Form -->
+  <div class="auth-form-section">
+    <div class="form-container-glass animate-fade-up">
+      <div class="form-header">
+        <div class="auth-toggle">
+          <button [class.active]="mode() === 'login'" (click)="mode.set('login')">Sign In</button>
+          <button [class.active]="mode() === 'signup'" (click)="mode.set('signup')">Create Account</button>
+        </div>
+        <h2>{{ mode() === 'login' ? 'Welcome back' : 'Start your journey' }}</h2>
+        <p class="text-muted">{{ mode() === 'login' ? 'Please enter your details to continue' : 'Join our community of premium shoppers' }}</p>
+      </div>
+
+      <form class="auth-form-main" (submit)="submit()">
+        <div class="form-group animate-fade-up" *ngIf="mode() === 'signup'">
+          <label>Full Name</label>
+          <div class="input-with-icon">
+            <i class="pi pi-user"></i>
+            <input type="text" [(ngModel)]="form.name" name="name" class="input-premium" placeholder="John Doe" required />
+          </div>
+        </div>
+
+        <div class="form-group animate-fade-up">
+          <label>Email Address</label>
+          <div class="input-with-icon">
+            <i class="pi pi-envelope"></i>
+            <input type="email" [(ngModel)]="form.email" name="email" class="input-premium" placeholder="name@company.com" required />
+          </div>
+        </div>
+
+        <div class="form-group animate-fade-up" *ngIf="mode() === 'signup'">
+          <label>Phone Number</label>
+          <div class="input-with-icon">
+            <i class="pi pi-phone"></i>
+            <input type="text" [(ngModel)]="form.phone" name="phone" class="input-premium" placeholder="+91 00000 00000" />
+          </div>
+        </div>
+
+        <div class="form-group animate-fade-up">
+          <label>Password</label>
+          <div class="input-with-icon">
+            <i class="pi pi-lock"></i>
+            <input type="password" [(ngModel)]="form.password" name="password" class="input-premium" placeholder="••••••••" required />
+          </div>
+        </div>
+
+        <button pButton type="submit" [label]="mode() === 'login' ? 'SIGN IN' : 'CREATE ACCOUNT'" 
+                class="btn-premium btn-primary w-full mt-4" [loading]="loading()"></button>
+      </form>
+
+      <div class="auth-helper-links mt-8">
+        <p *ngIf="mode() === 'login'">Forgot password? <a href="#" class="link-accent">Reset here</a></p>
+        <p *ngIf="mode() === 'signup'">By joining, you agree to our <a href="#" class="link-accent">Terms</a></p>
+      </div>
+    </div>
+  </div>
+</div>

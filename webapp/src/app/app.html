@@ -1,0 +1,29 @@
+<p-toast position="bottom-left" />
+
+<!-- Flash Inspired Floating Background -->
+<div class="floating-bg-layer" *ngIf="settingsService.settings().floatingIcons">
+  <div class="float-item item-1">🍔</div>
+  <div class="float-item item-2">🥦</div>
+
+  <div class="float-item item-3">🍕</div>
+  <div class="float-item item-4">🥤</div>
+  <div class="float-item item-5">🍎</div>
+  <div class="float-item item-6">🍞</div>
+  <div class="float-item item-7">🥑</div>
+  <div class="float-item item-8">🍣</div>
+  <div class="float-item item-9">🍩</div>
+  <div class="float-item item-10">🍦</div>
+  <div class="float-item item-11">🍪</div>
+  <div class="float-item item-12">🍇</div>
+  <div class="float-item item-13">🥕</div>
+  <div class="float-item item-14">🥚</div>
+  <div class="float-item item-15">🧀</div>
+</div>
+
+
+<app-loader />
+<app-navbar />
+<main class="main-shell">
+  <router-outlet />
+</main>
+<app-cart-drawer />

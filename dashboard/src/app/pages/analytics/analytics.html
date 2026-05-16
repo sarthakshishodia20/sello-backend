@@ -1,0 +1,101 @@
+<div class="analytics-page">
+  <!-- ══ Header Section ══ -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-box">
+        <i class="pi pi-chart-bar"></i>
+        <h1>Business Analytics</h1>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="timeframe-box">
+        <p-select 
+          [options]="timeframeOptions" 
+          [(ngModel)]="selectedTimeframe" 
+          (onChange)="loadAnalytics()"
+          styleClass="premium-dropdown"
+        ></p-select>
+      </div>
+      <button class="btn-refresh" (click)="loadAnalytics()">
+        <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══ Key Metrics ══ -->
+  <div class="metrics-grid">
+    <div class="metric-card" [style.border-left-color]="'#10b981'">
+      <label>Total Sales</label>
+      <div class="value">{{ fmtCurrency(data().sales) }}</div>
+      <p-tag value="Revenue" severity="success"></p-tag>
+    </div>
+    <div class="metric-card" [style.border-left-color]="'#3b82f6'">
+      <label>Customers</label>
+      <div class="value">{{ data().customers | number }}</div>
+      <p-tag value="Total Base" severity="info"></p-tag>
+    </div>
+    <div class="metric-card" [style.border-left-color]="'#f59e0b'">
+      <label>Total Merchants</label>
+      <div class="value">{{ data().merchants_total | number }}</div>
+      <p-tag value="Active Network" severity="warn"></p-tag>
+    </div>
+  </div>
+
+  <div class="analytics-grid">
+    <!-- ══ Revenue Trend (Bar Graph) ══ -->
+    <div class="chart-section glass-card">
+      <div class="section-header">
+        <h3>Revenue Trend</h3>
+        <p>Visualizing growth trends for the selected period</p>
+      </div>
+      <div class="chart-container">
+        <p-chart type="bar" [data]="chartData()" [options]="chartOptions" height="350px"></p-chart>
+      </div>
+    </div>
+
+    <!-- ══ Breakdown Sections ══ -->
+    <div class="breakdown-section glass-card">
+      <div class="section-header">
+        <h3>Performance Breakdown</h3>
+        <p>Detailed status analysis across the network</p>
+      </div>
+
+      <div class="breakdown-groups">
+        <!-- Orders -->
+        <div class="group-box">
+          <label>Orders Status</label>
+          <div class="status-list">
+            <div class="status-item">
+              <span>Completed</span>
+              <strong>{{ data().orders.completed }}</strong>
+            </div>
+            <div class="status-item">
+              <span>Pending</span>
+              <strong>{{ data().orders.pending }}</strong>
+            </div>
+            <div class="status-item">
+              <span>Cancelled</span>
+              <strong class="text-danger">{{ data().orders.cancelled }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Merchants -->
+        <div class="group-box">
+          <label>Merchant Status</label>
+          <div class="status-list">
+            <div class="status-item">
+              <span>Active</span>
+              <strong>{{ data().merchants.active }}</strong>
+            </div>
+            <div class="status-item">
+              <span>Inactive</span>
+              <strong>{{ data().merchants.inactive }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

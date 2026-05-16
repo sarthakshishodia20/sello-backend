@@ -1,0 +1,27 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-text">sello<span class="dot">.</span></span>
+  </div>
+
+  <nav class="nav-section">
+    @for (item of filteredNavItems(); track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+        <i [class]="item.icon"></i>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-profile">
+      <div class="avatar">{{ auth.user()?.name?.[0]?.toUpperCase() || 'A' }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ auth.user()?.name }}</div>
+        <div style="font-size: 0.7rem; color: var(--text-secondary)">{{ auth.isAdmin() ? 'Administrator' : 'Merchant' }}</div>
+      </div>
+    </div>
+    <button class="logout-btn" (click)="logout()">
+      <i class="fa-solid fa-right-from-bracket"></i> {{ lang.translate('nav.logout') }}
+    </button>
+  </div>
+</aside>

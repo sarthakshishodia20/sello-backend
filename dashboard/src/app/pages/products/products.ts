@@ -1,0 +1,784 @@
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { ChipModule } from 'primeng/chip';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { MessageService } from 'primeng/api';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { DrawerModule } from 'primeng/drawer';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { PaginatorModule } from 'primeng/paginator';
+import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
+import { DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { MerchantSettingsService } from '../../services/merchant-settings';
+
+@Component({
+  selector: 'app-products',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    CardModule,
+    ChipModule,
+    DialogModule,
+    InputTextModule,
+    InputNumberModule,
+    ProgressSpinnerModule,
+    TableModule,
+    TagModule,
+    DrawerModule,
+    ToggleSwitchModule,
+    SelectModule,
+    TextareaModule,
+    PaginatorModule,
+    DragDropModule
+  ],
+  templateUrl: './products.html',
+  styleUrl: './products.css'
+})
+export class ProductsComponent implements OnInit {
+  api = inject(ApiService);
+  auth = inject(AuthService);
+  messageService = inject(MessageService);
+  settingsService = inject(MerchantSettingsService);
+  langService = this.api.langService;
+
+  categories = signal<any[]>([]);
+  loading = signal(false);
+  saving = signal(false);
+
+  // Pagination & Search
+  products = signal<any[]>([]);
+  totalRecords = signal(0);
+  limit = 20;
+  offset = 0;
+  search = '';
+  searchSubject = new Subject<string>();
+  // AI & Dialog states
+  aiLoading = signal(false);
+  aiImageLoading = signal(false);
+  dialogVisible = signal(false);
+  catDialogVisible = signal(false);
+  catSaving = signal(false);
+  lightboxVisible = signal(false);
+  lightboxImage = signal<string | null>(null);
+
+  // Custom Confirmation Dialog
+  confirmVisible = signal(false);
+  confirmMessage = signal('');
+  confirmTarget = signal<any>(null);
+  confirmType = signal<'product' | 'category'>('product');
+
+  // Category context menu
+  catMenuVisible = signal(false);
+  catMenuTarget = signal<any | null>(null);
+  catMenuPos = signal({ x: 0, y: 0 });
+  catToggleSaving = signal(false);
+
+  // Product context menu
+  prodMenuVisible = signal(false);
+  prodMenuTarget = signal<any | null>(null);
+  prodMenuPos = signal({ x: 0, y: 0 });
+
+  selectedCategoryId = signal<number | null>(null);
+  selectedProduct = signal<any | null>(null);
+  merchantEditContext = signal<any | null>(null);
+
+  form: any = {};
+  catForm: any = { id: null, name: '', description: '', parent_id: null };
+
+  viewMode = computed(() => (this.auth.isAdmin() ? 'master' : 'merchant'));
+
+  /** Merchant and admin can manage inventory/enable-disable. */
+  canManage = computed(() => this.auth.isAdmin() || this.auth.isMerchant());
+
+  selectedCategoryName = computed(() => {
+    const id = this.selectedCategoryId();
+    if (!id) return 'Product Catalogue';
+    return this.categories().find(c => c.id === id)?.name || 'Collection';
+  });
+
+  ngOnInit() {
+    this.loadCategories();
+    this.loadProducts();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(value => {
+      this.search = value;
+      this.offset = 0;
+      this.loadProducts();
+    });
+
+    // Close menus on outside click
+    document.addEventListener('click', () => {
+      this.catMenuVisible.set(false);
+      this.prodMenuVisible.set(false);
+      this.catMenuTarget.set(null);
+      this.prodMenuTarget.set(null);
+    });
+  }
+
+  selectCategory(id: number | null) {
+    this.selectedCategoryId.set(id);
+    this.selectedProduct.set(null);
+    this.offset = 0;
+    this.loadProducts();
+  }
+
+  openCatCreate() {
+    if (!this.auth.isAdmin()) {
+      this.messageService.add({ severity: 'warn', summary: 'Admin only', detail: 'Only masterbrand admins can create root categories.' });
+      return;
+    }
+    this.catForm = { id: null, name: '', description: '', parent_id: null };
+    this.catDialogVisible.set(true);
+  }
+
+  openCatEdit(cat: any) {
+    if (!this.auth.isAdmin()) return;
+    this.catForm = { id: cat.id, name: cat.name, description: cat.description || '', parent_id: cat.parent_id };
+    this.catDialogVisible.set(true);
+    this.catMenuVisible.set(false);
+  }
+
+  saveCategory() {
+    if (!this.catForm.name) return;
+    this.catSaving.set(true);
+    
+    const request = this.catForm.id 
+      ? this.api.put(`/catalog/categories/${this.catForm.id}`, this.catForm)
+      : this.api.post('/catalog/categories', this.catForm);
+
+    request.subscribe({
+      next: () => {
+        this.catSaving.set(false);
+        this.catDialogVisible.set(false);
+        this.messageService.add({ severity: 'success', summary: 'Category saved', detail: 'Changes applied successfully.' });
+        this.loadCategories();
+      },
+      error: () => this.catSaving.set(false)
+    });
+  }
+
+  /** Open the 3-dot context menu for a category */
+  openCatMenu(event: MouseEvent, cat: any) {
+    event.stopPropagation();
+    this.catMenuTarget.set(cat);
+    this.catMenuPos.set({ x: event.clientX, y: event.clientY });
+    this.catMenuVisible.set(true);
+    this.prodMenuVisible.set(false);
+  }
+
+  /** Open the 3-dot context menu for a product */
+  openProdMenu(event: MouseEvent, product: any) {
+    event.stopPropagation();
+    this.prodMenuTarget.set(product);
+    this.prodMenuPos.set({ x: event.clientX - 160, y: event.clientY }); // Offset slightly left for UI
+    this.prodMenuVisible.set(true);
+    this.catMenuVisible.set(false);
+  }
+
+  toggleCatMenu(event: MouseEvent, cat: any) {
+    event.stopPropagation();
+    if (this.catMenuTarget()?.id === cat.id) {
+      this.catMenuTarget.set(null);
+    } else {
+      this.catMenuTarget.set(cat);
+      this.prodMenuTarget.set(null);
+    }
+  }
+
+  toggleProdMenu(event: MouseEvent, prod: any) {
+    event.stopPropagation();
+    if (this.prodMenuTarget()?.id === prod.id) {
+      this.prodMenuTarget.set(null);
+    } else {
+      this.prodMenuTarget.set(prod);
+      this.catMenuTarget.set(null);
+    }
+  }
+
+  /** Toggle category active/inactive (admin only) */
+  toggleCategoryStatus(cat: any) {
+    if (!this.auth.isAdmin()) {
+      this.messageService.add({ severity: 'warn', summary: 'Admin only', detail: 'Only admins can enable/disable categories.' });
+      return;
+    }
+    this.catToggleSaving.set(true);
+    const newState = !Boolean(cat.is_active);
+    this.api.put(`/catalog/categories/${cat.id}`, { is_active: newState }).subscribe({
+      next: () => {
+        this.catToggleSaving.set(false);
+        this.catMenuTarget.set(null);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Category updated',
+          detail: `${cat.name} ${newState ? 'enabled' : 'disabled'}.`
+        });
+        this.loadCategories();
+      },
+      error: () => {
+        this.catToggleSaving.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Could not update category status.' });
+      }
+    });
+  }
+
+  selectProduct(product: any) {
+    this.selectedProduct.set(product);
+  }
+
+  loadCategories() {
+    this.api.get<any>('/catalog/categories', { include_inactive: true }).subscribe({
+      next: (response) => this.categories.set(response.data.categories || [])
+    });
+  }
+
+  loadProducts() {
+    this.loading.set(true);
+    const params: any = {
+      limit: this.limit,
+      offset: this.offset
+    };
+    const catId = this.selectedCategoryId();
+    if (catId) params.category_id = catId;
+    if (this.search) params.search = this.search;
+
+    const endpoint = this.viewMode() === 'master' ? '/products/master' : '/products/inherited';
+
+    this.api.get<any>(endpoint, params).subscribe({
+      next: (response) => {
+        this.products.set(response.data.products || []);
+        this.totalRecords.set(response.data.total || 0);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Load failed',
+          detail: 'Failed to fetch products.'
+        });
+      }
+    });
+  }
+
+  onPageChange(event: any) {
+    this.offset = event.first;
+    this.limit = event.rows;
+    this.loadProducts();
+  }
+
+  onSearch(event: any) {
+    this.searchSubject.next(event.target.value);
+  }
+
+  openMasterCreate() {
+    this.merchantEditContext.set(null);
+    this.form = {
+      category_id: this.selectedCategoryId() || null,
+      sku: '',
+      name: '',
+      short_description: '',
+      description: '',
+      ai_description: '',
+      image_url: '',
+      price: 0,
+      stock_qty: -1,
+      inventory_enabled: false,
+      sort_order: 0,
+      is_active: true
+    };
+    this.dialogVisible.set(true);
+  }
+
+  openMasterEdit(product: any) {
+    this.merchantEditContext.set(null);
+    this.form = {
+      id: product.id,
+      category_id: product.category_id,
+      sku: product.sku,
+      name: product.name,
+      short_description: product.short_description || '',
+      description: product.description || '',
+      ai_description: product.ai_description || '',
+      image_url: product.image_url || '',
+      price: product.price,
+      stock_qty: product.stock_qty ?? -1,
+      inventory_enabled: (product.stock_qty !== null && product.stock_qty !== -1),
+      sort_order: product.sort_order,
+      is_active: Boolean(product.is_active)
+    };
+    this.dialogVisible.set(true);
+    this.prodMenuVisible.set(false);
+  }
+
+  openMerchantCreate() {
+    this.merchantEditContext.set(null);
+    this.form = {
+      category_id: this.selectedCategoryId() || null,
+      name: '',
+      short_description: '',
+      description: '',
+      ai_description: '',
+      image_url: '',
+      price: 0,
+      stock_qty: -1,
+      inventory_enabled: false,
+      is_active: true
+    };
+    this.dialogVisible.set(true);
+  }
+
+  openMerchantEdit(product: any) {
+    this.prodMenuVisible.set(false);
+    if (product.merchant_product_id) {
+      this.merchantEditContext.set(product);
+      this.form = {
+        id: product.merchant_product_id,
+        category_id: product.effective_category_id,
+        name: product.effective_name,
+        short_description: product.effective_short_description || '',
+        description: product.effective_description || '',
+        ai_description: product.effective_ai_description || '',
+        image_url: product.effective_image_url || '',
+        price: product.effective_price,
+        stock_qty: product.effective_stock_qty ?? -1,
+        inventory_enabled: (product.effective_stock_qty !== null && product.effective_stock_qty !== -1),
+        is_active: Boolean(product.effective_is_active)
+      };
+      this.dialogVisible.set(true);
+      return;
+    }
+
+    this.api.post<any>(`/products/inherited/${product.catalogue_id}/delink`, {}).subscribe({
+      next: (response) => {
+        const merchantProduct = response.data.merchantProduct;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Delink complete',
+          detail: 'Now editing merchant-owned copy.'
+        });
+        this.merchantEditContext.set(product);
+        this.form = {
+          id: merchantProduct.id,
+          category_id: merchantProduct.category_id,
+          name: merchantProduct.name,
+          short_description: merchantProduct.short_description || '',
+          description: merchantProduct.description || '',
+          ai_description: merchantProduct.ai_description || '',
+          image_url: merchantProduct.image_url || '',
+          price: merchantProduct.price,
+          stock_qty: merchantProduct.stock_qty ?? -1,
+          inventory_enabled: (merchantProduct.stock_qty !== null && merchantProduct.stock_qty !== -1),
+          is_active: Boolean(merchantProduct.is_active)
+        };
+        this.dialogVisible.set(true);
+        this.loadProducts();
+      }
+    });
+  }
+
+  onInventoryToggle() {
+    if (!this.form.inventory_enabled) {
+      // Turned off → unlimited (-1)
+      this.form.stock_qty = -1;
+    } else {
+      // Turned on → default to 0 qty
+      this.form.stock_qty = 0;
+    }
+  }
+
+  generateAiDescription() {
+    if (!this.form.name) return;
+    const categoryName = this.categories().find((c) => c.id === Number(this.form.category_id))?.name || '';
+    this.aiLoading.set(true);
+    this.api.post<any>('/products/generate-description', {
+      product_name: this.form.name,
+      category_name: categoryName
+    }).subscribe({
+      next: (response) => {
+        this.form.ai_description = response.data.description;
+        this.form.description = response.data.description; // Replace main description too
+        this.aiLoading.set(false);
+      },
+      error: () => this.aiLoading.set(false)
+    });
+  }
+
+
+
+  save() {
+    this.saving.set(true);
+
+    const stockQty = this.form.inventory_enabled ? Number(this.form.stock_qty ?? 0) : -1;
+
+    const finalDescription = this.form.ai_description || this.form.description;
+
+    if (this.viewMode() === 'master') {
+      const payload = {
+        category_id: Number(this.form.category_id),
+        sku: this.form.sku,
+        name: this.form.name,
+        short_description: this.form.short_description,
+        description: finalDescription,
+        ai_description: this.form.ai_description,
+        image_url: this.form.image_url,
+        price: Number(this.form.price || 0),
+        stock_qty: stockQty,
+        sort_order: Number(this.form.sort_order || 0),
+        is_active: Boolean(this.form.is_active)
+      };
+
+      const request = this.form.id
+        ? this.api.put(`/products/master/${this.form.id}`, payload)
+        : this.api.post('/products/master', payload);
+
+      request.subscribe({
+        next: () => this.handleSaveSuccess('Master product saved'),
+        error: (error) => this.handleSaveError(error.error?.message)
+      });
+      return;
+    }
+
+    const merchantPayload = {
+      category_id: Number(this.form.category_id),
+      name: this.form.name,
+      short_description: this.form.short_description,
+      description: finalDescription,
+      ai_description: this.form.ai_description,
+      image_url: this.form.image_url,
+      price: Number(this.form.price || 0),
+      stock_qty: stockQty,
+      is_active: Boolean(this.form.is_active)
+    };
+
+    const request = this.form.id
+      ? this.api.put(`/products/merchant/${this.form.id}`, merchantPayload)
+      : this.api.post('/products/merchant', merchantPayload);
+
+    request.subscribe({
+      next: () => this.handleSaveSuccess(this.form.id ? 'Merchant override saved' : 'Private product created'),
+      error: (error) => this.handleSaveError(error.error?.message)
+    });
+  }
+
+  handleSaveSuccess(summary: string) {
+    this.saving.set(false);
+    this.dialogVisible.set(false);
+    this.messageService.add({ severity: 'success', summary, detail: 'Changes applied successfully.' });
+    this.loadProducts();
+  }
+
+  handleSaveError(detail = 'Save failed') {
+    this.saving.set(false);
+    this.messageService.add({ severity: 'error', summary: 'Save failed', detail });
+  }
+
+  toggleControlMode(product: any) {
+    if (!this.canManage()) return;
+    
+    // If it's already a merchant product, we offer to relink it to masterbrand
+    if (product.merchant_product_id) {
+      this.api.post<any>(`/products/inherited/${product.catalogue_id}/relink`, {}).subscribe({
+        next: (response) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Relinked to Brand',
+            detail: 'Product is now following masterbrand rules.'
+          });
+          // Update local state without closing the pane
+          product.merchant_product_id = null;
+          if (this.selectedProduct()?.id === product.id) {
+            this.selectedProduct.set({ ...product });
+          }
+        }
+      });
+      return;
+    }
+
+    // If it's a masterbrand product, we delink it to allow custom merchant overrides
+    this.api.post<any>(`/products/inherited/${product.catalogue_id}/delink`, {}).subscribe({
+      next: (response) => {
+        const merchantProduct = response.data.merchantProduct;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Custom Mode Active',
+          detail: 'You can now set merchant-specific price and availability.'
+        });
+        // Update local state
+        product.merchant_product_id = merchantProduct.id;
+        if (this.selectedProduct()?.id === product.id) {
+          this.selectedProduct.set({ ...product });
+        }
+      }
+    });
+  }
+
+  toggleMasterStatus(product: any) {
+    if (!this.canManage()) return;
+    const newState = !Boolean(product.is_active);
+    
+    // Optimistic Update
+    product.is_active = newState ? 1 : 0;
+    if (this.selectedProduct()?.id === product.id) {
+      this.selectedProduct.set({ ...product });
+    }
+
+    this.api.put(`/products/master/${product.id}`, { is_active: newState }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Masterbrand Update',
+          detail: `Master product successfully ${newState ? 'enabled' : 'disabled'}.`
+        });
+      },
+      error: () => {
+        product.is_active = !newState ? 1 : 0;
+        this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Could not update master status.' });
+      }
+    });
+  }
+
+  toggleMerchantStatus(product: any) {
+    if (!this.canManage()) return;
+    const newState = !Boolean(product.effective_is_active);
+    
+    // Optimistic Update
+    product.effective_is_active = newState ? 1 : 0;
+    if (this.selectedProduct()?.id === product.id) {
+       this.selectedProduct.set({ ...product });
+    }
+
+    if (!product.merchant_product_id) {
+      this.api.post<any>(`/products/inherited/${product.catalogue_id}/delink`, {}).subscribe({
+        next: (response) => {
+          this.updateMerchantStatus(response.data.merchantProduct.id, newState);
+        },
+        error: () => {
+          product.effective_is_active = !newState ? 1 : 0;
+        }
+      });
+      return;
+    }
+    this.updateMerchantStatus(product.merchant_product_id, newState);
+  }
+
+  private updateMerchantStatus(id: number, isActive: boolean) {
+    this.api.put(`/products/merchant/${id}`, { is_active: isActive }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Merchant Update',
+          detail: `Store-specific product successfully ${isActive ? 'enabled' : 'disabled'}.`
+        });
+      }
+    });
+  }
+
+  /** Background refresh without showing loader/spinner */
+  private loadProductsSilent() {
+    const params: any = {
+      limit: this.limit,
+      offset: this.offset
+    };
+    const catId = this.selectedCategoryId();
+    if (catId) params.category_id = catId;
+    if (this.search) params.search = this.search;
+
+    const endpoint = this.viewMode() === 'master' ? '/products/master' : '/products/inherited';
+
+    // Directly call http to avoid loader interceptor if needed, or just let it be.
+    // Actually, I'll just update the signals.
+    this.api.get<any>(endpoint, params).subscribe({
+      next: (response) => {
+        this.products.set(response.data.products || []);
+        this.totalRecords.set(response.data.total || 0);
+      }
+    });
+  }
+
+  sourceSeverity(sourceType: string): 'info' | 'warn' {
+    return sourceType === 'MERCHANT' ? 'warn' : 'info';
+  }
+
+  toggleOutOfStock(product: any) {
+    if (!this.canManage()) return;
+    const newState = !Boolean(product.is_out_of_stock);
+    
+    // Optimistic Update
+    product.is_out_of_stock = newState ? 1 : 0;
+    if (this.selectedProduct()?.id === product.id) {
+       this.selectedProduct.set({ ...product });
+    }
+
+    this.api.put(`/products/inherited/${product.catalogue_id}/stock-status`, { is_out_of_stock: newState }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Stock Updated',
+          detail: `Product marked as ${newState ? 'Out of Stock' : 'In Stock'}.`
+        });
+      },
+      error: () => {
+        product.is_out_of_stock = !newState ? 1 : 0;
+        this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Could not update stock status.' });
+      }
+    });
+  }
+
+  statusSeverity(isActive: boolean) {
+    return isActive ? 'success' : 'contrast';
+  }
+
+  asBoolean(val: any): boolean {
+    return Boolean(val);
+  }
+
+  isUnlimited(qty: any): boolean {
+    return qty === null || qty === -1;
+  }
+
+  fmtCurrency(value: number) {
+    return `₹${Number(value || 0).toLocaleString('en-IN')}`;
+  }
+
+  /** Drag and Drop Categories */
+  onCategoryDrop(event: CdkDragDrop<any[]>) {
+    if (event.previousIndex === event.currentIndex) return;
+    if (!this.auth.isAdmin()) return;
+
+    const list = this.categories();
+    const item1 = list[event.previousIndex];
+    const item2 = list[event.currentIndex];
+
+    // Optimistic local update
+    moveItemInArray(list, event.previousIndex, event.currentIndex);
+    this.categories.set([...list]);
+
+    this.api.post('/catalog/categories/swap', { id1: item1.id, id2: item2.id }).subscribe({
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Swap failed', detail: 'Could not update category order.' });
+        this.loadCategories(); // Revert
+      }
+    });
+  }
+
+  /** Drag and Drop Products */
+  onProductDrop(event: CdkDragDrop<any[]>) {
+    if (event.previousIndex === event.currentIndex) return;
+    if (this.viewMode() !== 'master') {
+      this.messageService.add({ severity: 'warn', summary: 'Restricted', detail: 'Sorting is only available in Masterbrand mode.' });
+      return;
+    }
+
+    const list = this.products();
+    const item1 = list[event.previousIndex];
+    const item2 = list[event.currentIndex];
+
+    // Optimistic local update
+    moveItemInArray(list, event.previousIndex, event.currentIndex);
+    this.products.set([...list]);
+
+    this.api.post('/products/swap', { id1: item1.id, id2: item2.id }).subscribe({
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Swap failed', detail: 'Could not update product order.' });
+        this.loadProducts(); // Revert
+      }
+    });
+  }
+
+  openLightbox(url: string | null) {
+    if (!url) return;
+    this.lightboxImage.set(url);
+    this.lightboxVisible.set(true);
+  }
+
+  duplicateProduct(product: any) {
+    if (!this.auth.isAdmin()) return;
+    this.api.post<any>(`/products/master/${product.id}/duplicate`, {}).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Duplicated', detail: 'Product copy created.' });
+        this.loadProducts();
+      }
+    });
+  }
+
+  deleteProduct(product: any) {
+    if (this.viewMode() === 'master') {
+      if (!this.auth.isAdmin()) return;
+      this.confirmTarget.set(product);
+      this.confirmType.set('product');
+      this.confirmMessage.set(`Are you sure you want to delete master product "${product.name}"? This will affect all merchants.`);
+      this.confirmVisible.set(true);
+    } else {
+      // Merchant mode
+      if (!product.merchant_product_id) {
+        this.messageService.add({ severity: 'warn', summary: 'Restricted', detail: 'You can only delete products you have customized (delinked).' });
+        return;
+      }
+      this.confirmTarget.set(product);
+      this.confirmType.set('product');
+      this.confirmMessage.set(`Are you sure you want to remove your custom version of "${product.effective_name}"?`);
+      this.confirmVisible.set(true);
+    }
+  }
+
+  deleteCategory(cat: any) {
+    if (!this.auth.isAdmin()) {
+      this.messageService.add({ severity: 'warn', summary: 'Restricted', detail: 'Only admins can delete categories.' });
+      return;
+    }
+    this.confirmTarget.set(cat);
+    this.confirmType.set('category');
+    this.confirmMessage.set(`Are you sure you want to delete category "${cat.name}"? This will also delete all products inside it.`);
+    this.confirmVisible.set(true);
+  }
+
+  confirmExecute() {
+    const target = this.confirmTarget();
+    const type = this.confirmType();
+    const isMaster = this.viewMode() === 'master';
+    this.confirmVisible.set(false);
+
+    if (type === 'product') {
+      if (isMaster) {
+        this.api.delete(`/products/master/${target.id}`).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Master product removed.' });
+            this.loadProducts();
+          }
+        });
+      } else {
+        this.api.delete(`/products/merchant/${target.merchant_product_id}`).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Custom version removed.' });
+            this.loadProducts();
+          }
+        });
+      }
+    } else {
+      this.api.delete(`/catalog/categories/${target.id}`).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Category and its products removed.' });
+          if (this.selectedCategoryId() === target.id) this.selectedCategoryId.set(null);
+          this.loadCategories();
+        }
+      });
+    }
+  }
+}

@@ -1,0 +1,161 @@
+/* Settings styles */
+.settings-page {
+  min-height: calc(100vh - 80px);
+  padding: 1rem 0 !important; /* Reduced vertical padding, horizontal 0 because shell has 20px */
+}
+
+.settings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px !important;
+  margin-top: 1rem;
+  color: var(--text-main);
+}
+
+/* Dark Mode support */
+:host-context(body.dark-mode) .settings-page {
+  background-color: transparent !important;
+}
+
+:host-context(body.dark-mode) .card {
+  background-color: #161b22 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+:host-context(body.dark-mode) .text-900 {
+  color: #facc15 !important;
+}
+
+:host-context(body.dark-mode) .text-secondary {
+  color: #8b949e !important;
+}
+
+/* Table Spacing & Boundaries */
+::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  padding: 1rem !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 1rem !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background-color: #1c2128 !important;
+  border-bottom-color: #30363d !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .p-datatable .p-datatable-tbody > tr {
+  background-color: #161b22 !important;
+}
+
+:host-context(body.dark-mode) ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  border-bottom-color: #30363d !important;
+}
+
+/* Language Switcher Pill */
+.lang-switcher-pill {
+  background: #f1f5f9;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 50px;
+  padding: 4px;
+  display: inline-flex; /* Ensure it only takes needed width */
+  gap: 2px;
+}
+
+:host-context(body.dark-mode) .lang-switcher-pill {
+  background: #30363d;
+  border-color: transparent;
+}
+
+.lang-opt-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #484f58;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lang-opt-btn.active {
+  background: #000;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+:host-context(body.dark-mode) .lang-opt-btn {
+  color: #c9d1d9;
+}
+
+:host-context(body.dark-mode) .lang-opt-btn.active {
+  background: #facc15;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(250, 204, 21, 0.3);
+}
+
+/* Field & Spacing */
+.bg-obsidian-soft {
+  background: rgba(0,0,0,0.03);
+}
+
+.border-obsidian {
+  border-color: rgba(0,0,0,0.05) !important;
+}
+
+:host-context(body.dark-mode) .bg-obsidian-soft {
+  background: rgba(255,255,255,0.03);
+}
+
+:host-context(body.dark-mode) .border-obsidian {
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+.field {
+  margin-bottom: 2rem;
+}
+
+.field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+:host-context(body.dark-mode) .field label {
+  color: #f0f6fc !important;
+}
+
+.hint-text {
+  font-size: 0.8rem;
+  color: #6e7681;
+  margin-top: 0.5rem;
+  display: block;
+  font-style: italic;
+}
+
+/* Dialog Boundaries */
+::ng-deep .custom-dialog .p-dialog-content {
+  padding: 1.5rem 2rem !important;
+}
+
+::ng-deep .custom-dialog .p-dialog-footer {
+  padding: 1rem 2rem !important;
+  border-top: 1px solid #f1f5f9;
+}
+
+:host-context(body.dark-mode) ::ng-deep .custom-dialog .p-dialog-footer {
+  border-top-color: #30363d;
+}

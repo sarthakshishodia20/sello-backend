@@ -1,0 +1,117 @@
+<div class="activity-page">
+  <div class="activity-container">
+  <div class="page-header-card">
+    <div class="header-title-box">
+      <div class="icon-wrap"><i class="pi pi-history"></i></div>
+      <div>
+        <h1>Activity Audit Log</h1>
+        <p>Tracking all data-modifying API operations for security and accountability.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <p-button icon="pi pi-refresh" label="Refresh" (onClick)="loadActivity()" [loading]="loading()" styleClass="p-button-warning shadow-2"></p-button>
+    </div>
+  </div>
+
+    <div class="card shadow-sm border-round-xl overflow-hidden activity-card">
+      <div class="table-container">
+        <p-table 
+          [value]="activities()" 
+          [lazy]="true" 
+          (onLazyLoad)="loadActivity($event)"
+          [paginator]="true" 
+          [rows]="rows" 
+          [totalRecords]="totalRecords()" 
+          [loading]="loading()"
+          [responsiveLayout]="'scroll'"
+          styleClass="p-datatable-sm"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="min-width: 150px">Timestamp</th>
+              <th style="min-width: 120px">User</th>
+              <th style="min-width: 100px">Method</th>
+              <th style="min-width: 250px">Endpoint</th>
+              <th style="min-width: 140px">IP Address</th>
+              <th style="min-width: 100px">Status</th>
+              <th style="width: 80px">Action</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-activity>
+            <tr>
+              <td class="text-sm">{{ activity.created_at | date:'MMM d, h:mm a' }}</td>
+              <td>
+                <div class="flex align-items-center gap-2">
+                  <span class="font-semibold text-sm text-800">{{ activity.user_name || 'System' }}</span>
+                </div>
+              </td>
+              <td>
+                <p-tag [value]="activity.method" [severity]="getSeverity(activity.method)"></p-tag>
+              </td>
+              <td>
+                <code class="text-xs bg-gray-100 p-1 border-round text-primary font-medium dark-code">{{ activity.endpoint }}</code>
+              </td>
+              <td class="text-sm text-600">{{ formatIP(activity.ip_address) }}</td>
+              <td>
+                <p-tag value="SUCCESS" severity="success" [rounded]="true"></p-tag>
+              </td>
+              <td>
+                <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="warn" (click)="showDetails(activity)" pTooltip="View Details" tooltipPosition="left"></p-button>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="text-center p-6">
+                <i class="pi pi-inbox text-4xl text-secondary mb-3 block"></i>
+                <p class="text-secondary">No activity logs found.</p>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Details Dialog -->
+<p-dialog 
+  [(visible)]="detailsVisible" 
+  [header]="'Activity Details'" 
+  [modal]="true" 
+  [style]="{width: '700px'}" 
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="activity-details-dialog"
+>
+  <div *ngIf="selectedActivity()" class="flex flex-column gap-4">
+    <div class="grid m-0">
+      <div class="col-6 p-2">
+        <label class="text-xs font-bold text-secondary uppercase block mb-1">Action</label>
+        <div class="text-sm font-semibold">{{ selectedActivity().action }}</div>
+      </div>
+      <div class="col-6 p-2">
+        <label class="text-xs font-bold text-secondary uppercase block mb-1">Timestamp</label>
+        <div class="text-sm">{{ selectedActivity().created_at | date:'MMMM d, y, h:mm:ss a' }}</div>
+      </div>
+      <div class="col-12 p-2">
+        <label class="text-xs font-bold text-secondary uppercase block mb-1">Endpoint</label>
+        <div class="text-sm font-mono bg-gray-50 p-2 border-round border-1 border-gray-100">{{ selectedActivity().method }} {{ selectedActivity().endpoint }}</div>
+      </div>
+    </div>
+
+    <div class="flex flex-column gap-2">
+      <label class="text-xs font-bold text-secondary uppercase">Request Payload</label>
+      <pre class="m-0 text-xs p-3 bg-gray-900 text-green-400 border-round overflow-auto" style="max-height: 200px;">{{ formatJson(selectedActivity().request_data) }}</pre>
+    </div>
+
+    <div class="flex flex-column gap-2">
+      <label class="text-xs font-bold text-secondary uppercase">Response Data</label>
+      <pre class="m-0 text-xs p-3 bg-gray-900 text-blue-400 border-round overflow-auto" style="max-height: 200px;">{{ formatJson(selectedActivity().response_data) }}</pre>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <p-button label="Close" icon="pi pi-times" [text]="true" severity="secondary" (click)="detailsVisible.set(false)"></p-button>
+  </ng-template>
+</p-dialog>

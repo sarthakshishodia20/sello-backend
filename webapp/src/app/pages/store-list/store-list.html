@@ -1,0 +1,119 @@
+<div class="marketplace-page">
+  <!-- Premium Hero Banner -->
+  <div class="hero-banner-wrap">
+    <div class="container hero-inner">
+      <div class="hero-content">
+        <span class="hero-badge">FASTEST DELIVERY</span>
+        <h1 class="hero-title">Everything you need, <br/>delivered <span class="text-accent">instantly.</span></h1>
+        <p class="hero-subtitle">Order from your favorite local stores and get it in minutes.</p>
+      </div>
+      <div class="hero-visual">
+        <!-- Abstract shape or icon -->
+        <div class="hero-blob"></div>
+        <i class="pi pi-bolt hero-icon"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Search Bar -->
+  <div class="top-search-bar">
+    <div class="container search-bar-inner">
+      <!-- Search Section -->
+      <div class="search-and-filters">
+        <div class="search-field">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            placeholder="Search for stores, items or cities..." 
+            (input)="onSearch($event)"
+            id="storeSearchInput"
+          />
+        </div>
+
+        <div class="filter-actions">
+          <div class="filter-group">
+            <div class="filter-chips">
+              <button class="filter-chip" [class.active]="selectedMode() === 'ALL'" (click)="setMode('ALL')">All</button>
+              <button class="filter-chip" [class.active]="selectedMode() === 'HOME_DELIVERY'" (click)="setMode('HOME_DELIVERY')" title="Home Delivery">Delivery</button>
+              <button class="filter-chip" [class.active]="selectedMode() === 'TAKE_AWAY'" (click)="setMode('TAKE_AWAY')" title="Take Away">Takeaway</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container marketplace-body">
+
+    <!-- Section Label -->
+    <div class="section-label">
+      <span class="label-bar"></span>
+      <span class="label-text">All Stores</span>
+      <span class="label-count" *ngIf="!loading()">{{ stores().length }} available</span>
+    </div>
+
+    <!-- Loading -->
+    <div class="stores-loading" *ngIf="loading()">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]"></div>
+    </div>
+
+    <!-- Store Grid -->
+    <div class="stores-grid" *ngIf="!loading()">
+      <div
+        class="store-card"
+        *ngFor="let store of stores()"
+        [class.store-closed]="!store.is_active"
+        (click)="onStoreClick(store)"
+      >
+        <!-- Thumbnail -->
+        <div class="store-thumb" [style.background]="store.image_url ? 'var(--bg-subtle)' : (store.theme_color || 'var(--accent)')">
+          <img *ngIf="store.image_url" [src]="store.image_url" class="store-img" [alt]="store.store_name" />
+          <div *ngIf="!store.image_url" class="store-initials">{{ getInitials(store.store_name) }}</div>
+          <button
+            class="heart-btn"
+            [class.liked]="wishlisted()[store.id]"
+            (click)="$event.preventDefault(); $event.stopPropagation(); toggleLike(store.id, $event)"
+            title="Save store"
+          >
+            <i class="pi" [class.pi-heart]="!wishlisted()[store.id]" [class.pi-heart-fill]="wishlisted()[store.id]"></i>
+          </button>
+        </div>
+
+        <!-- Card Info -->
+        <div class="store-info">
+          <div class="store-top-row">
+            <h3 class="store-title">{{ store.store_name }}</h3>
+            <span class="store-verified"><i class="pi pi-verified"></i></span>
+          </div>
+          <p class="store-desc">{{ store.description || 'Verified merchant storefront' }}</p>
+          <div class="store-meta-row">
+            <span class="meta-chip time-chip">
+              <i class="pi pi-clock"></i> {{ store.delivery_time || '30 mins' }}
+            </span>
+            <span class="meta-chip items-chip">
+              <i class="pi pi-box"></i> {{ store.total_products }} items
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-stores" *ngIf="!loading() && stores().length === 0">
+      <div class="empty-icon"><i class="pi pi-building-columns"></i></div>
+      <h3>No stores found in {{ location.currentCity() }}</h3>
+      <p>Try searching for something else or switching cities.</p>
+    </div>
+
+    <!-- Load More -->
+    <div class="load-more-wrap" *ngIf="hasMore() && stores().length > 0">
+      <button class="load-more-btn" (click)="loadMore()" [disabled]="loadingMore()">
+        <i class="pi pi-spin pi-spinner" *ngIf="loadingMore()"></i>
+        <span>{{ loadingMore() ? 'Loading...' : 'Load More Stores' }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>

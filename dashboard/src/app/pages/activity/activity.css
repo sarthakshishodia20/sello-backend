@@ -1,0 +1,99 @@
+/* Activity styles */
+.activity-page {
+  min-height: calc(100vh - 80px);
+  padding: 1rem 0 !important;
+}
+
+.activity-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.activity-card {
+  border: 1px solid var(--border);
+  border-radius: 12px !important;
+  margin-top: 1rem;
+  background: var(--bg-card);
+}
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* Dark Mode support */
+:host-context(body.dark-mode) .activity-page {
+  background-color: transparent !important;
+}
+
+:host-context(body.dark-mode) .activity-card {
+  background-color: #161b22 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+:host-context(body.dark-mode) .text-900 {
+  color: #facc15 !important;
+}
+
+:host-context(body.dark-mode) .p-datatable {
+  background-color: transparent !important;
+}
+
+:host-context(body.dark-mode) .p-datatable .p-datatable-thead > tr > th {
+  background-color: #1c2128 !important;
+  color: #facc15 !important;
+  border-bottom-color: #30363d !important;
+}
+
+:host-context(body.dark-mode) .p-datatable .p-datatable-tbody > tr:nth-child(odd) {
+  background-color: var(--rb-odd) !important;
+  color: var(--text-main) !important;
+}
+
+:host-context(body.dark-mode) .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background-color: var(--rb-even) !important;
+  color: var(--text-main) !important;
+}
+
+:host-context(body.dark-mode) .p-datatable .p-datatable-tbody > tr > td {
+  border-bottom-color: #30363d !important;
+}
+
+:host-context(body.dark-mode) .p-datatable .p-datatable-tbody > tr:hover {
+  background-color: #1c2128 !important;
+}
+
+:host-context(body.dark-mode) .dark-code {
+  background-color: #0d1117 !important;
+  color: #79c0ff !important;
+  border: 1px solid #30363d !important;
+}
+
+/* JSON pre styling */
+pre {
+  font-family: 'Fira Code', 'Courier New', monospace;
+  line-height: 1.6;
+  border-radius: 8px;
+}
+
+/* Dialog dark mode */
+:host-context(body.dark-mode) ::ng-deep .activity-details-dialog .p-dialog-header,
+:host-context(body.dark-mode) ::ng-deep .activity-details-dialog .p-dialog-content,
+:host-context(body.dark-mode) ::ng-deep .activity-details-dialog .p-dialog-footer {
+  background-color: #161b22 !important;
+  color: #c9d1d9 !important;
+  border-color: #30363d !important;
+}
+
+:host-context(body.dark-mode) .bg-gray-50 {
+  background-color: #0d1117 !important;
+  border-color: #30363d !important;
+  color: #79c0ff !important;
+}
+
+@media screen and (max-width: 768px) {
+  .activity-container {
+    padding: 0 1rem;
+  }
+}

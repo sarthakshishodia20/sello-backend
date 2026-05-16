@@ -1,0 +1,679 @@
+@import "primeicons/primeicons.css";
+
+/* ══════════════════════════════════════════════════
+   SELLO DESIGN SYSTEM — Global Tokens
+   Light Mode (Default) + Dark Mode
+══════════════════════════════════════════════════ */
+:root {
+  /* Brand */
+  --primary: #000000;
+  --primary-light: #f1f5f9;
+  --accent: #ef4444;
+  --accent-yellow: #4338ca; /* Professional Indigo for Light Mode */
+
+
+  /* Light Mode Tokens */
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-sidebar: #ffffff;
+  --border: #e2e8f0;
+  --shadow: 0 4px 20px rgba(0,0,0,0.05);
+
+  /* Text */
+  --text-main: #0f172a;
+  --text-dark: #1e293b;
+  --text-mid: #475569;
+  --text-muted: #64748b;
+  --text-secondary: #94a3b8;
+
+  /* Aliases for dashboard-shell */
+  --body-bg: #f8fafc;
+  --card-bg: #ffffff;
+  --white: #ffffff;
+  --sidebar-bg: #ffffff;
+  --topbar-bg: #ffffff;
+  --input-bg: #ffffff;
+
+  /* Surface (PrimeNG compatible) */
+  --surface-ground: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-border: #e2e8f0;
+  --surface-100: #f1f5f9;
+  --surface-dark: #f1f5f9;
+
+  /* Rainbow rows (tables) - Default Light */
+  --rb-odd: #ffffff;
+  --rb-even: #f8fafc;
+}
+
+/* ══ DARK MODE TOKEN OVERRIDES ══ */
+body.dark-mode {
+  --bg-main: #09090b;
+  --bg-card: #18181b;
+  --bg-sidebar: #09090b;
+  --border: #27272a;
+  --shadow: 0 10px 40px rgba(0,0,0,0.5);
+
+  --text-main: #fafafa;
+  --text-dark: #fafafa;
+  --text-mid: #d1d5db;
+  --text-muted: #a1a1aa;
+  --text-secondary: #71717a;
+  --accent-yellow: #facc15; /* High-contrast Yellow for Dark Mode */
+
+
+  --body-bg: #09090b;
+  --card-bg: #18181b;
+  --white: #18181b;
+  --sidebar-bg: #09090b;
+  --topbar-bg: #09090b;
+  --input-bg: #18181b;
+
+  --surface-ground: #09090b;
+  --surface-card: #18181b;
+  --surface-border: #27272a;
+  --surface-100: #27272a;
+  --surface-dark: #27272a;
+  --primary-light: #27272a;
+
+  --rb-odd: #18181b;
+  --rb-even: rgba(255,255,255,0.03);
+}
+
+/* ══ BASE ══ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ══ ICON FIX ══ */
+.pi {
+  font-family: 'primeicons' !important;
+  font-size: 1.1rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ══ LAYOUT ══ */
+.shell { display: flex; min-height: 100vh; }
+
+.side-panel {
+  width: 260px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 100;
+  transition: background 0.3s ease;
+}
+
+.content-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg-main);
+  transition: background 0.3s ease;
+}
+
+/* ══ GLOBAL PAGE HEADER ══ */
+.responsive-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.responsive-table-wrap::-webkit-scrollbar {
+  height: 6px;
+}
+
+.responsive-table-wrap::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+.page-header-card {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  background: var(--bg-card);
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.header-title-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-title-box .icon-wrap {
+  width: 52px;
+  height: 52px;
+  background: var(--surface-100);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-yellow);
+  font-size: 1.4rem;
+  border: 1px solid var(--border);
+}
+
+.header-title-box h1 {
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin: 0;
+  color: var(--text-dark);
+  letter-spacing: -0.5px;
+}
+
+.header-title-box p {
+  margin: 4px 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+@media screen and (max-width: 768px) {
+  .page-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions > * {
+    width: 100%;
+  }
+
+  .header-title-box {
+    align-items: flex-start;
+  }
+
+  .header-title-box h1 {
+    font-size: 1.3rem;
+  }
+}
+
+/* ══ Bulk Delete Button ══ */
+.btn-delete-bulk {
+  background: #ef4444 !important;
+  color: #fff !important;
+  border: none !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+}
+
+.btn-delete-bulk span {
+  display: none !important;
+}
+
+.btn-delete-bulk:hover {
+  background: #dc2626 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+}
+
+.btn-delete-bulk i {
+  font-size: 1.2rem !important;
+}
+
+/* ══ Action Buttons Group ══ */
+.action-btns-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+
+
+
+
+/* ══ TOPBAR ══ */
+.dashboard-topbar {
+  height: 80px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 50;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+
+body.dark-mode .dashboard-topbar {
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* ══ GLOBAL TABLE (Rainbow Effect for Light Mode) ══ */
+.p-datatable {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--surface-100) !important;
+  color: var(--text-muted) !important;
+  padding: 1.25rem !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 1.25rem !important;
+  border-bottom: 1px solid rgba(0,0,0,0.03) !important;
+  font-size: 14px !important;
+  color: var(--text-main) !important;
+  background: inherit !important; /* Let TR handle background */
+}
+
+/* Light Mode Rainbow Rows */
+body:not(.dark-mode) .p-datatable .p-datatable-tbody > tr:nth-child(5n+1) { background: #ffffff !important; }
+body:not(.dark-mode) .p-datatable .p-datatable-tbody > tr:nth-child(5n+2) { background: #f0f9ff !important; } /* Soft Blue */
+body:not(.dark-mode) .p-datatable .p-datatable-tbody > tr:nth-child(5n+3) { background: #f0fdf4 !important; } /* Soft Green */
+body:not(.dark-mode) .p-datatable .p-datatable-tbody > tr:nth-child(5n+4) { background: #fdf2f8 !important; } /* Soft Pink */
+body:not(.dark-mode) .p-datatable .p-datatable-tbody > tr:nth-child(5n+5) { background: #fefce8 !important; } /* Soft Yellow */
+
+/* Dark Mode Stable Rows */
+body.dark-mode .p-datatable .p-datatable-tbody > tr:nth-child(even) { background: rgba(255, 255, 255, 0.03) !important; }
+body.dark-mode .p-datatable .p-datatable-tbody > tr:nth-child(odd) { background: #18181b !important; }
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--surface-100) !important;
+  cursor: pointer;
+}
+
+
+/* ══ PrimeNG Drawer ══ */
+body.dark-mode .p-drawer {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode .p-drawer-header {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+body.dark-mode .p-drawer-content {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+body.dark-mode .p-drawer-footer {
+  background: var(--bg-card) !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+/* ══ PrimeNG Dialog ══ */
+body.dark-mode .p-dialog {
+  background: var(--bg-card) !important;
+}
+
+body.dark-mode .p-dialog-header {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+body.dark-mode .p-dialog-content {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+}
+
+body.dark-mode .p-dialog-footer {
+  background: var(--bg-card) !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+/* ══ PrimeNG Select/Dropdown Panel ══ */
+body.dark-mode .p-select,
+body.dark-mode .p-select-panel,
+body.dark-mode .p-autocomplete-panel,
+body.dark-mode .p-listbox,
+body.dark-mode .p-select-list,
+body.dark-mode .p-select-list-container {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-main) !important;
+}
+
+body.dark-mode .p-select-option,
+body.dark-mode .p-select-item,
+body.dark-mode .p-dropdown-item,
+body.dark-mode .p-select-option *,
+body.dark-mode .p-select-item *,
+body.dark-mode .p-dropdown-item * {
+  color: var(--text-main) !important;
+  background: transparent !important;
+}
+
+
+body.dark-mode .p-select-option:hover,
+body.dark-mode .p-select-option.p-select-option-selected,
+body.dark-mode .p-select-option.p-focus,
+body.dark-mode .p-select-item:hover,
+body.dark-mode .p-dropdown-item:hover {
+  background: var(--surface-100) !important;
+  color: var(--accent-yellow) !important;
+}
+
+
+body.dark-mode .p-select .p-select-label {
+  color: var(--text-main) !important;
+}
+
+/* ══ PrimeNG Inputtext ══ */
+body.dark-mode .p-inputtext,
+body.dark-mode input,
+body.dark-mode textarea {
+  background: var(--input-bg) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border) !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* ══ PrimeNG Toast ══ */
+body.dark-mode .p-toast-message {
+  background: #18181b !important;
+  border: 1px solid #27272a !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+}
+
+body.dark-mode .p-toast-message-content {
+  padding: 1rem !important;
+}
+
+body.dark-mode .p-toast-message-text {
+  color: #fff !important;
+}
+
+body.dark-mode .p-toast-summary {
+  color: #fff !important;
+  font-weight: 800 !important;
+}
+
+body.dark-mode .p-toast-detail {
+  color: rgba(255,255,255,0.7) !important;
+}
+
+body.dark-mode .p-toast-message-success {
+  background: #065f46 !important; /* Solid Dark Green */
+  border: 1px solid #10b981 !important;
+}
+
+body.dark-mode .p-toast-message-success .p-toast-message-icon,
+body.dark-mode .p-toast-message-success .p-toast-summary,
+body.dark-mode .p-toast-message-success .p-toast-detail {
+  color: #ecfdf5 !important;
+}
+
+body.dark-mode .p-toast-message-error {
+  background: #7f1d1d !important; /* Solid Dark Red */
+  border: 1px solid #ef4444 !important;
+}
+
+body.dark-mode .p-toast-message-error .p-toast-message-icon,
+body.dark-mode .p-toast-message-error .p-toast-summary,
+body.dark-mode .p-toast-message-error .p-toast-detail {
+  color: #fef2f2 !important;
+}
+
+
+
+/* ══ PrimeNG Tag ══ */
+body.dark-mode .p-tag.p-tag-success { background: rgba(0,230,118,0.12) !important; color: #00e676 !important; }
+body.dark-mode .p-tag.p-tag-danger  { background: rgba(255,77,77,0.12) !important;  color: #ff4d4d !important; }
+body.dark-mode .p-tag.p-tag-warning { background: rgba(251,191,36,0.12) !important; color: #fbbf24 !important; }
+body.dark-mode .p-tag.p-tag-info    { background: rgba(56,189,248,0.12) !important; color: #38bdf8 !important; }
+body.dark-mode .p-tag.p-tag-secondary { background: var(--surface-100) !important;  color: var(--text-muted) !important; }
+
+/* ══ ToggleSwitch (Yellow in Dark Mode) ══ */
+body.dark-mode p-toggleswitch .p-toggleswitch-slider {
+  background: #3f3f46 !important;
+}
+
+body.dark-mode p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider {
+  background: var(--accent-yellow) !important;
+}
+
+body.dark-mode p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-handle {
+  background: #000 !important;
+}
+
+/* ══ DatePicker / Calendar (Dark Mode) ══ */
+/* ══ DatePicker / Calendar (Aggressive Dark Mode) ══ */
+body.dark-mode .p-datepicker,
+body.dark-mode .p-datepicker *,
+.dark-mode .p-datepicker,
+.dark-mode .p-datepicker * {
+  background-color: #18181b !important;
+  color: #fff !important;
+  border-color: #27272a !important;
+}
+
+body.dark-mode .p-datepicker table td > span.p-highlight,
+.dark-mode .p-datepicker table td > span.p-highlight {
+  background: #facc15 !important;
+  color: #000 !important;
+}
+
+body.dark-mode .p-datepicker table td > span:hover,
+.dark-mode .p-datepicker table td > span:not(.p-highlight):hover {
+  background: #27272a !important;
+  color: #facc15 !important;
+}
+
+body.dark-mode .p-datepicker-header,
+.dark-mode .p-datepicker-header {
+  border-bottom: 1px solid #27272a !important;
+}
+
+body.dark-mode .p-datepicker-buttonbar,
+.dark-mode .p-datepicker-buttonbar {
+  border-top: 1px solid #27272a !important;
+}
+
+
+
+/* ══ Fix Refresh Icon & Inputs in Dark Mode ══ */
+body.dark-mode .btn-action-icon {
+  background: #27272a !important;
+  color: #fafafa !important;
+  border: 1px solid #3f3f46 !important;
+}
+
+body.dark-mode .btn-action-icon:hover {
+  background: #3f3f46 !important;
+}
+
+body.dark-mode .search-box-pill input,
+body.dark-mode .p-datepicker input {
+  background: #18181b !important;
+  color: #fafafa !important;
+  border: 1px solid #27272a !important;
+}
+
+body.dark-mode .search-box-pill i {
+  color: #a1a1aa !important;
+}
+
+body.dark-mode .p-datepicker .p-datepicker-trigger {
+  color: var(--accent-yellow) !important;
+}
+
+/* ══ Extension Dropdown ══ */
+.ext-dropdown-menu {
+  position: absolute;
+  top: 75px;
+  right: 32px;
+  width: 340px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  z-index: 2000;
+  padding: 12px;
+  transition: background 0.3s ease;
+}
+
+.ext-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 12px;
+  transition: all 0.2s;
+  gap: 12px;
+}
+
+.ext-menu-item:hover { background: var(--surface-100); }
+
+.ext-m-info label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+}
+.ext-m-info span { font-size: 0.75rem; color: var(--text-muted); }
+
+/* ══ Logo Text ══ */
+.sello-text { color: var(--accent-yellow); font-weight: 900; font-size: 1.8rem; }
+.sello-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; display: inline-block; }
+
+/* ══ Custom Confirmation Dialog ══ */
+/* ══ Confirmation Dialog & Global Dialog (Dark Mode) ══ */
+body.dark-mode .p-dialog,
+body.dark-mode .p-confirm-dialog,
+body.dark-mode .p-dialog-mask {
+  background: rgba(0,0,0,0.7) !important;
+}
+
+body.dark-mode .p-dialog .p-dialog-header,
+body.dark-mode .p-dialog .p-dialog-content,
+body.dark-mode .p-dialog .p-dialog-footer,
+body.dark-mode .p-confirm-dialog .p-dialog-header,
+body.dark-mode .p-confirm-dialog .p-dialog-content,
+body.dark-mode .p-confirm-dialog .p-dialog-footer {
+  background: #18181b !important;
+  color: #fff !important;
+  border-color: #27272a !important;
+}
+
+body.dark-mode .p-dialog .p-dialog-title,
+body.dark-mode .p-confirm-dialog .p-confirm-dialog-message {
+  color: #fff !important;
+}
+
+body.dark-mode .p-confirm-dialog .p-confirm-dialog-icon {
+  color: #ef4444 !important;
+}
+
+body.dark-mode .p-dialog .p-dialog-header-icons button {
+  color: #fff !important;
+}
+
+
+/* ══ Custom Select Polish ══ */
+.p-select {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  color: var(--text-main) !important;
+}
+
+body.dark-mode .p-select {
+  background: #18181b !important;
+  border-color: #27272a !important;
+}
+
+/* ══ Scrollbar ══ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ══ Utilities ══ */
+.mt-20 { margin-top: 20px; }
+.mb-20 { margin-bottom: 20px; }
+.mr-2 { margin-right: 8px; }
+.mr-3 { margin-right: 12px; }
+.d-none { display: none; }
+.d-md-flex { display: flex; }
+@media (max-width: 768px) { .d-md-flex { display: none !important; } }
+body.dark-mode .p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider {
+  background: var(--accent-yellow) !important;
+}
+
+body.dark-mode .p-toggleswitch .p-toggleswitch-slider {
+  background: #3f3f46;
+}
+
+/* Also for the custom yelo-toggle in products page */
+body.dark-mode .yelo-toggle input:checked + .yelo-slider {
+  background-color: var(--accent-yellow) !important;
+}
+body.dark-mode .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background-color: var(--rb-even) !important;
+}
+
+body.dark-mode .p-datatable .p-datatable-tbody > tr:nth-child(odd) {
+  background-color: var(--rb-odd) !important;
+}
+
+body.dark-mode .p-datatable .p-datatable-tbody > tr:hover {
+  background-color: rgba(250, 204, 21, 0.05) !important;
+}
+
+body.dark-mode .p-button.p-button-warning {
+  background: var(--accent-yellow) !important;
+  color: #000 !important;
+  border: none !important;
+}

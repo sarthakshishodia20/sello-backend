@@ -1,0 +1,437 @@
+/* ═══════════════════════════════════════════════
+   Sello Webapp — Global Design System
+   Font: Outfit | Theme: Dark/Light Adaptive
+═══════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import 'primeicons/primeicons.css';
+
+/* ── CSS Variables ── */
+:root {
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-xl: 40px;
+  --radius-full: 9999px;
+  
+  --nav-height: 80px;
+  --nav-height-mobile: 64px;
+
+  /* Default Light Mode Tokens (Grey Base) */
+  --bg-main:    #e2e8f0; /* Darker grey to prevent brightness */
+  --bg-card:    #f1f5f9; /* Slate 100 for cards */
+  --bg-subtle:  #cbd5e1; /* Slate 300 for subtle elements */
+  
+  --primary:    #ef4444; 
+  --accent:     #ef4444;
+  --accent-dark: #dc2626;
+  --accent-glow: rgba(239, 68, 68, 0.12);
+  --accent-gradient: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+
+
+  --text-main:  #0f172a;
+  --text-muted: #64748b;
+  --text-dim:   #94a3b8;
+
+  --border:        rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --glass-bg:   rgba(255, 255, 255, 0.85);
+
+  --shadow-sm:      0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md:      0 10px 30px rgba(0,0,0,0.06);
+  --shadow-lg:      0 20px 50px rgba(0,0,0,0.1);
+  --shadow-premium: 0 0 40px rgba(239, 68, 68, 0.08);
+}
+
+/* ── Dark Mode (Obsidian) ── */
+[data-theme='dark'] {
+  --bg-main:    #020617;
+  --bg-card:    #0f172a;
+  --bg-subtle:  #1e293b;
+  --primary:    #c9a200; /* Vibrant Gold for Dark Mode */
+  --accent:     #c9a200;
+  --accent-dark: #a68500;
+  --accent-glow: rgba(201, 162, 0, 0.2);
+  --accent-gradient: linear-gradient(135deg, #c9a200 0%, #8c7000 100%);
+
+
+
+  --text-main:  #fafafa;
+  --text-muted: #a1a1aa;
+  --text-dim:   #71717a;
+
+  --border:        rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.15);
+  --glass-bg:   rgba(9, 9, 11, 0.8);
+
+  --shadow-sm:      0 1px 4px rgba(0,0,0,0.5);
+  --shadow-md:      0 12px 40px rgba(0,0,0,0.6);
+  --shadow-lg:      0 25px 70px rgba(0,0,0,0.8);
+  --shadow-premium: 0 0 50px rgba(250, 204, 21, 0.05);
+}
+
+
+/* ── Base Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button, a, .cursor-pointer { cursor: pointer !important; }
+
+html, body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Outfit', -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background 0.3s ease;
+  position: relative;
+}
+
+/* ── Floating Doodle Background (Clear) ── */
+body {
+  position: relative;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Floating Items Layer */
+.floating-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1; /* Move above background but below most content */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.float-item {
+  position: absolute;
+  font-size: 2.2rem;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+  animation: floatRandom 20s linear infinite;
+  opacity: 0.8 !important; /* Make icons clear */
+}
+
+
+@keyframes floatRandom {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to   { transform: translate(100px, -100px) rotate(360deg); }
+}
+
+/* Specific Positions for Doodle Effect */
+.item-1 { top: 5%; left: 5%; animation-duration: 25s; }
+.item-2 { top: 25%; right: 10%; animation-duration: 18s; }
+.item-3 { bottom: 15%; left: 12%; animation-duration: 22s; }
+.item-4 { bottom: 8%; right: 5%; animation-duration: 30s; }
+.item-5 { top: 45%; left: 35%; animation-duration: 28s; opacity: 0.3; }
+.item-6 { top: 12%; right: 40%; animation-duration: 20s; opacity: 0.2; }
+.item-7 { top: 60%; right: 25%; animation-duration: 24s; opacity: 0.4; }
+.item-8 { bottom: 40%; left: 5%; animation-duration: 15s; opacity: 0.15; }
+.item-9 { top: 80%; left: 45%; animation-duration: 35s; opacity: 0.25; }
+.item-10 { top: 5%; left: 55%; animation-duration: 19s; opacity: 0.2; }
+.item-11 { bottom: 5%; left: 75%; animation-duration: 26s; opacity: 0.3; }
+.item-12 { top: 40%; right: 55%; animation-duration: 21s; opacity: 0.1; }
+.item-13 { bottom: 65%; left: 20%; animation-duration: 29s; opacity: 0.35; }
+.item-14 { top: 75%; right: 15%; animation-duration: 23s; opacity: 0.2; }
+.item-15 { top: 20%; left: 25%; animation-duration: 27s; opacity: 0.25; }
+
+
+/* Clear Backgrounds */
+[data-theme='dark'] body {
+  background: #020617;
+}
+
+
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; }
+
+/* ── Layout ── */
+.main-shell {
+  padding-top: var(--nav-height);
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .main-shell { padding-top: var(--nav-height-mobile); }
+}
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 1rem; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0 0.75rem; }
+}
+
+
+/* ── Typography ── */
+h1, h2, h3, h4 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.text-muted { color: var(--text-muted); }
+.text-dim   { color: var(--text-dim); }
+.text-accent { color: var(--accent); }
+.text-success { color: #10b981; }
+
+/* ── Premium Glow (Chamak) ── */
+.glow-on-hover:hover {
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.cursor-pointer { cursor: pointer; }
+
+/* ── Gradient Text ── */
+.text-gradient {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+
+/* ── Glass ── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Buttons ── */
+.btn-premium {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.9rem 2rem;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px var(--accent-glow);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 1.5px solid var(--border-strong);
+}
+
+.btn-outline:hover {
+  background: var(--bg-subtle);
+  transform: translateY(-2px);
+}
+
+/* ── Cards ── */
+.card-premium {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-premium:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-premium);
+  transform: translateY(-6px);
+}
+
+/* ── Inputs ── */
+.input-premium {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.input-premium:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.input-premium::placeholder { color: var(--text-dim); }
+
+.input-premium:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── PrimeNG Toast Customization ── */
+:host ::ng-deep .p-toast {
+  width: auto;
+  max-width: 380px;
+}
+
+:host ::ng-deep .p-toast-message {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  backdrop-filter: blur(16px);
+  margin-bottom: 1rem !important;
+}
+
+:host ::ng-deep .p-toast-message-success {
+  border-left: 6px solid #10b981 !important; /* Green */
+}
+
+:host ::ng-deep .p-toast-message-error {
+  border-left: 6px solid #ef4444 !important; /* Red */
+}
+
+:host ::ng-deep .p-toast-message-warn {
+  border-left: 6px solid #f59e0b !important; /* Amber */
+}
+
+:host ::ng-deep .p-toast-message-info {
+  border-left: 6px solid #3b82f6 !important; /* Blue */
+}
+
+:host ::ng-deep .p-toast-message-content {
+  padding: 1.25rem !important;
+}
+
+:host ::ng-deep .p-toast-summary {
+  font-weight: 800 !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 0.25rem;
+}
+
+:host ::ng-deep .p-toast-detail {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: var(--text-muted) !important;
+}
+
+:host ::ng-deep .p-toast-icon-close {
+  color: var(--text-dim) !important;
+}
+
+/* ── Spacing utils ── */
+.mt-4  { margin-top: 1rem; }
+.mt-8  { margin-top: 2rem; }
+.mb-4  { margin-bottom: 1rem; }
+.mb-8  { margin-bottom: 2rem; }
+.w-full { width: 100%; }
+.flex-1 { flex: 1; }
+
+/* ── Section padding ── */
+.section-padding { padding: 6rem 0; }
+
+/* ── Loading spinner ── */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 5rem 0;
+}
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ── PrimeNG Overrides ── */
+.p-toast .p-toast-message {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.p-progressspinner-circle {
+  stroke: var(--accent) !important;
+}
+
+.p-paginator {
+  background: transparent !important;
+  border: none !important;
+}
+
+.p-paginator .p-paginator-page,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-last {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  margin: 0 3px !important;
+}
+
+.p-paginator .p-paginator-page.p-highlight {
+  background: var(--accent) !important;
+  color: white !important;
+  border-color: var(--accent) !important;
+}
+
+/* ── Global Load More ── */
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.load-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 2.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: var(--radius-full);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: var(--shadow-sm);
+}
+
+.load-more-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--bg-subtle);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

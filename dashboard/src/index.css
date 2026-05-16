@@ -1,0 +1,231 @@
+/* ═══════════════════════════════════════════════
+   YELO DESIGN SYSTEM - Global Tokens
+   Reference: yelo-dashboard-angular
+═══════════════════════════════════════════════ */
+
+:root {
+  --yelo-blue: #377dff;
+  --yelo-blue-hover: #2b6ce2;
+  --yelo-blue-light: #f4f8ff;
+  --yelo-blue-bg: #377dff1c;
+  --yelo-bg: #f8fafc;
+  --yelo-card-bg: #ffffff;
+  --yelo-border: #f1f5f9;
+  --yelo-text: #212529;
+  --yelo-text-secondary: #64748b;
+  --yelo-text-muted: #94a3b8;
+  --yelo-shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.03);
+  --yelo-radius: 8px;
+  --yelo-radius-lg: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+body {
+  background-color: var(--bg-main, var(--yelo-bg));
+  color: var(--text-main, var(--yelo-text));
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ══════════════════════════════
+   GLOBAL COMPONENT STYLES
+══════════════════════════════ */
+
+/* Buttons */
+.yelo-btn-primary {
+  background-color: var(--yelo-blue) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: var(--yelo-radius) !important;
+  padding: 10px 20px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.yelo-btn-primary:hover {
+  background-color: var(--yelo-blue-hover) !important;
+  transform: translateY(-1px);
+}
+
+.yelo-btn-secondary {
+  background-color: #f1f5f9 !important;
+  color: var(--yelo-text-secondary) !important;
+  border: 1px solid var(--yelo-border) !important;
+  border-radius: var(--yelo-radius) !important;
+  padding: 10px 20px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.yelo-btn-secondary:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* Forms */
+.yelo-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--yelo-border);
+  border-radius: var(--yelo-radius);
+  font-size: 14px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.yelo-input:focus {
+  border-color: var(--yelo-blue);
+}
+
+/* Cards */
+.yelo-card {
+  background: var(--yelo-card-bg);
+  border: 1px solid var(--yelo-border);
+  border-radius: var(--yelo-radius-lg);
+  box-shadow: var(--yelo-shadow-soft);
+  padding: 24px;
+}
+
+/* Tables (PrimeNG Override) */
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background-color: #f8fafc !important;
+  color: var(--yelo-text-muted) !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid var(--yelo-border) !important;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 14px 16px !important;
+  border-bottom: 1px solid #f8fafc !important;
+  font-size: 14px !important;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  background-color: var(--yelo-blue-light) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+/* ── PrimeNG Overrides (Dark Mode) ── */
+body.dark-mode .p-datepicker {
+  background: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #fff !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+}
+
+body.dark-mode .p-datepicker .p-datepicker-header {
+  background: #18181b !important;
+  border-bottom: 1px solid #3f3f46 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .p-datepicker .p-datepicker-header .p-datepicker-title,
+body.dark-mode .p-datepicker .p-datepicker-header button {
+  color: #fff !important;
+}
+
+body.dark-mode .p-datepicker table th {
+  color: #a1a1aa !important;
+}
+
+body.dark-mode .p-datepicker table td span {
+  color: #e4e4e7 !important;
+}
+
+body.dark-mode .p-datepicker table td span:hover {
+  background: #3f3f46 !important;
+}
+
+body.dark-mode .p-datepicker table td.p-datepicker-today > span {
+  background: #27272a !important;
+  color: #facc15 !important;
+}
+
+body.dark-mode .p-datepicker table td > span.p-highlight {
+  background: #facc15 !important;
+  color: #000 !important;
+}
+
+body.dark-mode .p-select-panel,
+body.dark-mode .p-dropdown-panel,
+.dark-mode .p-select-panel,
+.dark-mode .p-dropdown-panel {
+  background: #18181b !important;
+  border: 1px solid #3f3f46 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+}
+
+
+body.dark-mode .p-select-item,
+body.dark-mode .p-dropdown-item {
+  color: #fff !important;
+  background: transparent !important;
+}
+
+body.dark-mode .p-select-item *,
+body.dark-mode .p-dropdown-item * {
+  color: #fff !important;
+}
+
+body.dark-mode .p-select-item:hover,
+body.dark-mode .p-dropdown-item:hover,
+body.dark-mode .p-select-item.p-highlight,
+body.dark-mode .p-dropdown-item.p-highlight {
+  background: #27272a !important;
+  color: #facc15 !important;
+}
+
+body.dark-mode .p-select-item:hover *,
+body.dark-mode .p-dropdown-item:hover *,
+body.dark-mode .p-select-item.p-highlight *,
+body.dark-mode .p-dropdown-item.p-highlight * {
+  color: #facc15 !important;
+}
+
+
+body.dark-mode .p-select-filter,
+body.dark-mode .p-dropdown-filter {
+  background: #27272a !important;
+  color: #fff !important;
+}
+
+body.dark-mode .p-select-panel::-webkit-scrollbar,
+body.dark-mode .p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.dark-mode .p-select-panel::-webkit-scrollbar-thumb,
+body.dark-mode .p-dropdown-panel .p-dropdown-items-wrapper::-webkit-scrollbar-thumb {
+  background: #3f3f46 !important;
+  border-radius: 10px;
+}
+
+

@@ -1,0 +1,62 @@
+<nav class="webapp-nav glass animate-fade">
+  <div class="container nav-inner">
+    <div class="nav-left">
+      <a routerLink="/" class="nav-brand">
+        <span class="logo-text">sello<span>.</span></span>
+      </a>
+      <div class="nav-divider"></div>
+<div class="city-selector" (click)="toggleCityMenu()">
+  <i class="pi pi-map-marker"></i>
+  <span>{{ location.currentCity() }}</span>
+  <i class="pi pi-chevron-down"></i>
+  
+  <!-- Simple City Dropdown -->
+  <div class="city-dropdown" *ngIf="showCityMenu()">
+    <div class="city-option" *ngFor="let city of cities" (click)="selectCity(city)">
+      {{ city }}
+    </div>
+  </div>
+</div>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-links">
+        <a routerLink="/" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <i class="pi pi-home"></i> <span>Home</span>
+        </a>
+        <a routerLink="/orders" class="nav-link" routerLinkActive="active" *ngIf="auth.isLoggedIn()">
+          <i class="pi pi-history"></i> <span>Orders</span>
+        </a>
+        <a routerLink="/wishlist" class="nav-link" routerLinkActive="active">
+          <i class="pi pi-heart"></i> <span>Wishlist</span>
+        </a>
+      </div>
+
+
+      <div class="nav-divider"></div>
+
+      <div class="auth-actions">
+        <button class="icon-btn theme-toggle" (click)="toggleTheme()" [title]="isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+          <i class="pi" [class.pi-moon]="isDark()" [class.pi-sun]="!isDark()"></i>
+        </button>
+
+        <button class="icon-btn" *ngIf="!auth.isLoggedIn()" routerLink="/login" title="Sign In">
+          <i class="pi pi-user"></i>
+        </button>
+        
+        <div class="user-profile-mini" *ngIf="auth.isLoggedIn()">
+          <div class="avatar-sm">{{ auth.user()?.name?.[0] }}</div>
+          <button class="logout-mini-btn" (click)="auth.logout()"><i class="pi pi-power-off"></i></button>
+        </div>
+      </div>
+
+      <button class="nav-cart-trigger" (click)="cart.isOpen.set(true)">
+        <div class="cart-icon-wrap">
+          <i class="pi pi-shopping-bag"></i>
+          <span class="cart-count-pill" *ngIf="cart.totalItems() > 0">{{ cart.totalItems() }}</span>
+        </div>
+        <span class="cart-total" *ngIf="cart.totalPrice() > 0">₹{{ cart.totalPrice() | number:'1.0-0' }}</span>
+      </button>
+    </div>
+  </div>
+</nav>
