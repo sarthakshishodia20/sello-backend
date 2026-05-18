@@ -47,6 +47,10 @@ async function getOverview(req, res) {
     return sendSuccess(res, 'Overview fetched', { overview });
   } catch (err) {
     logger.error(MODULE, 'GET_OVERVIEW_ERROR', { error: err.message });
+    try {
+      const { trackError } = require('../../../utilities/errorTracker');
+      await trackError(err, req);
+    } catch (e) {}
     return sendError(res, 'Failed to fetch overview', 500);
   }
 }

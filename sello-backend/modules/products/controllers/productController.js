@@ -66,6 +66,10 @@ async function getMasterProducts(req, res) {
     });
   } catch (err) {
     logger.error(MODULE, 'GET_MASTER_PRODUCTS_ERROR', { error: err.message });
+    try {
+      const { trackError } = require('../../../utilities/errorTracker');
+      await trackError(err, req);
+    } catch (e) {}
     return sendError(res, 'Failed to fetch master products', 500);
   }
 }
@@ -205,6 +209,10 @@ async function getInheritedProducts(req, res) {
     });
   } catch (err) {
     logger.error(MODULE, 'GET_INHERITED_PRODUCTS_ERROR', { error: err.message });
+    try {
+      const { trackError } = require('../../../utilities/errorTracker');
+      await trackError(err, req);
+    } catch (e) {}
     return sendError(res, 'Failed to fetch inherited products', 500);
   }
 }
