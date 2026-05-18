@@ -27,7 +27,7 @@
         <div class="banner-chips">
           <span class="b-chip"><i class="pi pi-verified"></i> Verified Merchant</span>
           <span class="b-chip"><i class="pi pi-truck"></i> Home Delivery</span>
-          <span class="b-chip brand-chip" *ngIf="store()?.masterbrand_name" [style.background]="(store()?.theme_color || 'var(--accent)') + '20'" [style.color]="store()?.theme_color || 'var(--accent)'">
+          <span class="brand-chip" *ngIf="store()?.masterbrand_name">
             <i class="pi pi-bookmark-fill"></i> Part of <strong>{{ store()?.masterbrand_name }}</strong> Network
           </span>
         </div>
@@ -172,3 +172,14 @@
     </div>
   </div>
 </footer>
+
+<!-- Parent Masterbrand Welcome Popup -->
+<div class="mb-welcome-popup" *ngIf="showWelcomePopup() && store()?.masterbrand_name">
+  <div class="popup-icon">
+    <i class="pi pi-bookmark-fill"></i>
+  </div>
+  <div class="popup-content">
+    <span class="popup-title">Official Network Store</span>
+    <span class="popup-desc">You are shopping at <strong>{{ store()?.store_name }}</strong>, an authorized merchant of the <strong>{{ store()?.masterbrand_name }}</strong> Network.</span>
+  </div>
+</div>

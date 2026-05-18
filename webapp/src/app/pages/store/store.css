@@ -744,14 +744,26 @@
 
 /* ── Masterbrand Network Badge & Brand Chips ── */
 .brand-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.35rem 0.9rem;
-  border-radius: var(--radius-full);
-  border: 1px solid currentColor;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  padding: 0.35rem 0.9rem !important;
+  border-radius: var(--radius-full) !important;
+  background: rgba(239, 68, 68, 0.1) !important; /* Soft red glow */
+  color: #ef4444 !important; /* Bright red text for excellent visibility */
+  border: 1.5px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+[data-theme='dark'] .brand-chip {
+  background: rgba(250, 204, 21, 0.1) !important; /* Soft gold glow */
+  color: #facc15 !important; /* Bright yellow text for extreme legibility */
+  border: 1.5px solid rgba(250, 204, 21, 0.35) !important;
+}
+
+.brand-chip strong {
+  font-weight: 900 !important;
 }
 
 .footer-left {
@@ -782,6 +794,109 @@
   color: var(--text-main);
   font-weight: 700;
   margin: 0 0.25rem;
+}
+
+/* ── Masterbrand Welcome Popup ── */
+.mb-welcome-popup {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.15);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-lg);
+  max-width: 460px;
+  width: calc(100% - 2rem);
+  animation: popupSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  color: #f8fafc;
+}
+
+@keyframes popupSlideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 3rem);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.mb-welcome-popup.fade-out {
+  animation: popupFadeOut 0.4s ease forwards;
+}
+
+@keyframes popupFadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -1.5rem);
+  }
+}
+
+.popup-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  text-align: left;
+}
+
+.popup-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #38bdf8;
+}
+
+.popup-desc {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.popup-desc strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .mb-welcome-popup {
+    bottom: 1.5rem;
+    padding: 0.85rem 1.25rem;
+  }
+  .popup-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  .popup-desc {
+    font-size: 0.8rem;
+  }
 }
 
 

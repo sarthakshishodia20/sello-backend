@@ -49,6 +49,9 @@ export class StoreComponent implements OnInit {
   // Wishlist
   wishlisted = signal<Record<number, boolean>>({});
 
+  // Welcome Popup
+  showWelcomePopup = signal(false);
+
   // Pagination & Filters
   limit = 12;
   offset = 0;
@@ -111,6 +114,18 @@ export class StoreComponent implements OnInit {
         }
 
         this.store.set(response.data.store);
+
+        // Show welcome popup
+        this.showWelcomePopup.set(true);
+        setTimeout(() => {
+          const element = document.querySelector('.mb-welcome-popup');
+          if (element) {
+            element.classList.add('fade-out');
+          }
+          setTimeout(() => {
+            this.showWelcomePopup.set(false);
+          }, 400);
+        }, 3500);
 
         this.categories.set(response.data.categories || []);
         this.categoryTree.set(response.data.category_tree || []);
