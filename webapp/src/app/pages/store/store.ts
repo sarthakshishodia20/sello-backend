@@ -253,8 +253,6 @@ export class StoreComponent implements OnInit {
       product
     );
 
-    this.playStoreNotificationSound();
-
     this.messageService.add({
       severity: 'success',
       summary: 'Added to cart',

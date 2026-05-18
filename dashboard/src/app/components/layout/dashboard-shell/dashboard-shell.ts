@@ -160,6 +160,21 @@ export class DashboardShellComponent {
     
     this.settingsService.loadSettings();
 
+    // Populate localStorage with merchant's sound choice on boot
+    if (this.auth.isMerchant()) {
+      this.api.get<any>('/merchants/profile').subscribe({
+        next: (res) => {
+          const merchant = res.data.merchant;
+          if (merchant && merchant.settings) {
+            try {
+              const parsed = typeof merchant.settings === 'string' ? JSON.parse(merchant.settings) : merchant.settings;
+              localStorage.setItem('sello_soundNotification', parsed.soundNotification || 'chime');
+            } catch (e) {}
+          }
+        }
+      });
+    }
+
     // Play chosen sound chime globally on dashboard notifications
     this.messageService.messageObserver.subscribe((msg: any) => {
       if (this.settingsService.settings().soundNotificationEnabled) {
