@@ -11,16 +11,16 @@ export interface SoundOption {
 })
 export class AudioService {
   public sounds: SoundOption[] = [
-    { key: 'chime', label: 'Chime Ding (Default)', url: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-200.wav' },
-    { key: 'bell', label: 'Classic Bell', url: 'https://assets.mixkit.co/active_storage/sfx/911/911-200.wav' },
-    { key: 'bubble', label: 'Bubble Pop', url: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-200.wav' },
-    { key: 'digital', label: 'Digital Beep', url: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-200.wav' },
-    { key: 'alarm', label: 'Alert Siren', url: 'https://assets.mixkit.co/active_storage/sfx/997/997-200.wav' }
+    { key: 'chime', label: 'Chime Ding (Default)', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/chimes.mp3' },
+    { key: 'bell', label: 'Classic Bell', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/bell.mp3' },
+    { key: 'bubble', label: 'Bubble Pop', url: 'https://raw.githubusercontent.com/MycroftAI/mycroft-core/master/mycroft/res/snd/start_listening.wav' },
+    { key: 'digital', label: 'Digital Beep', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/beep4.mp3' },
+    { key: 'alarm', label: 'Alert Siren', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/constant_beep.mp3' }
   ];
 
   play(soundKey: string) {
     if (soundKey === 'disabled') return;
-    
+
     const sound = this.sounds.find(s => s.key === soundKey) || this.sounds[0];
     if (!sound) return;
 
