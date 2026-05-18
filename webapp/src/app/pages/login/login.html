@@ -50,9 +50,8 @@
                 class="btn-premium btn-primary w-full mt-4" [loading]="loading()"></button>
       </form>
 
-      <div class="auth-helper-links mt-8">
-        <p *ngIf="mode() === 'login'">Forgot password? <a href="#" class="link-accent">Reset here</a></p>
-        <p *ngIf="mode() === 'signup'">By joining, you agree to our <a href="#" class="link-accent">Terms</a></p>
+      <div class="auth-helper-links mt-8" *ngIf="mode() === 'signup'">
+        <p>By joining, you agree to our <a href="#" class="link-accent">Terms</a></p>
       </div>
     </div>
   </div>

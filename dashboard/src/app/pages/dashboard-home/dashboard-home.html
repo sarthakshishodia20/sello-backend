@@ -84,6 +84,46 @@
           </p-table>
         </div>
       </div>
+
+      <!-- Sleek Audio Alerts Widget -->
+      <div class="sound-feature-card" *ngIf="auth.isMerchant()">
+        <div class="header-icon">
+          <i class="pi pi-bell"></i>
+        </div>
+        <div>
+          <h3>🎵 Live Audio Alerts Engine</h3>
+          <p>Sello is equipped with a premium, multi-tenant earcon sound engine designed to keep you updated on critical actions in real time.</p>
+        </div>
+        
+        <div class="feature-list">
+          <div class="feature-item">
+            <i class="pi pi-check-circle"></i>
+            <div>
+              <strong>Order Status Audios</strong>
+              <span>Triggers a crisp digital chime instantly whenever you accept, reject, or complete order statuses in the Orders section.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="pi pi-trash"></i>
+            <div>
+              <strong>Safe Delete Alerts</strong>
+              <span>Plays a warning digital earcon anytime you delete or archive products, categories, or customers across the platform.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="pi pi-shopping-bag"></i>
+            <div>
+              <strong>Customer Storefront</strong>
+              <span>Plays your customized sound to customers the exact millisecond they successfully place an order on your store website!</span>
+            </div>
+          </div>
+        </div>
+        
+        <a class="footer-link" routerLink="/profile">
+          <span>Manage Sound Preferences</span>
+          <i class="pi pi-arrow-right"></i>
+        </a>
+      </div>
     </div>
   </div>
 </div>

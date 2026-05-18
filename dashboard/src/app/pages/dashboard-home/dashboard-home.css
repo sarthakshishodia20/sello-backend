@@ -106,8 +106,14 @@
 /* ── Main Layout ── */
 .main-content-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
+}
+
+@media screen and (max-width: 992px) {
+  .main-content-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .glass-card {
@@ -223,4 +229,100 @@ body.dark-mode .glass-card {
   .chart-container {
     height: 300px;
   }
+}
+
+/* ── Sound Feature Card ── */
+.sound-feature-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+:host-context(body.dark-mode) .sound-feature-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.95));
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.sound-feature-card .header-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.sound-feature-card h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.sound-feature-card p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.sound-feature-card .feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.sound-feature-card .feature-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.sound-feature-card .feature-item i {
+  color: #f59e0b;
+  font-size: 1rem;
+  margin-top: 3px;
+}
+
+.sound-feature-card .feature-item div strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #f1f5f9;
+  margin-bottom: 2px;
+}
+
+.sound-feature-card .feature-item div span {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  display: block;
+}
+
+.sound-feature-card .footer-link {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #facc15;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.sound-feature-card .footer-link:hover {
+  opacity: 0.8;
 }

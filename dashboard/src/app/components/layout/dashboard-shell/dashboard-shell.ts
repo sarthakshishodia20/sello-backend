@@ -175,9 +175,30 @@ export class DashboardShellComponent {
       });
     }
 
-    // Play chosen sound chime globally on dashboard notifications
+    // Play chosen sound chime globally ONLY on order changes and deletions
     this.messageService.messageObserver.subscribe((msg: any) => {
-      if (this.settingsService.settings().soundNotificationEnabled) {
+      if (!msg || !this.settingsService.settings().soundNotificationEnabled) return;
+
+      const msgs = Array.isArray(msg) ? msg : [msg];
+      let shouldPlay = false;
+
+      for (const m of msgs) {
+        const summary = (m.summary || '').toLowerCase();
+        const detail = (m.detail || '').toLowerCase();
+
+        // 1. Order status changes (Summary is 'Updated' and detail contains 'order status')
+        const isOrderStatus = summary === 'updated' && detail.includes('order status');
+
+        // 2. Deletions or archives anywhere (Summary contains 'deleted', 'archived', or detail contains 'removed')
+        const isDelete = summary === 'deleted' || summary === 'archived' || detail.includes('delete') || detail.includes('removed');
+
+        if (isOrderStatus || isDelete) {
+          shouldPlay = true;
+          break;
+        }
+      }
+
+      if (shouldPlay) {
         const soundKey = localStorage.getItem('sello_soundNotification') || 'chime';
         this.audioService.play(soundKey);
       }
