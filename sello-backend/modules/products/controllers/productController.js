@@ -4,6 +4,37 @@ const logger = require('../../../utilities/loggingUtil');
 
 const MODULE = 'ProductController';
 
+function formatProductImageUrls(req, productsOrProduct) {
+  const host = `${req.protocol}://${req.get('host')}`;
+  const formatUrl = (url) => {
+    if (url && url.startsWith('/uploads/')) {
+      return `${host}${url}`;
+    }
+    return url;
+  };
+
+  const formatItem = (item) => {
+    if (!item) return item;
+    const formatted = { ...item };
+    if (formatted.image_url) formatted.image_url = formatUrl(formatted.image_url);
+    if (formatted.effective_image_url) formatted.effective_image_url = formatUrl(formatted.effective_image_url);
+    if (formatted.master_image_url) formatted.master_image_url = formatUrl(formatted.master_image_url);
+    if (formatted.merchant_image_url) formatted.merchant_image_url = formatUrl(formatted.merchant_image_url);
+    return formatted;
+  };
+
+  if (Array.isArray(productsOrProduct)) {
+    return productsOrProduct.map(formatItem);
+  }
+  return formatItem(productsOrProduct);
+}
+
+function cleanProductImageUrl(url) {
+  if (!url) return url;
+  const match = url.match(/\/uploads\/[^\/]+$/);
+  return match ? match[0] : url;
+}
+
 /**
  * Merchant scope resolver lets admin preview merchant inheritance using query params.
  */
@@ -30,7 +61,7 @@ async function getMasterProducts(req, res) {
     });
 
     return sendSuccess(res, 'Master products fetched', {
-      products,
+      products: formatProductImageUrls(req, products),
       total
     });
   } catch (err) {
@@ -45,11 +76,17 @@ async function getMasterProducts(req, res) {
  */
 async function createMasterProduct(req, res) {
   try {
+    if (req.body.image_url) {
+      req.body.image_url = cleanProductImageUrl(req.body.image_url);
+    }
     const { id } = await productService.createMasterProduct(req.selloUser.masterbrandId, req.body);
     const product = await productService.getMasterProductById(id, req.selloUser.masterbrandId);
-    return sendSuccess(res, 'Master product created successfully', { product }, 201);
+    return sendSuccess(res, 'Master product created successfully', { product: formatProductImageUrls(req, product) }, 201);
   } catch (err) {
     logger.error(MODULE, 'CREATE_MASTER_PRODUCT_ERROR', { error: err.message });
+    if (err.code === 'ER_DUP_ENTRY' || err.message.includes('ER_DUP_ENTRY')) {
+      return sendError(res, 'SKU already exists. Please use a different SKU code.', 400);
+    }
     return sendError(res, 'Failed to create master product', 500);
   }
 }
@@ -67,11 +104,17 @@ async function updateMasterProduct(req, res) {
       return sendNotFound(res, 'Master product not found');
     }
 
+    if (req.body.image_url) {
+      req.body.image_url = cleanProductImageUrl(req.body.image_url);
+    }
     await productService.updateMasterProduct(productId, req.selloUser.masterbrandId, req.body);
     const product = await productService.getMasterProductById(productId, req.selloUser.masterbrandId);
-    return sendSuccess(res, 'Master product updated successfully', { product });
+    return sendSuccess(res, 'Master product updated successfully', { product: formatProductImageUrls(req, product) });
   } catch (err) {
     logger.error(MODULE, 'UPDATE_MASTER_PRODUCT_ERROR', { error: err.message });
+    if (err.code === 'ER_DUP_ENTRY' || err.message.includes('ER_DUP_ENTRY')) {
+      return sendError(res, 'SKU already exists. Please use a different SKU code.', 400);
+    }
     return sendError(res, 'Failed to update master product', 500);
   }
 }
@@ -112,7 +155,7 @@ async function duplicateProduct(req, res) {
       merchantId
     );
     
-    return sendSuccess(res, 'Product duplicated successfully', { product: result });
+    return sendSuccess(res, 'Product duplicated successfully', { product: formatProductImageUrls(req, result) });
   } catch (err) {
     logger.error(MODULE, 'DUPLICATE_PRODUCT_ERROR', { error: err.message });
     return sendError(res, 'Failed to duplicate product', 500);
@@ -157,7 +200,7 @@ async function getInheritedProducts(req, res) {
     });
 
     return sendSuccess(res, 'Inherited products fetched', {
-      products,
+      products: formatProductImageUrls(req, products),
       total
     });
   } catch (err) {
@@ -183,7 +226,7 @@ async function delinkProduct(req, res) {
     return sendSuccess(
       res,
       result.alreadyDelinked ? 'Product was already delinked' : 'Product delinked successfully',
-      { merchantProduct }
+      { merchantProduct: formatProductImageUrls(req, merchantProduct) }
     );
   } catch (err) {
     logger.error(MODULE, 'DELINK_PRODUCT_ERROR', { error: err.message });
@@ -227,11 +270,17 @@ async function updateMerchantProduct(req, res) {
       return sendNotFound(res, 'Merchant product not found');
     }
 
+    if (req.body.image_url) {
+      req.body.image_url = cleanProductImageUrl(req.body.image_url);
+    }
     await productService.updateMerchantProduct(merchantProductId, merchantId, req.body);
     const product = await productService.getMerchantProductById(merchantProductId, merchantId);
-    return sendSuccess(res, 'Merchant product updated successfully', { product });
+    return sendSuccess(res, 'Merchant product updated successfully', { product: formatProductImageUrls(req, product) });
   } catch (err) {
     logger.error(MODULE, 'UPDATE_MERCHANT_PRODUCT_ERROR', { error: err.message });
+    if (err.code === 'ER_DUP_ENTRY' || err.message.includes('ER_DUP_ENTRY')) {
+      return sendError(res, 'SKU already exists. Please use a different SKU code.', 400);
+    }
     return sendError(res, 'Failed to update merchant product', 500);
   }
 }
@@ -247,6 +296,9 @@ async function createMerchantProduct(req, res) {
       return sendError(res, 'Only merchant users can create private products');
     }
 
+    if (req.body.image_url) {
+      req.body.image_url = cleanProductImageUrl(req.body.image_url);
+    }
     const { id } = await productService.createPrivateProduct(
       req.selloUser.masterbrandId,
       merchantId,
@@ -256,7 +308,28 @@ async function createMerchantProduct(req, res) {
     return sendSuccess(res, 'Private product created successfully', { id }, 201);
   } catch (err) {
     logger.error(MODULE, 'CREATE_MERCHANT_PRODUCT_ERROR', { error: err.message });
+    if (err.code === 'ER_DUP_ENTRY' || err.message.includes('ER_DUP_ENTRY')) {
+      return sendError(res, 'SKU already exists. Please use a different SKU code.', 400);
+    }
     return sendError(res, 'Failed to create private product', 500);
+  }
+}
+
+/**
+ * POST /api/products/upload
+ * Handles product image uploads using multer.
+ */
+async function uploadImage(req, res) {
+  try {
+    if (!req.file) {
+      return sendError(res, 'No file uploaded', 400);
+    }
+    const host = `${req.protocol}://${req.get('host')}`;
+    const imageUrl = `${host}/uploads/${req.file.filename}`;
+    return sendSuccess(res, 'Image uploaded successfully', { imageUrl });
+  } catch (err) {
+    logger.error(MODULE, 'UPLOAD_IMAGE_ERROR', { error: err.message });
+    return sendError(res, 'Failed to upload image', 500);
   }
 }
 
@@ -323,5 +396,6 @@ module.exports = {
   swapProducts,
   duplicateProduct,
   deleteMerchantProduct,
-  updateStockStatus
+  updateStockStatus,
+  uploadImage
 };

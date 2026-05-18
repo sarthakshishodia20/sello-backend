@@ -48,7 +48,7 @@ CREATE TABLE tb_merchants (
     FOREIGN KEY (masterbrand_id) REFERENCES tb_masterbrand(id) ON DELETE CASCADE,
   INDEX idx_tb_merchants_masterbrand (masterbrand_id),
   INDEX idx_tb_merchants_slug (slug)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB AUTO_INCREMENT=100001;
 
 -- Platform users are dashboard users only in Phase 1: admin and merchant admins.
 CREATE TABLE tb_users (
@@ -240,15 +240,15 @@ VALUES
 -- Seed merchants.
 INSERT INTO tb_merchants (id, masterbrand_id, name, code, slug, description, contact_email, phone, address, theme_color, is_active)
 VALUES
-  (1, 1, 'Selo Fresh Gurgaon', 'SELO_GGN', 'selo-fresh-gurgaon', 'Fresh groceries and pantry essentials for Gurgaon customers.', 'gurgaon@selo.com', '+91-9876543210', 'Sector 45, Gurgaon', '#0f766e', 1),
-  (2, 1, 'Selo Express Noida', 'SELO_NOIDA', 'selo-express-noida', 'Quick commerce style demo merchant with inherited catalogue.', 'noida@selo.com', '+91-9988776655', 'Sector 62, Noida', '#b45309', 1);
+  (100001, 1, 'Selo Fresh Gurgaon', 'SELO_GGN', 'selo-fresh-gurgaon', 'Fresh groceries and pantry essentials for Gurgaon customers.', 'gurgaon@selo.com', '+91-9876543210', 'Sector 45, Gurgaon', '#0f766e', 1),
+  (100002, 1, 'Selo Express Noida', 'SELO_NOIDA', 'selo-express-noida', 'Quick commerce style demo merchant with inherited catalogue.', 'noida@selo.com', '+91-9988776655', 'Sector 62, Noida', '#b45309', 1);
 
 -- Seed dashboard users.
 INSERT INTO tb_users (id, masterbrand_id, merchant_id, name, email, password_hash, role, phone, is_active)
 VALUES
   (1, 1, NULL, 'Selo Admin', 'admin@selo.com', '$2a$10$9ijV1ga6bhmDY6CZzz1XH.WV4c6cPlU5aiqMSBKDN74LzoAmOufO6', 'MASTERBRAND_ADMIN', '+91-9000000000', 1),
-  (2, 1, 1, 'Aman Merchant', 'merchant1@selo.com', '$2a$10$5ZgvxDEoRHT6xZx5cCEPVeXOVCmWqbO8ej0spFRrjXaFLqvVlHUGm', 'MERCHANT_ADMIN', '+91-9111111111', 1),
-  (3, 1, 2, 'Sara Merchant', 'merchant2@selo.com', '$2a$10$5ZgvxDEoRHT6xZx5cCEPVeXOVCmWqbO8ej0spFRrjXaFLqvVlHUGm', 'MERCHANT_ADMIN', '+91-9222222222', 1);
+  (2, 1, 100001, 'Aman Merchant', 'merchant1@selo.com', '$2a$10$5ZgvxDEoRHT6xZx5cCEPVeXOVCmWqbO8ej0spFRrjXaFLqvVlHUGm', 'MERCHANT_ADMIN', '+91-9111111111', 1),
+  (3, 1, 100002, 'Sara Merchant', 'merchant2@selo.com', '$2a$10$5ZgvxDEoRHT6xZx5cCEPVeXOVCmWqbO8ej0spFRrjXaFLqvVlHUGm', 'MERCHANT_ADMIN', '+91-9222222222', 1);
 
 -- Seed root categories and subcategories.
 INSERT INTO tb_categories (id, masterbrand_id, parent_id, name, slug, description, sort_order, is_active)
@@ -281,11 +281,11 @@ INSERT INTO tb_merchant_products (
   ai_description, price, stock_qty, image_url, is_active, is_delinked
 )
 VALUES
-  (1, 2, 1, 2, 'SEL-ORG-001', 'Sunrise Orange Box - Merchant Edit', 'Noida store override with adjusted price and stock.', 'This delinked copy demonstrates that merchant-specific edits live outside the masterbrand product table.', 'Sunrise Orange Box - Merchant Edit is a merchant-managed override that keeps local merchandising flexible. It proves the delink flow where a merchant gets its own editable catalogue row.', 219.00, 35, 'https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=800&q=80', 1, 1);
+  (1, 100002, 1, 2, 'SEL-ORG-001', 'Sunrise Orange Box - Merchant Edit', 'Noida store override with adjusted price and stock.', 'This delinked copy demonstrates that merchant-specific edits live outside the masterbrand product table.', 'Sunrise Orange Box - Merchant Edit is a merchant-managed override that keeps local merchandising flexible. It proves the delink flow where a merchant gets its own editable catalogue row.', 219.00, 35, 'https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=800&q=80', 1, 1);
 
 UPDATE tb_app_catalogue
 SET override_product_id = 1, source_type = 'MERCHANT'
-WHERE merchant_id = 2 AND product_id = 1;
+WHERE merchant_id = 100002 AND product_id = 1;
 
 -- Seed demo orders for dashboard metrics and order management page.
 INSERT INTO tb_orders (
@@ -293,8 +293,8 @@ INSERT INTO tb_orders (
   customer_address, payment_method, payment_status, order_status, subtotal, total_amount, notes
 )
 VALUES
-  (1, 'SEL-1001', 1, 1, NULL, 'Ritika Sharma', '+91-9000011111', 'ritika@example.com', 'DLF Phase 4, Gurgaon', 'COD', 'PENDING', 'PLACED', 274.00, 274.00, 'Please ring the bell once.'),
-  (2, 'SEL-1002', 1, 2, NULL, 'Karan Verma', '+91-9000022222', 'karan@example.com', 'Sector 75, Noida', 'COD', 'COLLECTED', 'DELIVERED', 438.00, 438.00, 'Leave at reception if unreachable.');
+  (1, 'SEL-1001', 1, 100001, NULL, 'Ritika Sharma', '+91-9000011111', 'ritika@example.com', 'DLF Phase 4, Gurgaon', 'COD', 'PENDING', 'PLACED', 274.00, 274.00, 'Please ring the bell once.'),
+  (2, 'SEL-1002', 1, 100002, NULL, 'Karan Verma', '+91-9000022222', 'karan@example.com', 'Sector 75, Noida', 'COD', 'COLLECTED', 'DELIVERED', 438.00, 438.00, 'Leave at reception if unreachable.');
 
 INSERT INTO tb_order_items (
   order_id, source_product_id, merchant_product_id, product_name_snapshot, sku_snapshot, quantity, unit_price, line_total
@@ -308,6 +308,6 @@ VALUES
 INSERT INTO tb_notifications (user_id, merchant_id, title, message, type, is_read, snooze_until)
 VALUES
   (1, NULL, 'Merchant onboarding complete', '2 demo merchants are ready for inherited catalogue testing.', 'SUCCESS', 0, NULL),
-  (NULL, 1, 'Catalogue sync ready', 'Your store is currently using the masterbrand catalogue without delinks.', 'INFO', 0, NULL),
-  (NULL, 2, '1 product delinked', 'Sunrise Orange Box was delinked for merchant-specific pricing and stock.', 'WARNING', 0, NULL),
-  (2, 1, 'New order placed', 'A COD order has landed in your dashboard queue.', 'INFO', 0, NULL);
+  (NULL, 100001, 'Catalogue sync ready', 'Your store is currently using the masterbrand catalogue without delinks.', 'INFO', 0, NULL),
+  (NULL, 100002, '1 product delinked', 'Sunrise Orange Box was delinked for merchant-specific pricing and stock.', 'WARNING', 0, NULL),
+  (2, 100001, 'New order placed', 'A COD order has landed in your dashboard queue.', 'INFO', 0, NULL);

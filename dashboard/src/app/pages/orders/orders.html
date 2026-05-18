@@ -142,9 +142,8 @@
           </td>
           <td class="amount-cell-bold">{{ fmtCurrency(order.total_amount) }}</td>
           <td>
-            <div class="payment-badge-status" [class.paid]="order.payment_status === 'PAID'">
-              <span class="pay-method">{{ order.payment_method }}</span>
-              <span class="pay-status-text">{{ order.payment_status }}</span>
+            <div class="payment-badge-status">
+              <span>Cash on Delivery</span>
             </div>
           </td>
           <td>

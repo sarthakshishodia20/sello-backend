@@ -4,6 +4,29 @@ const logger = require('../../../utilities/loggingUtil');
 
 const MODULE = 'WebappController';
 
+function formatImageUrls(req, dataOrArray) {
+  const host = `${req.protocol}://${req.get('host')}`;
+  const formatUrl = (url) => {
+    if (url && url.startsWith('/uploads/')) {
+      return `${host}${url}`;
+    }
+    return url;
+  };
+
+  const formatItem = (item) => {
+    if (!item) return item;
+    const formatted = { ...item };
+    if (formatted.image_url) formatted.image_url = formatUrl(formatted.image_url);
+    if (formatted.effective_image_url) formatted.effective_image_url = formatUrl(formatted.effective_image_url);
+    return formatted;
+  };
+
+  if (Array.isArray(dataOrArray)) {
+    return dataOrArray.map(formatItem);
+  }
+  return formatItem(dataOrArray);
+}
+
 async function getAllStores(req, res) {
   try {
     const { search, city, mode, limit = 12, offset = 0 } = req.query;
@@ -13,7 +36,7 @@ async function getAllStores(req, res) {
     const settings = await webappService.getMasterbrandSettings();
     
     return sendSuccess(res, 'Stores fetched', { 
-      stores, 
+      stores: formatImageUrls(req, stores), 
       total: stores.length,
       settings 
     });
@@ -38,7 +61,7 @@ async function getStoreBySlug(req, res) {
     const settings = await webappService.getMasterbrandSettings();
     
     return sendSuccess(res, 'Store fetched', {
-      store,
+      store: formatImageUrls(req, store),
       categories: categoryResult.categories,
       category_tree: categoryResult.tree,
       settings
@@ -82,7 +105,10 @@ async function getProductsForStore(req, res) {
       offset: req.query.offset ? Number(req.query.offset) : 0
     });
 
-    return sendSuccess(res, 'Products fetched', { products, total });
+    return sendSuccess(res, 'Products fetched', { 
+      products: formatImageUrls(req, products), 
+      total 
+    });
   } catch (err) {
     logger.error(MODULE, 'GET_PRODUCTS_ERROR', { error: err.message });
     return sendError(res, 'Failed to fetch products', 500);
@@ -93,6 +119,8 @@ async function getWishlistItems(req, res) {
   try {
     const { storeIds = [], productIds = [] } = req.body;
     const result = await webappService.getWishlistItems(storeIds, productIds);
+    if (result.stores) result.stores = formatImageUrls(req, result.stores);
+    if (result.products) result.products = formatImageUrls(req, result.products);
     return sendSuccess(res, 'Wishlist fetched', result);
   } catch (err) {
     logger.error(MODULE, 'GET_WISHLIST_ERROR', { error: err.message });
@@ -116,6 +144,8 @@ async function getCustomerWishlist(req, res) {
   try {
     const customerId = req.selloUser.id;
     const result = await webappService.getCustomerWishlist(customerId);
+    if (result.stores) result.stores = formatImageUrls(req, result.stores);
+    if (result.products) result.products = formatImageUrls(req, result.products);
     return sendSuccess(res, 'Customer wishlist fetched', result);
   } catch (err) {
     logger.error(MODULE, 'GET_CUSTOMER_WISHLIST_ERROR', { error: err.message });

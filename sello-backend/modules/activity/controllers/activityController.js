@@ -3,7 +3,7 @@ const logger = require('../../../utilities/loggingUtil');
 
 const MODULE = 'ActivityController';
 
-async function getAdminActivity(req, res) {
+async function getAdminActivity(req, res, next) {
   try {
     const { page = 1, limit = 10 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -43,11 +43,11 @@ async function getAdminActivity(req, res) {
     res.json({ status: 1, data: rows, total: totalRows[0].count });
   } catch (err) {
     logger.error(MODULE, 'GET_ADMIN_ACTIVITY_ERROR', { error: err.message });
-    res.status(500).json({ status: 0, message: 'Error fetching activity logs: ' + err.message });
+    next(err);
   }
 }
 
-async function getMerchantActivity(req, res) {
+async function getMerchantActivity(req, res, next) {
   try {
     const { page = 1, limit = 10 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -82,7 +82,7 @@ async function getMerchantActivity(req, res) {
     res.json({ status: 1, data: rows, total: totalRows[0].count });
   } catch (err) {
     logger.error(MODULE, 'GET_MERCHANT_ACTIVITY_ERROR', { error: err.message });
-    res.status(500).json({ status: 0, message: 'Error fetching activity logs: ' + err.message });
+    next(err);
   }
 }
 

@@ -1,5 +1,6 @@
 const mysql2 = require('mysql2');
 require('dotenv').config();
+const logger = require('../utilities/loggingUtil');
 
 let pool = null;
 
@@ -29,7 +30,26 @@ function initialize() {
       process.exit(1);
     }
     console.log('[Sello DB] ✅ MySQL pool connected to', config.database, '@', config.host);
-    connection.release();
+
+    const createErrorsTableSql = `
+      CREATE TABLE IF NOT EXISTS tb_errors (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        error_message TEXT NOT NULL,
+        error_stack TEXT NULL,
+        endpoint VARCHAR(255) NULL,
+        method VARCHAR(10) NULL,
+        user_id INT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `;
+    connection.query(createErrorsTableSql, (tableErr) => {
+      if (tableErr) {
+        console.error('[Sello DB] ❌ Failed to ensure tb_errors table:', tableErr.message);
+      } else {
+        console.log('[Sello DB] ✅ Table tb_errors verified successfully.');
+      }
+      connection.release();
+    });
   });
 
   return pool;
@@ -46,11 +66,31 @@ function query(sql, params = []) {
     if (!pool) {
       return reject(new Error('[Sello DB] Pool not initialized. Call initialize() first.'));
     }
+
+    const store = logger.getStore() || {};
+    logger.info('Database', 'QUERY_EXECUTE', {
+      reqId: store.reqId,
+      sql,
+      params
+    });
+
     pool.query(sql, params, (err, results) => {
       if (err) {
-        console.error('[Sello DB] Query error:', err.message, '\nSQL:', sql);
+        logger.error('Database', 'QUERY_ERROR', {
+          reqId: store.reqId,
+          sql,
+          params,
+          error: err.message
+        });
         return reject(err);
       }
+
+      logger.info('Database', 'QUERY_SUCCESS', {
+        reqId: store.reqId,
+        sql,
+        results: results
+      });
+
       return resolve(results);
     });
   });
@@ -74,8 +114,30 @@ async function transaction(callback) {
 
         const queryFn = (sql, params = []) =>
           new Promise((res, rej) => {
+            const store = logger.getStore() || {};
+            logger.info('Database', 'TRANSACTION_QUERY_EXECUTE', {
+              reqId: store.reqId,
+              sql,
+              params
+            });
+
             connection.query(sql, params, (qErr, results) => {
-              if (qErr) return rej(qErr);
+              if (qErr) {
+                logger.error('Database', 'TRANSACTION_QUERY_ERROR', {
+                  reqId: store.reqId,
+                  sql,
+                  params,
+                  error: qErr.message
+                });
+                return rej(qErr);
+              }
+
+              logger.info('Database', 'TRANSACTION_QUERY_SUCCESS', {
+                reqId: store.reqId,
+                sql,
+                results: results
+              });
+
               return res(results);
             });
           });

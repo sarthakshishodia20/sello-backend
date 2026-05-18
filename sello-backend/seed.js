@@ -27,7 +27,7 @@ async function resetAndSeed() {
       "INSERT INTO tb_masterbrand (id, name, code) VALUES (1, 'Selo Global', 'SELO_MAIN')"
     );
     await connection.query(
-      "INSERT INTO tb_merchants (id, masterbrand_id, name, code, slug) VALUES (1, 1, 'Selo Fresh Store', 'SELO_M1', 'fresh-store')"
+      "INSERT INTO tb_merchants (id, masterbrand_id, name, code, slug) VALUES (100001, 1, 'Selo Fresh Store', 'SELO_M1', 'fresh-store')"
     );
 
     console.log('Seeding categories...');
@@ -71,10 +71,10 @@ async function resetAndSeed() {
         [1, p[4], p[1], p[0], p[2], p[3], 100, i + 1]
       );
 
-      // Auto-inherit for merchant 1
+      // Auto-inherit for merchant 100001
       await connection.query(
         'INSERT INTO tb_app_catalogue (merchant_id, product_id, source_type, is_available) VALUES (?, ?, ?, ?)',
-        [1, res.insertId, 'MASTER', 1]
+        [100001, res.insertId, 'MASTER', 1]
       );
     }
 
@@ -94,7 +94,7 @@ async function resetAndSeed() {
     await connection.query(
       `INSERT INTO tb_users (masterbrand_id, merchant_id, name, email, password_hash, role) 
        VALUES (?, ?, ?, ?, ?, 'MERCHANT_ADMIN')`,
-      [1, 1, 'Selo Merchant', 'merchant@selo.com', merchantHash]
+      [1, 100001, 'Selo Merchant', 'merchant@selo.com', merchantHash]
     );
 
     console.log('Seeding complete! 🚀');

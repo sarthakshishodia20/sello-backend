@@ -214,18 +214,28 @@ async function archiveCategory(categoryId, masterbrandId) {
  */
 async function swapCategories(masterbrandId, id1, id2) {
   return db.transaction(async (query) => {
-    const rows = await query(
-      'SELECT id, sort_order FROM tb_categories WHERE id IN (?, ?) AND masterbrand_id = ?',
-      [id1, id2, masterbrandId]
+    // 1. Fetch all categories ordered by sort_order
+    const allCategories = await query(
+      'SELECT id, sort_order FROM tb_categories WHERE masterbrand_id = ? AND is_deleted = 0 ORDER BY sort_order ASC, created_at ASC',
+      [masterbrandId]
     );
 
-    if (rows.length !== 2) {
+    // 2. Normalize and assign unique sequential sort orders
+    for (let i = 0; i < allCategories.length; i++) {
+      const cat = allCategories[i];
+      cat.sort_order = i * 10;
+      await query('UPDATE tb_categories SET sort_order = ? WHERE id = ?', [cat.sort_order, cat.id]);
+    }
+
+    // 3. Find our target categories within the updated set
+    const c1 = allCategories.find(r => r.id === Number(id1));
+    const c2 = allCategories.find(r => r.id === Number(id2));
+
+    if (!c1 || !c2) {
       throw new Error('Both categories must exist and belong to the same masterbrand');
     }
 
-    const c1 = rows.find(r => r.id === Number(id1));
-    const c2 = rows.find(r => r.id === Number(id2));
-
+    // 4. Swap their unique sort orders
     await query('UPDATE tb_categories SET sort_order = ? WHERE id = ?', [c2.sort_order, c1.id]);
     await query('UPDATE tb_categories SET sort_order = ? WHERE id = ?', [c1.sort_order, c2.id]);
 

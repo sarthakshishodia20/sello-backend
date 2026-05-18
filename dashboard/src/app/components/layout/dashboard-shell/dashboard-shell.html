@@ -321,37 +321,105 @@
         </div>
       </div>
 
-      <!-- Section 2: Products & Catalog -->
+      <!-- Section 2: Catalog & Core Features Guide -->
       <div class="help-card mt-20">
         <div class="card-header-icon bg-orange"><i class="pi pi-clone"></i></div>
-        <h5>Catalog & Inventory</h5>
+        <h5>Catalog & Core Features Guide</h5>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 20px 0; line-height: 1.5;">
+          A comprehensive breakdown of Sello's advanced catalog tools, modular merchant extensions, visibility layers, and sorting mechanisms.
+        </p>
+        
         <div class="help-two-col">
+          <!-- Feature 1: Swap & Sort -->
           <div class="help-item-row">
             <div class="dot orange"></div>
             <div>
-              <strong>Master Products:</strong>
-              <p>Created by Masterbrand. Serve as the canonical source for pricing, images, and descriptions pushed to all merchants.</p>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Product Drag & Swap Sort
+                <span class="badge-role merchant">Merchant Only</span>
+              </strong>
+              <p>
+                <strong>What it is:</strong> A visual drag-and-drop mechanism to instantly arrange products display sequence on the storefront mobile webapp.
+              </p>
+              <p style="margin-top: 4px; font-size: 0.78rem; color: #64748b; line-height: 1.4;">
+                <strong>How it works:</strong> Drag items up/down. Sorting persists on storefront refresh. Master Admin cannot sort, ensuring clean master catalogues.
+              </p>
             </div>
           </div>
+
+          <!-- Feature 2: Extensions System -->
           <div class="help-item-row">
             <div class="dot blue"></div>
             <div>
-              <strong>Inherited Products:</strong>
-              <p>Products pushed from the Masterbrand to a Merchant. They stay synced with master prices and images by default.</p>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Sello Extensions System
+                <span class="badge-role master">Master Config</span>
+              </strong>
+              <p>
+                <strong>What it is:</strong> A suite of modular features configured by Masterbrand Admin globally in the Top Shell Navbar for merchants:
+              </p>
+              <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.78rem; color: #64748b; list-style-type: disc; display: flex; flex-direction: column; gap: 4px;">
+                <li><strong>Out of Stock:</strong> Allow merchants to snooze products locally.</li>
+                <li><strong>Custom Brand:</strong> Inherit brand items and override prices/copy.</li>
+                <li><strong>COD Toggle:</strong> Turn on cash-on-delivery store checkout.</li>
+                <li><strong>Floating Icons:</strong> Toggle live support bubbles on storefront.</li>
+              </ul>
             </div>
           </div>
+
+          <!-- Feature 3: Out of Stock (Snooze) -->
           <div class="help-item-row">
             <div class="dot pink"></div>
             <div>
-              <strong>Delinked / Overridden:</strong>
-              <p>When a merchant modifies a product (price, description, stock), it becomes "Delinked" from master data to preserve store-specific changes.</p>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Out of Stock (Snooze)
+                <span class="badge-role merchant">Merchant Toggled</span>
+              </strong>
+              <p>
+                <strong>What it is:</strong> Instantly snooze ordering on products. The item remains visible for customer storefront branding but hides checkout and adds an "Out of Stock" warning.
+              </p>
             </div>
           </div>
+
+          <!-- Feature 4: Gemini AI Description -->
           <div class="help-item-row">
             <div class="dot indigo"></div>
             <div>
-              <strong>Toggle Visibility:</strong>
-              <p>Products can be individually shown or hidden on the storefront using the toggle switch. Hidden products won't appear to customers.</p>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Gemini AI Copywriter
+                <span class="badge-role both">Both Roles</span>
+              </strong>
+              <p>
+                <strong>What it is:</strong> Tap the sparkles button in the edit/create drawer. Gemini AI automatically drafts high-conversion marketing copy based on title & category.
+              </p>
+            </div>
+          </div>
+
+          <!-- Feature 5: Enable/Disable Products -->
+          <div class="help-item-row">
+            <div class="dot green"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Dual Visibility Toggle
+                <span class="badge-role both">Both Roles</span>
+              </strong>
+              <p>
+                <strong>What it is:</strong> Double-layered visibility. Masterbrand Admin controls global active state. Linked merchants inherit this, but can disable local storefront visibility if permitted.
+              </p>
+            </div>
+          </div>
+
+          <!-- Feature 6: Calendar Date Search -->
+          <div class="help-item-row">
+            <div class="dot yellow"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Calendar Date Search
+                <span class="badge-role both">Both Roles</span>
+              </strong>
+              <p>
+                <strong>What it is:</strong> Select date ranges from the calendar to instantly search, filter, and audit logs, catalogue updates, and order history chronologically.
+              </p>
             </div>
           </div>
         </div>

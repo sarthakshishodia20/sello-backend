@@ -9,6 +9,7 @@ const express    = require('express');
 const cors       = require('cors');
 const path       = require('path');
 const { activityLogger } = require('./middlewares/activityLogger');
+const logger     = require('./utilities/loggingUtil');
 
 // ─── Initialize App ────────────────────────────────────────────────────────
 const app  = express();
@@ -41,10 +42,45 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ─── Static Files (uploaded images) ────────────────────────────────────────
 app.use('/uploads', express.static(path.join(__dirname, process.env.UPLOAD_DIR || 'uploads')));
 
-// ─── Request Logger ─────────────────────────────────────────────────────────
+// ─── Request Trace Logger ───────────────────────────────────────────────────
 app.use((req, res, next) => {
-//   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  next();
+  const store = {
+    reqId: Math.random().toString(36).slice(2, 9).toUpperCase(),
+    method: req.method,
+    url: req.originalUrl,
+    startTime: Date.now()
+  };
+
+  logger.getStorage().run(store, () => {
+    logger.info('API', 'REQUEST_START', {
+      reqId: store.reqId,
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body
+    });
+
+    const originalSend = res.send;
+    res.send = function (body) {
+      const duration = Date.now() - store.startTime;
+      let parsedBody = body;
+      try {
+        parsedBody = JSON.parse(body);
+      } catch (e) {}
+
+      logger.info('API', 'REQUEST_COMPLETE', {
+        reqId: store.reqId,
+        method: req.method,
+        url: req.originalUrl,
+        statusCode: res.statusCode,
+        durationMs: duration,
+        response: parsedBody
+      });
+
+      return originalSend.apply(res, arguments);
+    };
+
+    next();
+  });
 });
 
 // Apply activity logger globally (will only log if user is authenticated)
@@ -70,9 +106,15 @@ app.use((req, res) => {
   res.status(404).json({ status: 0, message: `Route not found: ${req.method} ${req.path}`, data: {} });
 });
 
+const { trackError } = require('./utilities/errorTracker');
+
 // ─── Global Error Handler ────────────────────────────────────────────────────
-app.use((err, req, res, next) => {
-  console.error('[Sello Error]', err.message);
+app.use(async (err, req, res, next) => {
+  console.error('[Sello Error]', err.message || err);
+  
+  // Track this unhandled exception to tb_errors table
+  await trackError(err, req);
+
   if (err.message && err.message.startsWith('CORS')) {
     return res.status(403).json({ status: 0, message: err.message, data: {} });
   }

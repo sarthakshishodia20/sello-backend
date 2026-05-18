@@ -77,6 +77,14 @@ async function getMasterProductById(productId, masterbrandId) {
  */
 async function createMasterProduct(masterbrandId, product) {
   return db.transaction(async (query) => {
+    let sku = product.sku;
+    if (!sku) {
+      const namePrefix = (product.name || 'PRD').trim().substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, 'X');
+      const ts = Date.now().toString(36).toUpperCase();
+      const rand = Math.random().toString(36).slice(2, 5).toUpperCase();
+      sku = `SKU-${namePrefix}-${ts}-${rand}`;
+    }
+
     const result = await query(
       `INSERT INTO tb_products
         (masterbrand_id, category_id, sku, name, short_description, description, ai_description, price, stock_qty, image_url, sort_order, is_active)
@@ -84,7 +92,7 @@ async function createMasterProduct(masterbrandId, product) {
       [
         masterbrandId,
         product.category_id,
-        product.sku,
+        sku,
         product.name,
         product.short_description || null,
         product.description || null,
@@ -108,7 +116,7 @@ async function createMasterProduct(masterbrandId, product) {
     logger.info(MODULE, 'MASTER_PRODUCT_CREATED', {
       productId: result.insertId,
       masterbrandId,
-      sku: product.sku
+      sku: sku
     });
 
     return { id: result.insertId };
@@ -483,6 +491,14 @@ async function generateAiDescription(productName, categoryName) {
  */
 async function createPrivateProduct(masterbrandId, merchantId, product) {
   return db.transaction(async (query) => {
+    let sku = product.sku;
+    if (!sku) {
+      const namePrefix = (product.name || 'PRD').trim().substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, 'X');
+      const ts = Date.now().toString(36).toUpperCase();
+      const rand = Math.random().toString(36).slice(2, 5).toUpperCase();
+      sku = `SKU-${namePrefix}-${ts}-${rand}`;
+    }
+
     const result = await query(
       `INSERT INTO tb_products
         (masterbrand_id, merchant_id, category_id, sku, name, short_description, description, ai_description, price, stock_qty, image_url, sort_order, is_active)
@@ -491,7 +507,7 @@ async function createPrivateProduct(masterbrandId, merchantId, product) {
         masterbrandId,
         merchantId,
         product.category_id,
-        product.sku,
+        sku,
         product.name,
         product.short_description || null,
         product.description || null,
@@ -513,7 +529,7 @@ async function createPrivateProduct(masterbrandId, merchantId, product) {
     logger.info(MODULE, 'PRIVATE_PRODUCT_CREATED', {
       productId: result.insertId,
       merchantId,
-      sku: product.sku
+      sku: sku
     });
 
     return { id: result.insertId };
@@ -525,18 +541,28 @@ async function createPrivateProduct(masterbrandId, merchantId, product) {
  */
 async function swapProducts(masterbrandId, id1, id2) {
   return db.transaction(async (query) => {
-    const rows = await query(
-      'SELECT id, sort_order FROM tb_products WHERE id IN (?, ?) AND masterbrand_id = ?',
-      [id1, id2, masterbrandId]
+    // 1. Fetch all active products ordered by sort_order
+    const allProducts = await query(
+      'SELECT id, sort_order FROM tb_products WHERE masterbrand_id = ? AND is_deleted = 0 ORDER BY sort_order ASC, created_at ASC',
+      [masterbrandId]
     );
 
-    if (rows.length !== 2) {
+    // 2. Normalize and assign unique sequential sort orders
+    for (let i = 0; i < allProducts.length; i++) {
+      const prod = allProducts[i];
+      prod.sort_order = i * 10;
+      await query('UPDATE tb_products SET sort_order = ? WHERE id = ?', [prod.sort_order, prod.id]);
+    }
+
+    // 3. Find our target products within the updated set
+    const p1 = allProducts.find(r => r.id === Number(id1));
+    const p2 = allProducts.find(r => r.id === Number(id2));
+
+    if (!p1 || !p2) {
       throw new Error('Both products must exist and belong to the same masterbrand');
     }
 
-    const p1 = rows.find(r => r.id === Number(id1));
-    const p2 = rows.find(r => r.id === Number(id2));
-
+    // 4. Swap their unique sort orders
     await query('UPDATE tb_products SET sort_order = ? WHERE id = ?', [p2.sort_order, p1.id]);
     await query('UPDATE tb_products SET sort_order = ? WHERE id = ?', [p1.sort_order, p2.id]);
 

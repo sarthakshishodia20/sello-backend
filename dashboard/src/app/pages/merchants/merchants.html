@@ -79,9 +79,23 @@
             <input type="checkbox" [checked]="isSelected(merchant)" (change)="toggleSelection(merchant)">
           </td>
           <td>
-            <a class="id-link" (click)="previewCatalogue(merchant)">#{{ merchant.merchant_id }}</a>
+            <a 
+              class="id-link" 
+              (click)="previewCatalogue(merchant)"
+              pTooltip="Click to see preview"
+              tooltipPosition="top"
+            >#{{ merchant.merchant_id }}</a>
           </td>
-          <td class="capitalize"><strong>{{ merchant.merchant_name }}</strong></td>
+          <td class="capitalize">
+            <strong 
+              class="merchant-name-preview-trigger" 
+              (click)="previewCatalogue(merchant)"
+              pTooltip="Click to see preview"
+              tooltipPosition="top"
+            >
+              {{ merchant.merchant_name }}
+            </strong>
+          </td>
           <td>{{ merchant.email || merchant.contact_email || '-' }}</td>
           <td>{{ merchant.phone || '-' }}</td>
           <td style="text-align: center;">
@@ -209,28 +223,60 @@
   [(visible)]="previewVisible" 
   position="right" 
   [style]="{width: '600px'}"
-  header="Catalogue Preview"
+  styleClass="yelo-preview-drawer"
+  [modal]="true"
 >
+  <ng-template pTemplate="header">
+    <div class="drawer-header-custom">
+      <i class="pi pi-shopping-bag header-icon"></i>
+      <span class="drawer-header-title">Catalogue Preview</span>
+    </div>
+  </ng-template>
+
   <div class="preview-content" *ngIf="previewMerchant()">
-    <div class="preview-header">
-      <h3>{{ previewMerchant().merchant_name }}</h3>
-      <p>Browsing inherited master products</p>
+    <div class="preview-header-card">
+      <div class="preview-header-left">
+        <h3>{{ previewMerchant().merchant_name }}</h3>
+        <p><i class="pi pi-info-circle mr-2"></i> Browsing inherited master products</p>
+      </div>
+      <div class="preview-stats">
+        <span class="stats-badge">
+          <i class="pi pi-box mr-2"></i> {{ previewProducts().length }} Items
+        </span>
+      </div>
     </div>
 
     <div class="products-grid">
       <div class="product-card" *ngFor="let p of previewProducts()">
-        <div class="p-img">
-          <img [src]="p.image || 'assets/no-image.png'" alt="p">
+        <div class="p-img-container">
+          <img 
+            [src]="p.effective_image_url || p.image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" 
+            (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+            alt="Product Image"
+            class="p-img"
+          />
+          <div class="source-badge" [class.merchant]="p.source_type === 'MERCHANT'">
+            {{ p.source_type }}
+          </div>
         </div>
         <div class="p-info">
-          <h4>{{ p.name }}</h4>
-          <p>{{ p.description }}</p>
+          <h4 class="product-title">{{ p.effective_name ?? p.name }}</h4>
+          <p class="product-desc">{{ (p.effective_short_description ?? p.short_description) || 'No description available.' }}</p>
           <div class="p-meta">
-            <span class="price">{{ fmtCurrency(p.price) }}</span>
-            <p-tag [value]="p.is_available ? 'Available' : 'Hidden'" [severity]="p.is_available ? 'success' : 'warn'"></p-tag>
+            <span class="price">{{ fmtCurrency(p.effective_price ?? p.price) }}</span>
+            <span class="avail-badge" [class.available]="p.is_available">
+              <i class="pi" [class.pi-check-circle]="p.is_available" [class.pi-times-circle]="!p.is_available"></i>
+              {{ p.is_available ? 'Available' : 'Hidden' }}
+            </span>
           </div>
         </div>
       </div>
+    </div>
+    
+    <div class="empty-preview" *ngIf="previewProducts().length === 0">
+      <i class="pi pi-shopping-bag"></i>
+      <h4>No Products Inherited</h4>
+      <p>This merchant currently has no active master products in their catalog.</p>
     </div>
   </div>
 </p-drawer>

@@ -22,6 +22,7 @@ import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
 import { DragDropModule, moveItemInArray, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MerchantSettingsService } from '../../services/merchant-settings';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-products',
@@ -30,6 +31,7 @@ import { MerchantSettingsService } from '../../services/merchant-settings';
     CommonModule,
     FormsModule,
     ButtonModule,
+    TooltipModule,
     CardModule,
     ChipModule,
     DialogModule,
@@ -69,6 +71,8 @@ export class ProductsComponent implements OnInit {
   // AI & Dialog states
   aiLoading = signal(false);
   aiImageLoading = signal(false);
+  imageUploading = signal(false);
+  showRawUrlInput = signal(false);
   dialogVisible = signal(false);
   catDialogVisible = signal(false);
   catSaving = signal(false);
@@ -659,8 +663,8 @@ export class ProductsComponent implements OnInit {
 
   /** Drag and Drop Categories */
   onCategoryDrop(event: CdkDragDrop<any[]>) {
+    if (this.viewMode() !== 'merchant') return;
     if (event.previousIndex === event.currentIndex) return;
-    if (!this.auth.isAdmin()) return;
 
     const list = this.categories();
     const item1 = list[event.previousIndex];
@@ -671,6 +675,13 @@ export class ProductsComponent implements OnInit {
     this.categories.set([...list]);
 
     this.api.post('/catalog/categories/swap', { id1: item1.id, id2: item2.id }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sequence Saved',
+          detail: 'Category order updated successfully.'
+        });
+      },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Swap failed', detail: 'Could not update category order.' });
         this.loadCategories(); // Revert
@@ -680,21 +691,29 @@ export class ProductsComponent implements OnInit {
 
   /** Drag and Drop Products */
   onProductDrop(event: CdkDragDrop<any[]>) {
+    if (this.viewMode() !== 'merchant') return;
     if (event.previousIndex === event.currentIndex) return;
-    if (this.viewMode() !== 'master') {
-      this.messageService.add({ severity: 'warn', summary: 'Restricted', detail: 'Sorting is only available in Masterbrand mode.' });
-      return;
-    }
 
     const list = this.products();
     const item1 = list[event.previousIndex];
     const item2 = list[event.currentIndex];
 
+    // Dynamically resolve product IDs: in merchant mode it is master_product_id, in master mode it is id
+    const id1 = this.viewMode() === 'master' ? item1.id : item1.master_product_id;
+    const id2 = this.viewMode() === 'master' ? item2.id : item2.master_product_id;
+
     // Optimistic local update
     moveItemInArray(list, event.previousIndex, event.currentIndex);
     this.products.set([...list]);
 
-    this.api.post('/products/swap', { id1: item1.id, id2: item2.id }).subscribe({
+    this.api.post('/products/swap', { id1, id2 }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sequence Saved',
+          detail: 'Product order updated successfully.'
+        });
+      },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Swap failed', detail: 'Could not update product order.' });
         this.loadProducts(); // Revert
@@ -780,5 +799,36 @@ export class ProductsComponent implements OnInit {
         }
       });
     }
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.messageService.add({ severity: 'error', summary: 'File too large', detail: 'Image must be less than 5MB.' });
+      return;
+    }
+
+    this.imageUploading.set(true);
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    this.api.post<any>('/products/upload', formData, true).subscribe({
+      next: (response) => {
+        this.form.image_url = response.data.imageUrl;
+        this.imageUploading.set(false);
+        this.messageService.add({ severity: 'success', summary: 'Uploaded', detail: 'Image uploaded successfully.' });
+      },
+      error: (error) => {
+        this.imageUploading.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Upload failed', detail: error.error?.message || 'Could not upload image.' });
+      }
+    });
+  }
+
+  removeImage() {
+    this.form.image_url = '';
   }
 }

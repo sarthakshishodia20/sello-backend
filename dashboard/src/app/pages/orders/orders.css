@@ -241,18 +241,24 @@
 .customer-info-box .c-phone { font-size: 0.8rem; color: var(--text-muted); }
 
 .payment-badge-status {
-  padding: 6px 12px;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  display: inline-flex;
   align-items: center;
-  min-width: 100px;
+  justify-content: center;
+  color: #d97706;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
-body.dark-mode .payment-badge-status { background: rgba(255,255,255,0.03); }
-
-.pay-status-text { font-size: 10px; font-weight: 900; letter-spacing: 0.05em; }
+body.dark-mode .payment-badge-status {
+  background: rgba(250, 204, 21, 0.06);
+  border-color: rgba(250, 204, 21, 0.15);
+  color: var(--accent-yellow);
+}
 
 /* Responsive */
 @media screen and (max-width: 1024px) {

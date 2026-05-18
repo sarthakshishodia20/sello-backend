@@ -307,12 +307,15 @@ async function getOrderById(orderId, user) {
  */
 async function updateOrderStatus(orderId, user, status) {
   const { whereSql, params } = buildOrderWhere(user, {});
-  const result = await db.query(
-    `UPDATE tb_orders o
-     SET o.order_status = ?
-     ${whereSql} AND o.id = ?`,
-    [status, ...params, orderId]
-  );
+  
+  let querySql = `UPDATE tb_orders o SET o.order_status = ? ${whereSql} AND o.id = ?`;
+  
+  // If status is 'DELIVERED', automatically collect the payment!
+  if (status === 'DELIVERED') {
+    querySql = `UPDATE tb_orders o SET o.order_status = ?, o.payment_status = 'COLLECTED' ${whereSql} AND o.id = ?`;
+  }
+
+  const result = await db.query(querySql, [status, ...params, orderId]);
 
   logger.info(MODULE, 'ORDER_STATUS_UPDATED', { orderId, status, actor: user.id });
   return result.affectedRows > 0;
@@ -435,6 +438,24 @@ async function getOrderAnalytics(user, timeframe = 'monthly') {
  * Bulk delete orders.
  */
 async function deleteOrders(ids, user) {
+  if (!ids || !ids.length) return 0;
+  const placeholders = ids.map(() => '?').join(', ');
+  let sql = '';
+  let params = [...ids];
+
+  if (user.role === 'SUPER_ADMIN') {
+    sql = `DELETE FROM tb_orders WHERE id IN (${placeholders})`;
+  } else if (user.role === 'MASTERBRAND_ADMIN') {
+    sql = `DELETE FROM tb_orders WHERE id IN (${placeholders}) AND masterbrand_id = ?`;
+    params.push(user.masterbrandId);
+  } else if (user.role === 'MERCHANT_ADMIN') {
+    sql = `DELETE FROM tb_orders WHERE id IN (${placeholders}) AND merchant_id = ?`;
+    params.push(user.merchantId);
+  } else {
+    return 0;
+  }
+
+  const result = await db.query(sql, params);
   return result.affectedRows;
 }
 

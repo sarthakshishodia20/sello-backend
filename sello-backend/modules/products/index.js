@@ -3,8 +3,11 @@ const controller = require('./controllers/productController');
 const validator  = require('./validators/productValidator');
 const { authenticate } = require('../../middlewares/auth');
 const { adminOnly, merchantOnly, allowRoles } = require('../../middlewares/roleGuard');
+const { upload } = require('../../middlewares/uploadMiddleware');
 
 router.use(authenticate);
+
+router.post('/upload', allowRoles('SUPER_ADMIN', 'MASTERBRAND_ADMIN', 'MERCHANT_ADMIN'), upload.single('image'), controller.uploadImage);
 
 router.get('/master', adminOnly, controller.getMasterProducts);
 router.post('/master', adminOnly, validator.validateCreateMasterProduct, controller.createMasterProduct);

@@ -1,10 +1,31 @@
+<div class="products-header-new animate-fade">
+  <div class="header-left">
+    <div class="title-box">
+      <i class="pi pi-box"></i>
+      <h1>Products Catalogue</h1>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <div class="view-mode-badge" [class.master-mode]="viewMode() === 'master'">
+      <i class="pi" [class.pi-globe]="viewMode() === 'master'" [class.pi-shop]="viewMode() !== 'master'"></i>
+      <span>{{ viewMode() === 'master' ? 'Master Brand' : 'Merchant Custom' }}</span>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="viewMode() === 'merchant'" class="sorting-tip-banner animate-fade">
+  <i class="pi pi-info-circle"></i>
+  <span><strong>Pro-Tip:</strong> You can drag and drop products to instantly rearrange their sequence on your storefront!</span>
+</div>
+
 <div class="catalogue-shell">
 
   <!-- ═══ PANE 1: Categories ═══ -->
   <aside class="cat-pane">
     <div class="pane-header">
       <span class="pane-title">Category ({{ categories().length }})</span>
-      <button *ngIf="auth.isAdmin()" class="icon-btn-plain" (click)="openCatCreate()" title="Add category">
+      <button *ngIf="viewMode() === 'master'" class="icon-btn-plain" (click)="openCatCreate()" title="Add category">
         <i class="pi pi-plus"></i>
       </button>
     </div>
@@ -13,18 +34,17 @@
       <i class="pi pi-box mr-2"></i> All Products
     </div>
 
-    <div class="cat-list scrollable" cdkDropList (cdkDropListDropped)="onCategoryDrop($event)">
+    <div class="cat-list scrollable">
       <div
         *ngFor="let c of categories()"
         class="cat-row"
-        cdkDrag
         [class.active]="selectedCategoryId() === c.id"
         [class.disabled-item]="!c.is_active"
         (click)="selectCategory(c.id)"
       >
         <span class="cat-row-name">{{ c.name }}</span>
         
-        <div class="hover-dropdown-container">
+        <div *ngIf="viewMode() === 'master'" class="hover-dropdown-container">
           <button class="cat-more-btn"><i class="pi pi-ellipsis-v"></i></button>
           <div class="hover-dropdown-menu">
             <div class="menu-item" (click)="openCatEdit(c)">
@@ -69,12 +89,12 @@
         <p-progressSpinner styleClass="w-2rem h-2rem"></p-progressSpinner>
       </div>
 
-      <div class="product-list scrollable" cdkDropList (cdkDropListDropped)="onProductDrop($event)">
+      <div class="product-list scrollable" cdkDropList [cdkDropListDisabled]="viewMode() !== 'merchant'" (cdkDropListDropped)="onProductDrop($event)">
       <div
         *ngFor="let p of products()"
         class="product-row"
         cdkDrag
-        [class.selected]="selectedProduct()?.id === p.id"
+        [class.selected]="selectedProduct() && (viewMode() === 'master' ? selectedProduct()?.id === p.id : selectedProduct()?.catalogue_id === p.catalogue_id)"
         [class.disabled-item]="!(viewMode() === 'master' ? p.is_active : p.effective_is_active)"
         (click)="selectProduct(p)"
       >
@@ -145,7 +165,14 @@
               />
               <span class="yelo-slider"></span>
             </label>
-            <span class="mode-label" [class.active]="p.merchant_product_id">Custom <i class="pi pi-info-circle"></i></span>
+            <span class="mode-label" [class.active]="p.merchant_product_id">
+              Custom 
+              <i 
+                class="pi pi-info-circle" 
+                pTooltip="Custom mode allows you to delink this product from the master brand data so you can set custom pricing, descriptions, and stocks specifically for your outlet store." 
+                tooltipPosition="top"
+              ></i>
+            </span>
           </div>
 
           <div class="toggle-row">
@@ -161,7 +188,14 @@
           </div>
 
           <div class="toggle-row" *ngIf="viewMode() !== 'master' && settingsService.settings().outOfStock">
-            <span class="text-danger font-bold"><i class="pi pi-exclamation-circle"></i> Mark Out of Stock</span>
+            <span class="text-danger font-bold">
+              <i 
+                class="pi pi-exclamation-circle"
+                pTooltip="Marking a product as Out of Stock will keep it visible on the storefront for branding but will disable customer ordering by removing the Add to Cart button."
+                tooltipPosition="top"
+              ></i> 
+              Mark Out of Stock
+            </span>
             <label class="yelo-toggle danger">
               <input
                 type="checkbox"
@@ -208,8 +242,11 @@
       </div>
 
       <div class="dialog-field" *ngIf="viewMode() === 'master'">
-        <label>{{ langService.translate('products.sku') }}</label>
-        <input pInputText [(ngModel)]="form.sku" [placeholder]="langService.translate('products.sku')" />
+        <label pTooltip="SKU (Stock Keeping Unit) is a unique identifier used to track individual inventory items. It acts as a distinct code/fingerprint for each product." tooltipPosition="top" style="cursor: help; display: inline-flex; align-items: center;">
+          {{ langService.translate('products.sku') }}
+          <i class="pi pi-question-circle" style="font-size: 0.8rem; margin-left: 4px; opacity: 0.7;"></i>
+        </label>
+        <input pInputText [(ngModel)]="form.sku" [placeholder]="langService.translate('products.sku')" pTooltip="SKU (Stock Keeping Unit) is a unique identifier used to track individual inventory items. It must be unique." tooltipPosition="top" />
       </div>
 
       <div class="dialog-field">
@@ -257,8 +294,51 @@
       </div>
 
       <div class="dialog-field" style="margin-top: 16px;">
-        <label>Image URL</label>
-        <input pInputText [(ngModel)]="form.image_url" placeholder="Paste image URL here" />
+        <label>Product Image</label>
+        
+        <div class="image-upload-wrapper">
+          <!-- Loading Spinner -->
+          <div class="upload-progress-spinner" *ngIf="imageUploading()">
+            <p-progressSpinner styleClass="w-2rem h-2rem"></p-progressSpinner>
+            <span class="spinner-text">Uploading image...</span>
+          </div>
+
+          <!-- Preview Zone -->
+          <div class="image-preview-zone" *ngIf="form.image_url && !imageUploading()">
+            <img [src]="form.image_url" alt="Product Preview" class="uploaded-preview-img" />
+            <button type="button" class="remove-image-btn" (click)="removeImage()" title="Remove image">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+          
+          <!-- Upload Zone -->
+          <div class="upload-drop-zone" *ngIf="!form.image_url && !imageUploading()" (click)="fileInput.click()">
+            <i class="pi pi-cloud-upload"></i>
+            <span class="upload-text">Click to upload image</span>
+            <span class="upload-subtext">PNG, JPG, WEBP, or GIF (max 5MB)</span>
+            <input 
+              #fileInput 
+              type="file" 
+              (change)="onFileSelected($event)" 
+              accept="image/*" 
+              style="display: none;" 
+            />
+          </div>
+        </div>
+        
+        <!-- Toggle Manual Input -->
+        <div class="raw-url-toggle" (click)="showRawUrlInput.set(!showRawUrlInput())">
+          <i class="pi" [class.pi-chevron-down]="!showRawUrlInput()" [class.pi-chevron-up]="showRawUrlInput()"></i>
+          <span>Or paste external Image URL</span>
+        </div>
+        
+        <input 
+          *ngIf="showRawUrlInput()" 
+          pInputText 
+          [(ngModel)]="form.image_url" 
+          placeholder="https://example.com/image.jpg" 
+          class="mt-2 animate-fade url-input-fallback" 
+        />
       </div>
 
       <div class="inventory-box">
@@ -321,6 +401,8 @@
   [modal]="true"
   [dismissableMask]="true"
   [showHeader]="false"
+  [resizable]="false"
+  [draggable]="false"
   styleClass="yelo-lightbox"
   [contentStyle]="{ padding: '0', overflow: 'hidden' }"
 >

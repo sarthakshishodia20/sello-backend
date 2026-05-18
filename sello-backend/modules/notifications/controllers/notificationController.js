@@ -1,35 +1,43 @@
 const db = require('../../../database/mysqlLib');
 
-async function getHistory(req, res) {
+async function getHistory(req, res, next) {
   try {
     const { page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
     const user = req.selloUser;
 
     let query = `SELECT * FROM tb_notification_received WHERE `;
+    let countQuery = `SELECT COUNT(*) as count FROM tb_notification_received WHERE `;
     let params = [];
+    let countParams = [];
 
     if (user.role === 'MASTERBRAND_ADMIN' || user.role === 'SUPER_ADMIN') {
-      query += `user_id = ? OR (user_id IS NULL AND merchant_id IS NULL)`;
+      const cond = `(user_id = ? OR (user_id IS NULL AND merchant_id IS NULL))`;
+      query += cond;
+      countQuery += cond;
       params.push(user.id);
+      countParams.push(user.id);
     } else {
-      query += `merchant_id = ?`;
+      const cond = `merchant_id = ?`;
+      query += cond;
+      countQuery += cond;
       params.push(user.merchantId);
+      countParams.push(user.merchantId);
     }
 
     query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
     params.push(parseInt(limit), parseInt(offset));
 
     const rows = await db.query(query, params);
-    const totalRows = await db.query(`SELECT COUNT(*) as count FROM tb_notification_received WHERE ` + (user.role.includes('ADMIN') ? `user_id = ?` : `merchant_id = ?`), [user.role.includes('ADMIN') ? user.id : user.merchantId]);
+    const totalRows = await db.query(countQuery, countParams);
 
     res.json({ status: 1, data: rows, total: totalRows[0].count });
   } catch (err) {
-    res.status(500).json({ status: 0, message: err.message });
+    next(err);
   }
 }
 
-async function getTemplates(req, res) {
+async function getTemplates(req, res, next) {
   try {
     const user = req.selloUser;
     let rows;
@@ -66,11 +74,11 @@ async function getTemplates(req, res) {
 
     res.json({ status: 1, data: rows });
   } catch (err) {
-    res.status(500).json({ status: 0, message: err.message });
+    next(err);
   }
 }
 
-async function createTemplate(req, res) {
+async function createTemplate(req, res, next) {
   try {
     const { event_type, title_template, body_template } = req.body;
     const user = req.selloUser;
@@ -84,11 +92,11 @@ async function createTemplate(req, res) {
     );
     res.json({ status: 1, message: 'Template created' });
   } catch (err) {
-    res.status(500).json({ status: 0, message: err.message });
+    next(err);
   }
 }
 
-async function updateTemplate(req, res) {
+async function updateTemplate(req, res, next) {
   try {
     const { id } = req.params;
     const { title_template, body_template, is_active } = req.body;
@@ -98,7 +106,7 @@ async function updateTemplate(req, res) {
     );
     res.json({ status: 1, message: 'Template updated' });
   } catch (err) {
-    res.status(500).json({ status: 0, message: err.message });
+    next(err);
   }
 }
 

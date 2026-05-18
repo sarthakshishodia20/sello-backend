@@ -17,6 +17,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SelectModule } from 'primeng/select';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { ApiService } from '../../services/api';
 import { SearchService } from '../../services/search';
 import { AuthService } from '../../services/auth';
@@ -41,7 +42,8 @@ import { environment } from '../../../environments/environment';
     TextareaModule,
     ToggleSwitchModule,
     SelectModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    TooltipModule
   ],
   providers: [ConfirmationService],
   templateUrl: './merchants.html',
