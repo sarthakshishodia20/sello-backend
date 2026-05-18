@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api';
 import { CardModule } from 'primeng/card';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ChartModule } from 'primeng/chart';
@@ -19,7 +18,6 @@ import { LanguageService } from '../../services/language.service';
     CardModule, 
     SelectModule, 
     SkeletonModule, 
-    ProgressSpinnerModule,
     ChartModule,
     TagModule
   ],

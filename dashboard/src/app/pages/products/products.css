@@ -1034,3 +1034,56 @@ body.dark-mode .image-upload-wrapper:hover {
   border-color: var(--accent-yellow);
   background: rgba(250, 204, 21, 0.01);
 }
+
+/* ── Premium Skeleton Loader for Products Column ── */
+.column-skeleton-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  width: 100%;
+}
+
+.skeleton-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--surface-card, rgba(255, 255, 255, 0.03));
+  border-radius: 12px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.05));
+  position: relative;
+  overflow: hidden;
+}
+
+body.dark-mode .skeleton-item {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-bar {
+  background: linear-gradient(90deg, var(--surface-100, #f1f5f9) 25%, var(--surface-200, #e2e8f0) 50%, var(--surface-100, #f1f5f9) 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+body.dark-mode .skeleton-bar {
+  background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+  background-size: 200% 100%;
+}
+
+.skeleton-circle {
+  background: linear-gradient(90deg, var(--surface-100, #f1f5f9) 25%, var(--surface-200, #e2e8f0) 50%, var(--surface-100, #f1f5f9) 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+body.dark-mode .skeleton-circle {
+  background: linear-gradient(90deg, #27272a 25%, #3f3f46 50%, #27272a 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes loading-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

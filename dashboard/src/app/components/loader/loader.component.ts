@@ -10,7 +10,7 @@ import { LoaderService } from '../../services/loader';
     <div 
       [class.global-loader-overlay]="!absolute()" 
       [class.absolute-loader-overlay]="absolute()" 
-      *ngIf="loader.visible()"
+      *ngIf="showLoader()"
     >
       <div class="loader-container">
         <!-- Circular Spinner -->
@@ -26,14 +26,18 @@ import { LoaderService } from '../../services/loader';
       position: fixed;
       inset: 0;
       z-index: 999999;
-      background: transparent;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
+      pointer-events: auto !important;
+      user-select: none;
     }
 
     :host-context(body.dark-mode) .global-loader-overlay {
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
     }
 
     .absolute-loader-overlay {
@@ -45,10 +49,11 @@ import { LoaderService } from '../../services/loader';
       flex-direction: column;
       align-items: center;
       padding: 1.5rem;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      backdrop-filter: blur(8px); /* Minimal blur only on the small box */
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px); /* Rich blur only on the small box */
     }
 
     :host-context(body.dark-mode) .loader-container {
@@ -101,4 +106,9 @@ import { LoaderService } from '../../services/loader';
 export class LoaderComponent {
   loader = inject(LoaderService);
   absolute = input<boolean>(false);
+  visible = input<boolean | null>(null);
+
+  showLoader() {
+    return this.visible() !== null ? this.visible() : this.loader.visible();
+  }
 }

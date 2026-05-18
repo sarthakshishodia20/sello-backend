@@ -117,7 +117,7 @@
 
 .input-wrap { position: relative; display: flex; align-items: center; }
 
-.input-wrap i {
+.input-wrap > i {
   position: absolute;
   left: 20px;
   color: #71717a;

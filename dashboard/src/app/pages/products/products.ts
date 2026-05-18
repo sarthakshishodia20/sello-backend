@@ -10,7 +10,6 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { MessageService } from 'primeng/api';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { DrawerModule } from 'primeng/drawer';
@@ -37,7 +36,6 @@ import { TooltipModule } from 'primeng/tooltip';
     DialogModule,
     InputTextModule,
     InputNumberModule,
-    ProgressSpinnerModule,
     TableModule,
     TagModule,
     DrawerModule,

@@ -67,7 +67,7 @@ CREATE TABLE tb_users (
   name            VARCHAR(120) NOT NULL,
   email           VARCHAR(160) NOT NULL UNIQUE,
   password_hash   VARCHAR(255) NOT NULL,
-  role            ENUM('SUPER_ADMIN', 'MASTERBRAND_ADMIN', 'MERCHANT_ADMIN') NOT NULL,
+  role            ENUM('SUPER_ADMIN', 'MASTERBRAND_ADMIN', 'MERCHANT_ADMIN', 'CUSTOMER') NOT NULL,
   phone           VARCHAR(30),
   is_active       TINYINT(1) NOT NULL DEFAULT 1,
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -306,4 +306,15 @@ CREATE TABLE IF NOT EXISTS tb_merchant_activity (
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_merch_activity_merchant FOREIGN KEY (merchant_id) REFERENCES tb_merchants(id) ON DELETE CASCADE,
   CONSTRAINT fk_merch_activity_user FOREIGN KEY (user_id) REFERENCES tb_users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 5. Customer Wishlist
+CREATE TABLE IF NOT EXISTS tb_customer_wishlist (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id     INT NOT NULL,
+  type            ENUM('STORE', 'PRODUCT') NOT NULL,
+  item_id         INT NOT NULL,
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_tb_customer_wishlist_customer FOREIGN KEY (customer_id) REFERENCES tb_users(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_tb_customer_wishlist (customer_id, type, item_id)
 ) ENGINE=InnoDB;

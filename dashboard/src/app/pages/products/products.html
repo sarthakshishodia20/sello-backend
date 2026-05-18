@@ -51,10 +51,6 @@
               <i class="pi pi-pencil"></i>
               <span>Edit Category</span>
             </div>
-            <div class="menu-item" (click)="toggleCategoryStatus(c)">
-              <i [class]="c.is_active ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
-              <span>{{ c.is_active ? 'Disable Category' : 'Enable Category' }}</span>
-            </div>
             <div class="menu-item delete-item" (click)="deleteCategory(c)">
               <i class="pi pi-trash"></i>
               <span>Delete Category</span>
@@ -85,11 +81,14 @@
     </div>
 
     <div class="product-list-wrapper">
-      <div *ngIf="loading()" class="list-loading-overlay">
-        <p-progressSpinner styleClass="w-2rem h-2rem"></p-progressSpinner>
+      <div *ngIf="loading()" class="column-skeleton-loader">
+        <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5]">
+          <div class="skeleton-bar" style="width: 70%; height: 16px; border-radius: 8px;"></div>
+          <div class="skeleton-circle" style="width: 20px; height: 20px; border-radius: 50%;"></div>
+        </div>
       </div>
 
-      <div class="product-list scrollable" cdkDropList [cdkDropListDisabled]="viewMode() !== 'merchant'" (cdkDropListDropped)="onProductDrop($event)">
+      <div *ngIf="!loading()" class="product-list scrollable" cdkDropList [cdkDropListDisabled]="viewMode() !== 'merchant'" (cdkDropListDropped)="onProductDrop($event)">
       <div
         *ngFor="let p of products()"
         class="product-row"
@@ -299,7 +298,7 @@
         <div class="image-upload-wrapper">
           <!-- Loading Spinner -->
           <div class="upload-progress-spinner" *ngIf="imageUploading()">
-            <p-progressSpinner styleClass="w-2rem h-2rem"></p-progressSpinner>
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: var(--accent-yellow);"></i>
             <span class="spinner-text">Uploading image...</span>
           </div>
 
@@ -418,25 +417,38 @@
 <p-dialog
   [(visible)]="confirmVisible"
   [modal]="true"
-  [header]="'Confirm Action'"
   [style]="{ width: '400px' }"
+  [showHeader]="false"
   styleClass="yelo-confirm-dialog"
-  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
 >
-  <div class="confirm-body">
-    <div class="confirm-icon">
-      <i class="pi pi-exclamation-triangle"></i>
+  <div style="padding: 40px 32px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <!-- Premium Warning Icon -->
+    <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+      <i class="pi pi-exclamation-triangle" style="font-size: 24px; color: #ef4444;"></i>
     </div>
-    <div class="confirm-text">
+    
+    <h3 style="font-size: 20px; font-weight: 800; color: var(--text-color, #111827); margin: 0 0 12px 0; line-height: 1.3;">Confirm Delete</h3>
+    <p style="font-size: 15px; color: var(--text-secondary, #64748b); margin: 0 0 32px 0; line-height: 1.5; font-weight: 500;">
       {{ confirmMessage() }}
+    </p>
+    
+    <div style="display: flex; gap: 12px; width: 100%;">
+      <button 
+        style="flex: 1; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color, #e2e8f0); background: var(--bg-card, #fff); color: var(--text-color, #475569); font-weight: 700; cursor: pointer; transition: all 0.2s;" 
+        (click)="confirmVisible.set(false)"
+      >
+        Cancel
+      </button>
+      <button 
+        style="flex: 1; padding: 14px; border-radius: 12px; border: none; background: #ef4444; color: #fff; font-weight: 700; cursor: pointer; transition: all 0.2s;" 
+        (click)="confirmExecute()"
+      >
+        Yes, Delete
+      </button>
     </div>
   </div>
-  <ng-template pTemplate="footer">
-    <div class="confirm-actions">
-      <button class="yelo-btn-secondary" (click)="confirmVisible.set(false)">Cancel</button>
-      <button class="yelo-btn-primary danger-btn" (click)="confirmExecute()">Yes, Delete</button>
-    </div>
-  </ng-template>
 </p-dialog>
 
 

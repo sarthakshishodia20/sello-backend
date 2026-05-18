@@ -226,7 +226,7 @@ async function getOverview(user) {
         WHERE masterbrand_id = ?
       `, [user.masterbrandId]),
       db.query('SELECT COUNT(*) AS total_categories FROM tb_categories WHERE masterbrand_id = ? AND is_deleted = 0', [user.masterbrandId]),
-      db.query('SELECT COUNT(*) AS total_products FROM tb_products WHERE masterbrand_id = ? AND is_deleted = 0 AND merchant_id IS NULL', [user.masterbrandId]),
+      db.query('SELECT COUNT(*) AS total_products FROM tb_products WHERE masterbrand_id = ? AND is_deleted = 0', [user.masterbrandId]),
       db.query(`
         SELECT
           COUNT(*) AS total_orders,

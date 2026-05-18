@@ -1,5 +1,5 @@
 import { Component, inject, signal, AfterViewInit } from '@angular/core';
-import { NgIf, NgClass } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -20,8 +20,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
   standalone: true,
   imports: [
     NgIf, 
-    NgClass, 
-    FormsModule, 
+    FormsModule,  
     ButtonModule, 
     CardModule, 
     DividerModule, 

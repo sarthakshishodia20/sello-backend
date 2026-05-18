@@ -7,16 +7,16 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
 import { TagModule } from 'primeng/tag';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [NgIf, FormsModule, ButtonModule, CardModule, InputTextModule, TextareaModule, TagModule, ProgressSpinnerModule, DialogModule, SelectModule],
+  imports: [NgIf, FormsModule, ButtonModule, CardModule, InputTextModule, TextareaModule, TagModule, LoaderComponent, DialogModule, SelectModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })

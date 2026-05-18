@@ -220,6 +220,4 @@
   </div>
 </p-dialog>
 
-<div class="loading-overlay" *ngIf="loading()">
-  <p-progressSpinner strokeWidth="4"></p-progressSpinner>
-</div>
+<app-loader [absolute]="true" [visible]="loading()"></app-loader>

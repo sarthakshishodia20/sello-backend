@@ -6,10 +6,10 @@ import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ApiService } from '../../services/api';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 @Component({
   selector: 'app-categories',
@@ -22,7 +22,7 @@ import { ApiService } from '../../services/api';
     CardModule,
     DialogModule,
     InputTextModule,
-    ProgressSpinnerModule,
+    LoaderComponent,
     TableModule,
     TagModule
   ],
