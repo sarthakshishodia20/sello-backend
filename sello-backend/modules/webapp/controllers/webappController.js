@@ -58,7 +58,7 @@ async function getStoreBySlug(req, res) {
     }
 
     const categoryResult = await webappService.getCategoriesForStore(store.masterbrand_id);
-    const settings = await webappService.getMasterbrandSettings();
+    const settings = await webappService.getMasterbrandSettings(store.masterbrand_id);
     
     return sendSuccess(res, 'Store fetched', {
       store: formatImageUrls(req, store),

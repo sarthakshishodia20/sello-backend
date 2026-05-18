@@ -27,6 +27,9 @@
         <div class="banner-chips">
           <span class="b-chip"><i class="pi pi-verified"></i> Verified Merchant</span>
           <span class="b-chip"><i class="pi pi-truck"></i> Home Delivery</span>
+          <span class="b-chip brand-chip" *ngIf="store()?.masterbrand_name" [style.background]="(store()?.theme_color || 'var(--accent)') + '20'" [style.color]="store()?.theme_color || 'var(--accent)'">
+            <i class="pi pi-bookmark-fill"></i> Part of <strong>{{ store()?.masterbrand_name }}</strong> Network
+          </span>
         </div>
       </div>
     </div>
@@ -160,7 +163,12 @@
 <!-- Store Footer -->
 <footer class="store-footer">
   <div class="container footer-row">
-    <span class="footer-brand">sello<span>.</span></span>
-    <span class="footer-copy">© 2026 {{ store()?.store_name }}. Powered by Sello.</span>
+    <div class="footer-left">
+      <span class="footer-brand">sello<span>.</span></span>
+      <span class="footer-copy">© 2026 {{ store()?.store_name }}. Powered by Sello.</span>
+    </div>
+    <div class="footer-right" *ngIf="store()?.masterbrand_name">
+      <span class="mb-badge">Authorized store of <strong>{{ store()?.masterbrand_name }}</strong> (Code: {{ store()?.masterbrand_code }})</span>
+    </div>
   </div>
 </footer>

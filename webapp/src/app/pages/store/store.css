@@ -742,6 +742,49 @@
   .banner-logo { width: 60px; height: 60px; font-size: 1.8rem; }
 }
 
+/* ── Masterbrand Network Badge & Brand Chips ── */
+.brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-full);
+  border: 1px solid currentColor;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.mb-badge {
+  font-size: 0.8rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+}
+
+.mb-badge strong {
+  color: var(--text-main);
+  font-weight: 700;
+  margin: 0 0.25rem;
+}
+
+
 
 
 

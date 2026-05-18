@@ -74,6 +74,8 @@ async function getStoreBySlug(slug) {
     SELECT
       m.id,
       m.masterbrand_id,
+      mb.name AS masterbrand_name,
+      mb.code AS masterbrand_code,
       m.name AS store_name,
       m.slug AS store_slug,
       m.description,
@@ -87,6 +89,7 @@ async function getStoreBySlug(slug) {
       m.city_name,
       m.theme_color
     FROM tb_merchants m
+    INNER JOIN tb_masterbrand mb ON m.masterbrand_id = mb.id
     WHERE m.slug = ? AND m.is_active = 1
     LIMIT 1
   `, [slug]);
@@ -218,8 +221,9 @@ async function getWishlistItems(storeIds, productIds) {
   return { stores, products };
 }
 
-async function getMasterbrandSettings() {
-  const rows = await db.query('SELECT settings FROM tb_masterbrand WHERE id = 1');
+async function getMasterbrandSettings(masterbrandId = 1) {
+  const queryId = masterbrandId || 1;
+  const rows = await db.query('SELECT settings FROM tb_masterbrand WHERE id = ?', [queryId]);
   return rows[0]?.settings || {};
 }
 
