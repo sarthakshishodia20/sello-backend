@@ -205,7 +205,7 @@
           <div class="u-avatar-box">{{ (auth.user()?.name || 'S').slice(0,1) }}</div>
           <div class="u-info">
             <div class="u-name">{{ auth.user()?.name || 'User' }}</div>
-            <div class="u-role">Settings & Language</div>
+            <div class="u-role">{{ auth.isAdmin() ? 'Super Admin' : 'Merchant Admin' }}</div>
           </div>
           <i class="pi pi-chevron-right" style="color: #94a3b8;"></i>
         </div>

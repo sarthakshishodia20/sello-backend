@@ -76,7 +76,6 @@ a:hover { opacity: 0.8; }
 
 :host ::ng-deep .p-overlay-mask {
   background: rgba(0,0,0,0.5) !important;
-  backdrop-filter: blur(4px);
 }
 
 :host ::ng-deep .p-tag {

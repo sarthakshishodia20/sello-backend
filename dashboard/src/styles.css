@@ -769,8 +769,6 @@ body.dark-mode .p-button.p-button-warning {
   height: 40px;
   border-radius: 50%;
   background: rgba(15, 23, 42, 0.6) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   color: #ffffff !important;
   display: flex;

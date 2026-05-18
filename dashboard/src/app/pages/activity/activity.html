@@ -110,8 +110,4 @@
       <pre class="m-0 text-xs p-3 bg-gray-900 text-blue-400 border-round overflow-auto" style="max-height: 200px;">{{ formatJson(selectedActivity().response_data) }}</pre>
     </div>
   </div>
-  
-  <ng-template pTemplate="footer">
-    <p-button label="Close" icon="pi pi-times" [text]="true" severity="secondary" (click)="detailsVisible.set(false)"></p-button>
-  </ng-template>
 </p-dialog>

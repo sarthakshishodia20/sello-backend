@@ -26,8 +26,7 @@ import { LoaderService } from '../../services/loader';
       position: fixed;
       inset: 0;
       z-index: 999999;
-      background: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(4px);
+      background: transparent !important;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -35,9 +34,9 @@ import { LoaderService } from '../../services/loader';
       user-select: none;
     }
 
-    :host-context(body.dark-mode) .global-loader-overlay {
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(4px);
+    :host-context(body.dark-mode) .global-loader-overlay,
+    :host-context(body.dark-mode) .absolute-loader-overlay {
+      background: transparent !important;
     }
 
     .absolute-loader-overlay {
@@ -53,7 +52,6 @@ import { LoaderService } from '../../services/loader';
       border-radius: 12px;
       border: 1px solid rgba(0, 0, 0, 0.08);
       box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(12px); /* Rich blur only on the small box */
     }
 
     :host-context(body.dark-mode) .loader-container {

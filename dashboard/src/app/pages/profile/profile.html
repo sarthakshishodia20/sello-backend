@@ -178,7 +178,15 @@
             <strong>{{ auth.user()?.masterbrandName || 'Global' }}</strong>
           </div>
 
-          <div class="status-row">
+          <div class="status-row" *ngIf="auth.user()?.role === 'MASTERBRAND_ADMIN'">
+            <div class="status-label">
+              <i class="pi pi-id-card"></i>
+              <span>Masterbrand ID</span>
+            </div>
+            <code>{{ auth.user()?.masterbrandId || 'N/A' }}</code>
+          </div>
+
+          <div class="status-row" *ngIf="auth.user()?.role !== 'MASTERBRAND_ADMIN'">
             <div class="status-label">
               <i class="pi pi-id-card"></i>
               <span>Merchant ID</span>
