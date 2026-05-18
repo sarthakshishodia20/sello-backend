@@ -230,6 +230,7 @@ CREATE TABLE tb_order_items (
 CREATE TABLE tb_notifications (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   user_id       INT NULL,
+  masterbrand_id INT NULL,
   merchant_id   INT NULL,
   title         VARCHAR(180) NOT NULL,
   message       TEXT NOT NULL,
@@ -237,6 +238,8 @@ CREATE TABLE tb_notifications (
   is_read       TINYINT(1) NOT NULL DEFAULT 0,
   snooze_until  DATETIME NULL,
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_tb_notifications_masterbrand
+    FOREIGN KEY (masterbrand_id) REFERENCES tb_masterbrand(id) ON DELETE CASCADE,
   CONSTRAINT fk_tb_notifications_user
     FOREIGN KEY (user_id) REFERENCES tb_users(id) ON DELETE CASCADE,
   CONSTRAINT fk_tb_notifications_merchant
