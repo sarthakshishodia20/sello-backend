@@ -164,6 +164,7 @@ CREATE TABLE tb_app_catalogue (
   override_product_id INT NULL,
   source_type         ENUM('MASTER', 'MERCHANT') NOT NULL DEFAULT 'MASTER',
   is_available        TINYINT(1) NOT NULL DEFAULT 1,
+  is_out_of_stock     TINYINT(1) NOT NULL DEFAULT 0,
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_tb_app_catalogue_merchant

@@ -9,7 +9,7 @@ const MODULE = 'ProductService';
  */
 async function getMasterProducts(masterbrandId, { categoryId = null, search = '', includeInactive = true, limit = 10, offset = 0 } = {}) {
   const params = [masterbrandId];
-  let whereSql = 'WHERE p.masterbrand_id = ? AND p.is_deleted = 0 AND p.merchant_id IS NULL';
+  let whereSql = 'WHERE p.masterbrand_id = ? AND p.is_deleted = 0';
 
   if (!includeInactive) {
     whereSql += ' AND p.is_active = 1';
