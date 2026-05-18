@@ -147,6 +147,17 @@
               <p-toggleswitch [ngModel]="settingsService.settings().floatingIcons" (ngModelChange)="toggleExtFloatingIcons($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
             </div>
 
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(59,130,246,0.1); color: #3b82f6;">
+                <i class="pi pi-volume-up"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>Notification Sounds</label>
+                <span>Enable notification sounds for merchants</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().soundNotificationEnabled" (ngModelChange)="toggleExtSoundNotification($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
 
           </div>
         </div>

@@ -7,6 +7,7 @@ export interface MasterbrandSettings {
   brandCustom: boolean;
   codEnabled: boolean;
   floatingIcons: boolean;
+  soundNotificationEnabled: boolean;
 }
 
 
@@ -21,7 +22,8 @@ export class MerchantSettingsService {
     outOfStock: true,
     brandCustom: false,
     codEnabled: true,
-    floatingIcons: true
+    floatingIcons: true,
+    soundNotificationEnabled: false
   });
 
   loadSettings() {
@@ -32,10 +34,9 @@ export class MerchantSettingsService {
             outOfStock: res.data.settings.outOfStock !== false,
             brandCustom: res.data.settings.brandCustom === true,
             codEnabled: res.data.settings.codEnabled !== false,
-            floatingIcons: res.data.settings.floatingIcons !== false
-
+            floatingIcons: res.data.settings.floatingIcons !== false,
+            soundNotificationEnabled: res.data.settings.soundNotificationEnabled === true
           });
-
         }
       }
     });

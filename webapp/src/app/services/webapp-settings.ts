@@ -4,6 +4,8 @@ export interface WebappSettings {
   floatingIcons: boolean;
   outOfStock: boolean;
   codEnabled: boolean;
+  soundNotificationEnabled: boolean;
+  soundNotification?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -12,7 +14,9 @@ export class WebappSettingsService {
   settings = signal<WebappSettings>({
     floatingIcons: true,
     outOfStock: true,
-    codEnabled: true
+    codEnabled: true,
+    soundNotificationEnabled: false,
+    soundNotification: 'chime'
   });
 
   updateSettings(newSettings: Partial<WebappSettings>) {

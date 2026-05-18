@@ -12,6 +12,8 @@ import { SelectModule } from 'primeng/select';
 import { ApiService } from '../../services/api';
 import { AuthService } from '../../services/auth';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { MerchantSettingsService } from '../../services/merchant-settings';
+import { AudioService } from '../../services/audio.service';
 
 @Component({
   selector: 'app-profile',
@@ -24,6 +26,8 @@ export class ProfileComponent implements OnInit {
   api = inject(ApiService);
   auth = inject(AuthService);
   messageService = inject(MessageService);
+  settingsService = inject(MerchantSettingsService);
+  audioService = inject(AudioService);
 
   loading = signal(true);
   saving = signal(false);
@@ -39,6 +43,15 @@ export class ProfileComponent implements OnInit {
     { name: 'Kolkata', code: 'Kolkata' }
   ];
 
+  soundOptions = [
+    { key: 'chime', label: 'Chime Ding (Default)' },
+    { key: 'bell', label: 'Classic Bell' },
+    { key: 'bubble', label: 'Bubble Pop' },
+    { key: 'digital', label: 'Digital Beep' },
+    { key: 'alarm', label: 'Alert Siren' },
+    { key: 'disabled', label: 'Mute Sounds' }
+  ];
+
   // Form for either merchant or admin profile editing
   form: any = {
     name: '',
@@ -50,8 +63,13 @@ export class ProfileComponent implements OnInit {
     city_name: '',
     delivery_time: '',
     delivery_mode: 'BOTH',
-    theme_color: '#000000'
+    theme_color: '#000000',
+    soundNotification: 'chime'
   };
+
+  previewSound() {
+    this.audioService.play(this.form.soundNotification);
+  }
 
   ngOnInit() {
     this.load();
@@ -81,6 +99,17 @@ export class ProfileComponent implements OnInit {
           next: (response) => {
             const merchant = response.data.merchant;
             this.merchantProfile.set(merchant);
+            
+            // Parse existing settings column
+            let mSettings: any = {};
+            if (merchant.settings) {
+              try {
+                mSettings = typeof merchant.settings === 'string' ? JSON.parse(merchant.settings) : merchant.settings;
+              } catch (e) {
+                console.error('Error parsing merchant settings:', e);
+              }
+            }
+
             this.form = {
               name: merchant.merchant_name,
               description: merchant.description || '',
@@ -90,7 +119,8 @@ export class ProfileComponent implements OnInit {
               city_name: merchant.city_name || 'Delhi',
               delivery_time: merchant.delivery_time || '30 mins',
               delivery_mode: merchant.delivery_mode || 'BOTH',
-              theme_color: merchant.theme_color || '#000000'
+              theme_color: merchant.theme_color || '#000000',
+              soundNotification: mSettings.soundNotification || 'chime'
             };
             this.loading.set(false);
           },
@@ -107,6 +137,15 @@ export class ProfileComponent implements OnInit {
     // Determine endpoint based on role
     const endpoint = this.auth.isAdmin() ? '/auth/profile' : '/merchants/profile';
     
+    // Parse existing settings
+    let currentSettings: any = {};
+    const merchant = this.merchantProfile();
+    if (merchant && merchant.settings) {
+      try {
+        currentSettings = typeof merchant.settings === 'string' ? JSON.parse(merchant.settings) : merchant.settings;
+      } catch (e) {}
+    }
+
     // Normalize payload
     const payload = this.auth.isAdmin() ? {
       name: this.form.name,
@@ -121,7 +160,11 @@ export class ProfileComponent implements OnInit {
       city_name: this.form.city_name,
       delivery_time: this.form.delivery_time,
       delivery_mode: this.form.delivery_mode,
-      theme_color: this.form.theme_color
+      theme_color: this.form.theme_color,
+      settings: {
+        ...currentSettings,
+        soundNotification: this.form.soundNotification
+      }
     };
 
     this.api.put(endpoint, payload).subscribe({

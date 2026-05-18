@@ -7,6 +7,8 @@ import { MessageService } from 'primeng/api';
 import { CartService } from '../../services/cart';
 import { ApiService } from '../../services/api';
 import { CustomerAuthService } from '../../services/customer-auth';
+import { WebappSettingsService } from '../../services/webapp-settings';
+import { AudioService } from '../../services/audio.service';
 
 @Component({
   selector: 'app-payment',
@@ -271,6 +273,8 @@ export class PaymentComponent implements OnInit {
   router = inject(Router);
   route  = inject(ActivatedRoute);
   messageService = inject(MessageService);
+  webappSettings = inject(WebappSettingsService);
+  audio          = inject(AudioService);
 
   loadingBreakdown = signal(false);
   placing = signal(false);
@@ -337,6 +341,9 @@ export class PaymentComponent implements OnInit {
     this.api.placeOrder(payload).subscribe({
       next: (res: any) => {
         this.placing.set(false);
+        if (this.webappSettings.settings().soundNotificationEnabled) {
+          this.audio.play(this.webappSettings.settings().soundNotification || 'chime');
+        }
         this.cart.clear();
         this.router.navigate(['/order-success'], { queryParams: { order: res.data.order_no } });
       },

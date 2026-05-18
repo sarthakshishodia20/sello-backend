@@ -152,6 +152,44 @@
           </div>
         </div>
       </div>
+
+      <!-- Section 3: Notification Sounds (Only for Merchants and when allowed by Masterbrand) -->
+      <div class="glass-card mt-24" *ngIf="auth.isMerchant() && settingsService.settings().soundNotificationEnabled">
+        <div class="section-header">
+          <div class="header-left">
+            <h3>Notification Sound Preferences</h3>
+            <p>Customize the sound played when new alerts or orders arrive</p>
+          </div>
+        </div>
+        
+        <div class="form-grid full">
+          <div class="field-box">
+            <label>Choose Notification Chime</label>
+            <div style="display: flex; gap: 12px; align-items: center; width: 100%;">
+              <div style="flex: 1;">
+                <p-select 
+                  [options]="soundOptions" 
+                  [(ngModel)]="form.soundNotification" 
+                  optionLabel="label" 
+                  optionValue="key" 
+                  placeholder="Select a sound"
+                  styleClass="yelo-dropdown"
+                  [style]="{'width':'100%'}"
+                ></p-select>
+              </div>
+              <button 
+                type="button" 
+                class="mode-btn" 
+                style="height: 48px; min-width: 130px; margin: 0; padding: 0 16px; border: 1px solid var(--border); display: flex; gap: 8px; align-items: center; justify-content: center; background: var(--bg-card); cursor: pointer; border-radius: 8px;"
+                (click)="previewSound()"
+              >
+                <i class="pi pi-volume-up" style="font-size: 1.1rem; color: #f59e0b;"></i>
+                <span style="font-weight: 600;">Test Sound</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ══ Right Column: Status & Security ══ -->

@@ -87,7 +87,8 @@ async function getStoreBySlug(slug) {
       m.delivery_time,
       m.delivery_mode,
       m.city_name,
-      m.theme_color
+      m.theme_color,
+      m.settings
     FROM tb_merchants m
     INNER JOIN tb_masterbrand mb ON m.masterbrand_id = mb.id
     WHERE m.slug = ? AND m.is_active = 1

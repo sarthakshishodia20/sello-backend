@@ -16,6 +16,7 @@ import { ToastModule } from 'primeng/toast';
 import { DialogModule } from 'primeng/dialog';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../services/auth';
 import { LanguageService, Language } from '../../../services/language.service';
 import { SearchService } from '../../../services/search';
@@ -23,6 +24,7 @@ import { ApiService } from '../../../services/api';
 import { environment } from '../../../../environments/environment';
 import { LoaderComponent } from '../../loader/loader.component';
 import { MerchantSettingsService } from '../../../services/merchant-settings';
+import { AudioService } from '../../../services/audio.service';
 
 interface NavItem {
   label: string;
@@ -65,6 +67,8 @@ export class DashboardShellComponent {
   private searchService = inject(SearchService);
   public settingsService = inject(MerchantSettingsService);
   private api = inject(ApiService);
+  private messageService = inject(MessageService);
+  private audioService = inject(AudioService);
 
   isSidebarCollapsed = signal(false);
   isDarkMode = signal(localStorage.getItem('theme') === 'dark');
@@ -92,6 +96,10 @@ export class DashboardShellComponent {
 
   toggleExtFloatingIcons(val: boolean) {
     this.settingsService.updateSettings({ floatingIcons: val });
+  }
+
+  toggleExtSoundNotification(val: boolean) {
+    this.settingsService.updateSettings({ soundNotificationEnabled: val });
   }
 
 
@@ -151,6 +159,21 @@ export class DashboardShellComponent {
     }
     
     this.settingsService.loadSettings();
+
+    // Play chosen sound chime globally on dashboard notifications
+    this.messageService.messageObserver.subscribe((msg: any) => {
+      if (this.settingsService.settings().soundNotificationEnabled) {
+        const user = this.auth.user();
+        let soundKey = 'chime';
+        if (user && user.settings) {
+          try {
+            const mSettings = typeof user.settings === 'string' ? JSON.parse(user.settings) : user.settings;
+            soundKey = mSettings.soundNotification || 'chime';
+          } catch (e) {}
+        }
+        this.audioService.play(soundKey);
+      }
+    });
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),

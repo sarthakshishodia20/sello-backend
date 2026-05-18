@@ -14,6 +14,7 @@ import { CartService } from '../../services/cart';
 import { CustomerAuthService } from '../../services/customer-auth';
 import { LoaderService } from '../../services/loader.service';
 import { WebappSettingsService } from '../../services/webapp-settings';
+import { AudioService } from '../../services/audio.service';
 
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -33,6 +34,7 @@ export class StoreComponent implements OnInit {
   messageService = inject(MessageService);
   loader = inject(LoaderService);
   webappSettings = inject(WebappSettingsService);
+  audio = inject(AudioService);
 
 
   store = signal<any | null>(null);
@@ -106,10 +108,20 @@ export class StoreComponent implements OnInit {
 
         // Update Masterbrand feature toggles
         if (response.data.settings) {
+          let soundKey = 'chime';
+          if (response.data.store && response.data.store.settings) {
+            try {
+              const parsed = typeof response.data.store.settings === 'string' ? JSON.parse(response.data.store.settings) : response.data.store.settings;
+              soundKey = parsed.soundNotification || 'chime';
+            } catch (e) {}
+          }
+
           this.webappSettings.updateSettings({
             floatingIcons: response.data.settings.floatingIcons !== false,
             outOfStock: response.data.settings.outOfStock !== false,
-            codEnabled: response.data.settings.codEnabled !== false
+            codEnabled: response.data.settings.codEnabled !== false,
+            soundNotificationEnabled: response.data.settings.soundNotificationEnabled === true,
+            soundNotification: soundKey
           });
         }
 
@@ -204,6 +216,12 @@ export class StoreComponent implements OnInit {
     return inCart < p.stock_qty;
   }
 
+  playStoreNotificationSound() {
+    const settings = this.webappSettings.settings();
+    if (!settings.soundNotificationEnabled) return;
+    this.audio.play(settings.soundNotification || 'chime');
+  }
+
   addToCart(product: any) {
     if (!this.canAddToCart(product)) {
       this.messageService.add({
@@ -225,6 +243,8 @@ export class StoreComponent implements OnInit {
       },
       product
     );
+
+    this.playStoreNotificationSound();
 
     this.messageService.add({
       severity: 'success',

@@ -101,6 +101,7 @@ async function getMerchantById(merchantId, masterbrandId) {
       m.delivery_time,
       m.delivery_mode,
       m.city_name,
+      m.settings,
       m.created_at,
       owner.id AS owner_user_id,
       owner.name AS owner_name,
@@ -122,7 +123,7 @@ async function getMerchantById(merchantId, masterbrandId) {
  * Merchant owners can update their store metadata without touching masterbrand catalogue data.
  */
 async function updateMerchantProfile(merchantId, masterbrandId, fields) {
-  const allowed = ['merchant_name', 'description', 'contact_email', 'phone', 'address', 'theme_color', 'delivery_time', 'delivery_mode', 'city_name'];
+  const allowed = ['merchant_name', 'description', 'contact_email', 'phone', 'address', 'theme_color', 'delivery_time', 'delivery_mode', 'city_name', 'settings'];
   const updates = [];
   const params = [];
 
@@ -130,7 +131,11 @@ async function updateMerchantProfile(merchantId, masterbrandId, fields) {
     if (fields[key] !== undefined) {
       const column = key === 'merchant_name' ? 'name' : key;
       updates.push(`${column} = ?`);
-      params.push(fields[key] || null);
+      let val = fields[key];
+      if (key === 'settings' && typeof val === 'object' && val !== null) {
+        val = JSON.stringify(val);
+      }
+      params.push(val !== undefined ? val : null);
     }
   });
 
