@@ -23,15 +23,8 @@ const db = require('./database/mysqlLib');
 db.initialize();
 
 // ─── CORS ──────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:4200,http://localhost:4201').split(',');
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error(`CORS blocked: ${origin}`));
-  },
+  origin: true, // Dynamically mirror requesting origin to seamlessly authorize all live Render frontends
   credentials: true
 }));
 
