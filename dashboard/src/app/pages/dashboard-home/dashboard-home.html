@@ -4,7 +4,7 @@
     <header class="dashboard-header">
       <div class="header-content">
         <div class="greeting-box">
-          <h1>{{ getGreeting() }}, Selo</h1>
+          <h1>{{ getGreeting() }}, {{ auth.user()?.name || 'User' }}</h1>
           <p>Here's what's happening with your business today.</p>
         </div>
         <div class="header-meta">
