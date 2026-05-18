@@ -235,6 +235,15 @@ export class StoreComponent implements OnInit {
     const store = this.store();
     if (!store) return;
 
+    const currentMerchant = this.cart.merchant();
+    if (currentMerchant && currentMerchant.id !== store.id) {
+      const confirmSwitch = window.confirm(
+        `Your cart contains items from "${currentMerchant.name}". Would you like to clear your cart and start shopping at "${store.store_name}"?`
+      );
+      if (!confirmSwitch) return;
+      this.cart.clear();
+    }
+
     this.cart.addToCart(
       {
         id: store.id,

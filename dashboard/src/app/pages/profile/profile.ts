@@ -110,6 +110,9 @@ export class ProfileComponent implements OnInit {
               }
             }
 
+            const soundKey = mSettings.soundNotification || 'chime';
+            localStorage.setItem('sello_soundNotification', soundKey);
+
             this.form = {
               name: merchant.merchant_name,
               description: merchant.description || '',
@@ -120,7 +123,7 @@ export class ProfileComponent implements OnInit {
               delivery_time: merchant.delivery_time || '30 mins',
               delivery_mode: merchant.delivery_mode || 'BOTH',
               theme_color: merchant.theme_color || '#000000',
-              soundNotification: mSettings.soundNotification || 'chime'
+              soundNotification: soundKey
             };
             this.loading.set(false);
           },
@@ -170,6 +173,9 @@ export class ProfileComponent implements OnInit {
     this.api.put(endpoint, payload).subscribe({
       next: () => {
         this.saving.set(false);
+        if (!this.auth.isAdmin() && this.form.soundNotification) {
+          localStorage.setItem('sello_soundNotification', this.form.soundNotification);
+        }
         this.messageService.add({
           severity: 'success',
           summary: 'Profile Updated',

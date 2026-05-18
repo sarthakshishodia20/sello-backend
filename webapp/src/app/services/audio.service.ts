@@ -11,9 +11,9 @@ export interface SoundOption {
 })
 export class AudioService {
   public sounds: SoundOption[] = [
-    { key: 'chime', label: 'Chime Ding (Default)', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/chimes.mp3' },
+    { key: 'chime', label: 'Digital Chime (Default)', url: 'https://raw.githubusercontent.com/MycroftAI/mycroft-core/master/mycroft/res/snd/start_listening.wav' },
+    { key: 'bubble', label: 'Bubble Pop', url: 'https://raw.githubusercontent.com/MycroftAI/mycroft-core/master/mycroft/res/snd/acknowledge.mp3' },
     { key: 'bell', label: 'Classic Bell', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/bell.mp3' },
-    { key: 'bubble', label: 'Bubble Pop', url: 'https://raw.githubusercontent.com/MycroftAI/mycroft-core/master/mycroft/res/snd/start_listening.wav' },
     { key: 'digital', label: 'Digital Beep', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/beep4.mp3' },
     { key: 'alarm', label: 'Alert Siren', url: 'https://raw.githubusercontent.com/MycroftAI/skill-alarm/18.08/sounds/constant_beep.mp3' }
   ];

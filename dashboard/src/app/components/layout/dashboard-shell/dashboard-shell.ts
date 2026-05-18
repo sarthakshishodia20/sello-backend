@@ -163,14 +163,7 @@ export class DashboardShellComponent {
     // Play chosen sound chime globally on dashboard notifications
     this.messageService.messageObserver.subscribe((msg: any) => {
       if (this.settingsService.settings().soundNotificationEnabled) {
-        const user = this.auth.user();
-        let soundKey = 'chime';
-        if (user && user.settings) {
-          try {
-            const mSettings = typeof user.settings === 'string' ? JSON.parse(user.settings) : user.settings;
-            soundKey = mSettings.soundNotification || 'chime';
-          } catch (e) {}
-        }
+        const soundKey = localStorage.getItem('sello_soundNotification') || 'chime';
         this.audioService.play(soundKey);
       }
     });
