@@ -8,6 +8,7 @@ let pool = null;
  * Initialize MySQL connection pool
  */
 function initialize() {
+  const isCloud = process.env.DB_HOST && process.env.DB_HOST !== 'localhost' && process.env.DB_HOST !== '127.0.0.1';
   const config = {
     host              : process.env.DB_HOST     || 'localhost',
     port              : parseInt(process.env.DB_PORT) || 3306,
@@ -18,7 +19,8 @@ function initialize() {
     connectionLimit   : 10,
     queueLimit        : 0,
     timezone          : 'Z',
-    charset           : 'utf8mb4'
+    charset           : 'utf8mb4',
+    ssl               : isCloud ? { rejectUnauthorized: false } : undefined
   };
 
   pool = mysql2.createPool(config);

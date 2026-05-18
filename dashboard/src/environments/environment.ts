@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiBase: 'http://localhost:4000/api',
-  webappUrl: 'http://localhost:4201'
+  apiBase: 'https://sello-api.onrender.com/api',
+  webappUrl: 'https://sello-storefront.onrender.com'
 };

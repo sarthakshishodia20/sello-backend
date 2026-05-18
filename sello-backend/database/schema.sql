@@ -1,5 +1,5 @@
 -- Selo Phase 1 Database Schema
--- Import this file in phpMyAdmin or run: mysql -u root -p < database/schema.sql
+-- Import this file to Aiven MySQL database to create structural tables
 -- The schema models a single masterbrand, inherited merchant catalogues, delinked products, and COD orders.
 
 CREATE DATABASE IF NOT EXISTS selo_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -8,6 +8,10 @@ USE selo_db;
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS tb_order_items;
 DROP TABLE IF EXISTS tb_orders;
+DROP TABLE IF EXISTS tb_notification_received;
+DROP TABLE IF EXISTS tb_notification_templates;
+DROP TABLE IF EXISTS tb_masterbrand_activity;
+DROP TABLE IF EXISTS tb_merchant_activity;
 DROP TABLE IF EXISTS tb_notifications;
 DROP TABLE IF EXISTS tb_app_catalogue;
 DROP TABLE IF EXISTS tb_merchant_products;
@@ -25,6 +29,7 @@ CREATE TABLE tb_masterbrand (
   code          VARCHAR(60) NOT NULL UNIQUE,
   description   TEXT,
   is_active     TINYINT(1) NOT NULL DEFAULT 1,
+  settings      JSON DEFAULT (JSON_OBJECT('outOfStock', true, 'brandCustom', false, 'codEnabled', true)),
   created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -40,7 +45,11 @@ CREATE TABLE tb_merchants (
   contact_email   VARCHAR(160),
   phone           VARCHAR(30),
   address         TEXT,
+  image_url       VARCHAR(500) NULL,
   theme_color     VARCHAR(20) NOT NULL DEFAULT '#0f172a',
+  delivery_time   VARCHAR(50) NULL,
+  delivery_mode   VARCHAR(50) NULL,
+  city_name       VARCHAR(100) NULL,
   is_active       TINYINT(1) NOT NULL DEFAULT 1,
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -81,6 +90,7 @@ CREATE TABLE tb_categories (
   description     TEXT,
   sort_order      INT NOT NULL DEFAULT 0,
   is_active       TINYINT(1) NOT NULL DEFAULT 1,
+  is_deleted      TINYINT(1) NOT NULL DEFAULT 0,
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_tb_categories_masterbrand
@@ -106,6 +116,7 @@ CREATE TABLE tb_products (
   image_url         VARCHAR(500),
   sort_order        INT NOT NULL DEFAULT 0,
   is_active         TINYINT(1) NOT NULL DEFAULT 1,
+  is_deleted        TINYINT(1) NOT NULL DEFAULT 0,
   created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_tb_products_masterbrand
@@ -132,6 +143,7 @@ CREATE TABLE tb_merchant_products (
   image_url         VARCHAR(500),
   is_active         TINYINT(1) NOT NULL DEFAULT 1,
   is_delinked       TINYINT(1) NOT NULL DEFAULT 1,
+  is_deleted        TINYINT(1) NOT NULL DEFAULT 0,
   created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_tb_merchant_products_merchant
@@ -232,82 +244,62 @@ CREATE TABLE tb_notifications (
   INDEX idx_tb_notifications_user (user_id)
 ) ENGINE=InnoDB;
 
--- Seed masterbrand.
-INSERT INTO tb_masterbrand (id, name, code, description, is_active)
-VALUES
-  (1, 'Selo Masterbrand', 'SELO', 'Phase 1 demo masterbrand for inherited merchant catalogue.', 1);
+-- 1. Notification Templates (Terminology)
+CREATE TABLE IF NOT EXISTS tb_notification_templates (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  masterbrand_id  INT NULL,
+  merchant_id     INT NULL,
+  event_type      VARCHAR(100) NOT NULL,
+  title_template  TEXT NOT NULL,
+  body_template   TEXT NOT NULL,
+  is_active       TINYINT(1) NOT NULL DEFAULT 1,
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_templates_masterbrand FOREIGN KEY (masterbrand_id) REFERENCES tb_masterbrand(id) ON DELETE CASCADE,
+  CONSTRAINT fk_templates_merchant FOREIGN KEY (merchant_id) REFERENCES tb_merchants(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Seed merchants.
-INSERT INTO tb_merchants (id, masterbrand_id, name, code, slug, description, contact_email, phone, address, theme_color, is_active)
-VALUES
-  (100001, 1, 'Selo Fresh Gurgaon', 'SELO_GGN', 'selo-fresh-gurgaon', 'Fresh groceries and pantry essentials for Gurgaon customers.', 'gurgaon@selo.com', '+91-9876543210', 'Sector 45, Gurgaon', '#0f766e', 1),
-  (100002, 1, 'Selo Express Noida', 'SELO_NOIDA', 'selo-express-noida', 'Quick commerce style demo merchant with inherited catalogue.', 'noida@selo.com', '+91-9988776655', 'Sector 62, Noida', '#b45309', 1);
+-- 2. Notification Received (History)
+CREATE TABLE IF NOT EXISTS tb_notification_received (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  user_id         INT NULL,
+  merchant_id     INT NULL,
+  title           VARCHAR(255) NOT NULL,
+  message         TEXT NOT NULL,
+  type            VARCHAR(50) NOT NULL DEFAULT 'INFO',
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_received_user FOREIGN KEY (user_id) REFERENCES tb_users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_received_merchant FOREIGN KEY (merchant_id) REFERENCES tb_merchants(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Seed dashboard users.
-INSERT INTO tb_users (id, masterbrand_id, merchant_id, name, email, password_hash, role, phone, is_active)
-VALUES
-  (1, 1, NULL, 'Selo Admin', 'admin@selo.com', '$2a$10$9ijV1ga6bhmDY6CZzz1XH.WV4c6cPlU5aiqMSBKDN74LzoAmOufO6', 'MASTERBRAND_ADMIN', '+91-9000000000', 1),
-  (2, 1, 100001, 'Aman Merchant', 'merchant1@selo.com', '$2a$10$5ZgvxDEoRHT6xZx5cCEPVeXOVCmWqbO8ej0spFRrjXaFLqvVlHUGm', 'MERCHANT_ADMIN', '+91-9111111111', 1),
-  (3, 1, 100002, 'Sara Merchant', 'merchant2@selo.com', '$2a$10$5ZgvxDEoRHT6xZx5cCEPVeXOVCmWqbO8ej0spFRrjXaFLqvVlHUGm', 'MERCHANT_ADMIN', '+91-9222222222', 1);
+-- 3. Masterbrand Activity Log
+CREATE TABLE IF NOT EXISTS tb_masterbrand_activity (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  masterbrand_id  INT NOT NULL,
+  user_id         INT NOT NULL,
+  action          VARCHAR(100) NOT NULL,
+  endpoint        VARCHAR(255) NOT NULL,
+  method          VARCHAR(10) NOT NULL,
+  request_data    JSON,
+  response_data   JSON,
+  ip_address      VARCHAR(45),
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_mb_activity_masterbrand FOREIGN KEY (masterbrand_id) REFERENCES tb_masterbrand(id) ON DELETE CASCADE,
+  CONSTRAINT fk_mb_activity_user FOREIGN KEY (user_id) REFERENCES tb_users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Seed root categories and subcategories.
-INSERT INTO tb_categories (id, masterbrand_id, parent_id, name, slug, description, sort_order, is_active)
-VALUES
-  (1, 1, NULL, 'Fresh Produce', 'fresh-produce', 'Root category for fruits and vegetables.', 1, 1),
-  (2, 1, 1, 'Citrus Fruits', 'citrus-fruits', 'Subcategory used for fresh citrus inventory.', 1, 1),
-  (3, 1, NULL, 'Pantry Staples', 'pantry-staples', 'Everyday staples for routine household ordering.', 2, 1),
-  (4, 1, 3, 'Healthy Snacks', 'healthy-snacks', 'Subcategory for grab-and-go snacks.', 1, 1),
-  (5, 1, NULL, 'Beverages', 'beverages', 'Beverage catalogue root for the demo webapp.', 3, 1),
-  (6, 1, 5, 'Sparkling Water', 'sparkling-water', 'Subcategory used to show nested filters.', 1, 1);
-
--- Seed universal masterbrand products.
-INSERT INTO tb_products (id, masterbrand_id, category_id, sku, name, short_description, description, ai_description, price, stock_qty, image_url, sort_order, is_active)
-VALUES
-  (1, 1, 2, 'SEL-ORG-001', 'Sunrise Orange Box', '8 handpicked oranges in a ready-to-sell box.', 'Fresh oranges packed for quick retail fulfilment and clean shelf presentation.', 'Sunrise Orange Box is a fresh citrus pack designed for reliable daily demand. It gives merchants a bright, premium-looking fruit option with simple ordering and display value.', 199.00, 60, 'https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=800&q=80', 1, 1),
-  (2, 1, 4, 'SEL-BAR-002', 'Protein Nut Bar', 'Balanced snack bar for busy customers.', 'Compact energy bar with mixed nuts, dates and a clean-label presentation.', 'Protein Nut Bar is a compact impulse-purchase snack that fits wellness-focused baskets. Its simple positioning makes it easy for merchants to merchandise in checkout and snack zones.', 75.00, 140, 'https://images.unsplash.com/photo-1572441713132-51c75654db73?auto=format&fit=crop&w=800&q=80', 2, 1),
-  (3, 1, 6, 'SEL-SPK-003', 'Lime Spark Water', 'Zero-sugar sparkling water with lime finish.', 'Light sparkling drink suited for combo baskets and quick commerce beverage ordering.', 'Lime Spark Water adds a premium beverage option to the catalogue with a crisp citrus profile. It works well for basket-building and for merchants who want a modern drinks shelf.', 49.00, 200, 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80', 3, 1),
-  (4, 1, 3, 'SEL-RIC-004', 'Daily Basmati Rice', '5kg family pack of basmati rice.', 'Staple pantry line built for repeat household ordering and merchant trust.', 'Daily Basmati Rice is a dependable pantry staple aimed at repeat grocery purchases. It helps merchants anchor larger baskets with a recognizable, practical household essential.', 499.00, 45, 'https://images.unsplash.com/photo-1586201375761-83865001e31b?auto=format&fit=crop&w=800&q=80', 4, 1),
-  (5, 1, 4, 'SEL-TRM-005', 'Roasted Trail Mix', 'Crunchy nut and seed blend.', 'A premium snack mix useful for gift, office and wellness baskets.', 'Roasted Trail Mix brings a premium snack option with broad appeal across office and personal orders. It is positioned as a high-value add-on product for better cart conversion.', 165.00, 90, 'https://images.unsplash.com/photo-1515543904379-3d757afe72e1?auto=format&fit=crop&w=800&q=80', 5, 1);
-
--- Every active merchant inherits every active master product in the mini version.
-INSERT INTO tb_app_catalogue (merchant_id, product_id, source_type, is_available)
-SELECT m.id, p.id, 'MASTER', 1
-FROM tb_merchants m
-JOIN tb_products p ON p.masterbrand_id = m.masterbrand_id;
-
--- Seed one delinked merchant product to demonstrate override behaviour immediately after setup.
-INSERT INTO tb_merchant_products (
-  id, merchant_id, source_product_id, category_id, sku, name, short_description, description,
-  ai_description, price, stock_qty, image_url, is_active, is_delinked
-)
-VALUES
-  (1, 100002, 1, 2, 'SEL-ORG-001', 'Sunrise Orange Box - Merchant Edit', 'Noida store override with adjusted price and stock.', 'This delinked copy demonstrates that merchant-specific edits live outside the masterbrand product table.', 'Sunrise Orange Box - Merchant Edit is a merchant-managed override that keeps local merchandising flexible. It proves the delink flow where a merchant gets its own editable catalogue row.', 219.00, 35, 'https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=800&q=80', 1, 1);
-
-UPDATE tb_app_catalogue
-SET override_product_id = 1, source_type = 'MERCHANT'
-WHERE merchant_id = 100002 AND product_id = 1;
-
--- Seed demo orders for dashboard metrics and order management page.
-INSERT INTO tb_orders (
-  id, order_no, masterbrand_id, merchant_id, placed_by_user_id, customer_name, customer_phone, customer_email,
-  customer_address, payment_method, payment_status, order_status, subtotal, total_amount, notes
-)
-VALUES
-  (1, 'SEL-1001', 1, 100001, NULL, 'Ritika Sharma', '+91-9000011111', 'ritika@example.com', 'DLF Phase 4, Gurgaon', 'COD', 'PENDING', 'PLACED', 274.00, 274.00, 'Please ring the bell once.'),
-  (2, 'SEL-1002', 1, 100002, NULL, 'Karan Verma', '+91-9000022222', 'karan@example.com', 'Sector 75, Noida', 'COD', 'COLLECTED', 'DELIVERED', 438.00, 438.00, 'Leave at reception if unreachable.');
-
-INSERT INTO tb_order_items (
-  order_id, source_product_id, merchant_product_id, product_name_snapshot, sku_snapshot, quantity, unit_price, line_total
-)
-VALUES
-  (1, 1, NULL, 'Sunrise Orange Box', 'SEL-ORG-001', 1, 199.00, 199.00),
-  (1, 2, NULL, 'Protein Nut Bar', 'SEL-BAR-002', 1, 75.00, 75.00),
-  (2, 1, 1, 'Sunrise Orange Box - Merchant Edit', 'SEL-ORG-001', 2, 219.00, 438.00);
-
--- Seed notifications for overview and snooze testing.
-INSERT INTO tb_notifications (user_id, merchant_id, title, message, type, is_read, snooze_until)
-VALUES
-  (1, NULL, 'Merchant onboarding complete', '2 demo merchants are ready for inherited catalogue testing.', 'SUCCESS', 0, NULL),
-  (NULL, 100001, 'Catalogue sync ready', 'Your store is currently using the masterbrand catalogue without delinks.', 'INFO', 0, NULL),
-  (NULL, 100002, '1 product delinked', 'Sunrise Orange Box was delinked for merchant-specific pricing and stock.', 'WARNING', 0, NULL),
-  (2, 100001, 'New order placed', 'A COD order has landed in your dashboard queue.', 'INFO', 0, NULL);
+-- 4. Merchant Activity Log
+CREATE TABLE IF NOT EXISTS tb_merchant_activity (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  merchant_id     INT NOT NULL,
+  user_id         INT NOT NULL,
+  action          VARCHAR(100) NOT NULL,
+  endpoint        VARCHAR(255) NOT NULL,
+  method          VARCHAR(10) NOT NULL,
+  request_data    JSON,
+  response_data   JSON,
+  ip_address      VARCHAR(45),
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_merch_activity_merchant FOREIGN KEY (merchant_id) REFERENCES tb_merchants(id) ON DELETE CASCADE,
+  CONSTRAINT fk_merch_activity_user FOREIGN KEY (user_id) REFERENCES tb_users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
