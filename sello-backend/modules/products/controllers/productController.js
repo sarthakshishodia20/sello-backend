@@ -407,5 +407,19 @@ module.exports = {
   duplicateProduct,
   deleteMerchantProduct,
   updateStockStatus,
-  uploadImage
+  uploadImage,
+  getSearchSuggestions
 };
+
+async function getSearchSuggestions(req, res) {
+  try {
+    const query = req.query.search || '';
+    if (!query) return sendSuccess(res, 'Suggestions fetched', { suggestions: [] });
+    
+    const suggestions = await productService.getSearchSuggestions(req.selloUser, query);
+    return sendSuccess(res, 'Suggestions fetched', { suggestions });
+  } catch (err) {
+    logger.error(MODULE, 'GET_SUGGESTIONS_ERROR', { error: err.message });
+    return sendError(res, 'Failed to fetch suggestions', 500);
+  }
+}

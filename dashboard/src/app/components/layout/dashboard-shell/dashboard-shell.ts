@@ -106,6 +106,10 @@ export class DashboardShellComponent {
     this.settingsService.updateSettings({ availabilityEnabled: val });
   }
 
+  toggleExtVoiceAI(val: boolean) {
+    this.settingsService.updateSettings({ voiceAiEnabled: val });
+  }
+
 
 
   // Language options for the picker

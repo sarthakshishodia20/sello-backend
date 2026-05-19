@@ -124,6 +124,13 @@ export class ProductsComponent implements OnInit {
 
   viewMode = computed(() => (this.auth.isAdmin() ? 'master' : 'merchant'));
 
+  voiceInterimText = signal('');
+
+  hasVoiceAiAccess = computed(() => {
+    if (this.auth.isAdmin()) return true;
+    return this.settingsService.settings().voiceAiEnabled === true;
+  });
+
   /** Merchant and admin can manage inventory/enable-disable. */
   canManage = computed(() => this.auth.isAdmin() || this.auth.isMerchant());
 
@@ -425,17 +432,10 @@ export class ProductsComponent implements OnInit {
 
   /** Fetch product name suggestions from backend */
   fetchSuggestions(query: string) {
-    const params: any = { limit: 6, offset: 0, search: query };
-    const catId = this.selectedCategoryId();
-    if (catId) params.category_id = catId;
-    const endpoint = this.viewMode() === 'master' ? '/products/master' : '/products/inherited';
-
-    this.api.get<any>(endpoint, params).subscribe({
+    this.api.get<any>('/products/suggestions', { search: query }).subscribe({
       next: (response) => {
-        const names = (response.data.products || [])
-          .map((p: any) => p.effective_name ?? p.name)
-          .filter((n: string) => n && n.toLowerCase().includes(query.toLowerCase()));
-        this.suggestions.set([...new Set<string>(names)]);
+        const names = response.data.suggestions || [];
+        this.suggestions.set(names);
         this.showSuggestions.set(names.length > 0);
       },
       error: () => this.suggestions.set([])
@@ -450,16 +450,31 @@ export class ProductsComponent implements OnInit {
     this.recognition = new SpeechRecognition();
     this.recognition.lang = 'en-IN';
     this.recognition.continuous = false;
-    this.recognition.interimResults = false;
+    this.recognition.interimResults = true;
 
     this.recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      this.searchInputValue.set(transcript);
-      this.search = transcript;
-      this.isListening.set(false);
-      this.offset = 0;
-      this.hasMore.set(true);
-      this.searchSubject.next(transcript);
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      const text = finalTranscript || interimTranscript;
+      this.voiceInterimText.set(text);
+
+      if (finalTranscript) {
+        this.searchInputValue.set(finalTranscript);
+        this.search = finalTranscript;
+        this.isListening.set(false);
+        this.offset = 0;
+        this.hasMore.set(true);
+        this.searchSubject.next(finalTranscript);
+      }
     };
 
     this.recognition.onerror = () => {
@@ -482,6 +497,7 @@ export class ProductsComponent implements OnInit {
       this.isListening.set(false);
       return;
     }
+    this.voiceInterimText.set('');
     this.isListening.set(true);
     this.recognition.start();
   }

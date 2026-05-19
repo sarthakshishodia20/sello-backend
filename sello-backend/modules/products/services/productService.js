@@ -587,6 +587,31 @@ async function updateCatalogueStockStatus(catalogueId, merchantId, isOutOfStock)
   logger.info(MODULE, 'CATALOGUE_STOCK_STATUS_UPDATED', { catalogueId, merchantId, isOutOfStock });
 }
 
+async function getSearchSuggestions(user, queryStr) {
+  const like = `%${queryStr}%`;
+  if (user.role === 'MASTERBRAND_ADMIN') {
+    const rows = await db.query(
+      `SELECT DISTINCT name 
+       FROM tb_products 
+       WHERE masterbrand_id = ? AND is_deleted = 0 AND name LIKE ? 
+       LIMIT 6`,
+      [user.masterbrandId, like]
+    );
+    return rows.map(r => r.name);
+  } else {
+    const rows = await db.query(
+      `SELECT DISTINCT COALESCE(mp.name, p.name) AS name 
+       FROM tb_app_catalogue ac 
+       JOIN tb_products p ON p.id = ac.product_id 
+       LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id 
+       WHERE ac.merchant_id = ? AND p.is_deleted = 0 AND (mp.name LIKE ? OR p.name LIKE ?) 
+       LIMIT 6`,
+      [user.merchantId, like, like]
+    );
+    return rows.map(r => r.name);
+  }
+}
+
 module.exports = {
   getMasterProducts,
   getMasterProductById,
@@ -603,7 +628,8 @@ module.exports = {
   swapProducts,
   duplicateProduct,
   archiveMerchantProduct,
-  updateCatalogueStockStatus
+  updateCatalogueStockStatus,
+  getSearchSuggestions
 };
 /**
  * Relink removes the merchant override and returns the catalogue item to follow masterbrand data.

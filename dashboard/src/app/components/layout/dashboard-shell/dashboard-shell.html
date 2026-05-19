@@ -170,6 +170,17 @@
               <p-toggleswitch [ngModel]="settingsService.settings().availabilityEnabled" (ngModelChange)="toggleExtAvailability($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
             </div>
 
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(16,185,129,0.1); color: #10b981;">
+                <i class="pi pi-microphone"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>AI & Voice Assistant</label>
+                <span>Enable voice search & auto suggestions</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().voiceAiEnabled" (ngModelChange)="toggleExtVoiceAI($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
 
           </div>
         </div>

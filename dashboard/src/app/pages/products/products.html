@@ -80,6 +80,7 @@
         (input)="onSearch($event)" 
         class="product-search-input" />
       <button 
+        *ngIf="hasVoiceAiAccess()"
         class="voice-search-btn" 
         [class.listening]="isListening()"
         (click)="$event.stopPropagation(); startVoiceSearch()"
@@ -88,7 +89,7 @@
       </button>
 
       <!-- Suggestions Dropdown -->
-      <div class="search-suggestions" *ngIf="showSuggestions() && suggestions().length > 0" (click)="$event.stopPropagation()">
+      <div class="search-suggestions" *ngIf="hasVoiceAiAccess() && showSuggestions() && suggestions().length > 0" (click)="$event.stopPropagation()">
         <div 
           class="suggestion-item" 
           *ngFor="let s of suggestions()" 
@@ -500,5 +501,36 @@
     </div>
   </div>
 </p-dialog>
+
+
+<!-- Premium Voice Search Overlay with Gemini Wave Effect -->
+<div class="voice-search-overlay" *ngIf="isListening()" (click)="startVoiceSearch()">
+  <div class="voice-search-modal" (click)="$event.stopPropagation()">
+    <div class="gemini-aurora-bg"></div>
+    
+    <button class="voice-close-btn" (click)="startVoiceSearch()">
+      <i class="pi pi-times"></i>
+    </button>
+
+    <div class="voice-modal-header">
+      <i class="pi pi-microphone voice-mic-glow"></i>
+      <h2>Listening...</h2>
+      <p>Speak clearly now</p>
+    </div>
+
+    <!-- Gemini voice wave effects -->
+    <div class="gemini-wave-container">
+      <div class="gemini-wave wave-1"></div>
+      <div class="gemini-wave wave-2"></div>
+      <div class="gemini-wave wave-3"></div>
+      <div class="gemini-wave wave-4"></div>
+    </div>
+
+    <div class="voice-interim-box">
+      <p class="voice-placeholder" *ngIf="!voiceInterimText()">"Try saying 'Beverages', 'Pizza' or a product SKU"</p>
+      <p class="voice-text" *ngIf="voiceInterimText()">{{ voiceInterimText() }}</p>
+    </div>
+  </div>
+</div>
 
 
