@@ -545,201 +545,134 @@
   </div>
 </div>
 
-<!-- ═══ STEP 1: Snooze/UnSnooze Duration Prompt Dialog (Yelo style) ═══ -->
+<!-- ═══ STEP 1: Snooze/UnSnooze Duration Prompt ═══ -->
 <p-dialog
   [(visible)]="snoozePromptVisible"
   [modal]="true"
-  [style]="{ width: '480px', 'border-radius': '24px', 'box-shadow': '0 25px 50px -12px rgba(0,0,0,0.25)' }"
+  [style]="{ width: '460px' }"
   [showHeader]="false"
   [draggable]="false"
   [resizable]="false"
-  styleClass="snooze-prompt-dialog-new"
+  styleClass="snooze-prompt-dialog"
   appendTo="body"
 >
-  <div style="padding: 32px; position: relative;">
-    <!-- Local Loader Overlay inside Prompt -->
-    <div class="snooze-loader-overlay" *ngIf="snoozeLoading()" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(var(--bg-card-rgb), 0.85); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; border-radius:24px;">
-      <p-progressspinner strokeWidth="4"></p-progressspinner>
-      <span style="font-weight:700; color:var(--text-dark); margin-top:12px;">Loading catalog...</span>
+  <div class="snooze-prompt-wrapper">
+    <!-- Tab Toggle -->
+    <div class="snooze-prompt-tabs">
+      <button
+        type="button"
+        class="sp-tab-btn"
+        [class.active]="promptTab() === 'snooze'"
+        (click)="switchSnoozeTab('snooze', 'prompt')"
+      >Snooze</button>
+      <button
+        type="button"
+        class="sp-tab-btn"
+        [class.active]="promptTab() === 'unsnooze'"
+        (click)="switchSnoozeTab('unsnooze', 'prompt')"
+      >UnSnooze</button>
     </div>
 
-    <!-- Toggle Buttons inside Prompt (Snooze vs UnSnooze) -->
-    <div style="display: flex; background: var(--bg-subtle, #f8fafc); padding: 6px; border-radius: 16px; border: 1px solid var(--border, #e2e8f0); margin-bottom: 24px; justify-content: center; gap: 8px;">
-      <button 
-        type="button" 
-        style="flex: 1; padding: 10px 18px; border-radius: 12px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-        [style.background]="promptTab() === 'snooze' ? 'var(--bg-card, #ffffff)' : 'transparent'"
-        [style.color]="promptTab() === 'snooze' ? 'var(--primary, #0f172a)' : 'var(--text-muted, #64748b)'"
-        [style.box-shadow]="promptTab() === 'snooze' ? 'var(--shadow-sm)' : 'none'"
-        (click)="confirmSnoozeTabSwitch('snooze', 'prompt')"
-      >
-        Snooze
-      </button>
-      <button 
-        type="button" 
-        style="flex: 1; padding: 10px 18px; border-radius: 12px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-        [style.background]="promptTab() === 'unsnooze' ? 'var(--bg-card, #ffffff)' : 'transparent'"
-        [style.color]="promptTab() === 'unsnooze' ? 'var(--primary, #0f172a)' : 'var(--text-muted, #64748b)'"
-        [style.box-shadow]="promptTab() === 'unsnooze' ? 'var(--shadow-sm)' : 'none'"
-        (click)="confirmSnoozeTabSwitch('unsnooze', 'prompt')"
-      >
-        UnSnooze
-      </button>
-    </div>
-
-    <!-- Mode Specific Prompts -->
-    <div *ngIf="promptTab() === 'snooze'">
-      <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark, #0f172a); margin: 0 0 8px 0;">Choose a snooze duration</h3>
-      <p style="font-size: 13px; color: var(--text-muted, #64748b); margin: 0 0 20px 0; font-weight: 500;">Select when the item availability should automatically restore.</p>
-
-      <div style="display: flex; gap: 16px; margin-bottom: 28px;">
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 11px; font-weight: 800; color: var(--text-muted, #64748b); text-transform: uppercase; letter-spacing: 0.5px;">Date</label>
+    <ng-container *ngIf="promptTab() === 'snooze'">
+      <h3 class="sp-title">Choose snooze duration</h3>
+      <p class="sp-desc">Items will become unavailable until this date & time.</p>
+      <div class="sp-datetime-row">
+        <div class="sp-field">
+          <label class="sp-label">Date & Time</label>
           <p-datepicker
-            [(ngModel)]="promptSnoozeDate"
+            [(ngModel)]="promptSnoozeDateTime"
             [showIcon]="true"
             iconDisplay="input"
-            placeholder="Select Date"
+            [showTime]="true"
+            [hourFormat]="'24'"
+            [minDate]="todayDate"
+            placeholder="Select date & time"
             appendTo="body"
-            styleClass="prompt-datepicker-premium"
+            styleClass="snooze-datepicker"
           ></p-datepicker>
         </div>
-
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-          <label style="font-size: 11px; font-weight: 800; color: var(--text-muted, #64748b); text-transform: uppercase; letter-spacing: 0.5px;">Time</label>
-          <input 
-            type="time" 
-            [(ngModel)]="promptSnoozeTime" 
-            class="p-inputtext p-component" 
-            style="padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border, #e2e8f0); background: var(--bg-card, #ffffff); color: var(--text-dark, #0f172a); font-size: 13px; font-weight: 600; width: 100%;"
-          />
-        </div>
       </div>
-    </div>
+    </ng-container>
 
-    <div *ngIf="promptTab() === 'unsnooze'">
-      <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark, #0f172a); margin: 0 0 8px 0;">Ready to UnSnooze catalog items?</h3>
-      <p style="font-size: 13px; color: var(--text-muted, #64748b); margin: 0 0 28px 0; font-weight: 500; line-height: 1.5;">This will instantly restore catalog discovery and ordering access for the products or categories you choose in the next screen.</p>
-    </div>
+    <ng-container *ngIf="promptTab() === 'unsnooze'">
+      <h3 class="sp-title">UnSnooze catalog items</h3>
+      <p class="sp-desc">Select products or categories to restore on next screen.</p>
+    </ng-container>
 
-    <!-- Action Buttons -->
-    <div style="display: flex; gap: 12px;">
-      <button 
-        type="button" 
-        class="prompt-cancel-btn"
-        (click)="snoozePromptVisible.set(false)"
-      >
-        Cancel
-      </button>
-      <button 
-        type="button" 
-        class="prompt-confirm-btn"
-        (click)="confirmSnoozePromptDetails()"
-      >
-        Confirm
-      </button>
+    <div class="sp-actions">
+      <button type="button" class="sp-btn-cancel" (click)="snoozePromptVisible.set(false)">Cancel</button>
+      <button type="button" class="sp-btn-confirm" (click)="confirmSnoozePromptDetails()">Continue</button>
     </div>
   </div>
 </p-dialog>
 
-<!-- ═══ STEP 2: Main Three-Pane Snooze & UnSnooze Selection Dialog ═══ -->
+<!-- ═══ STEP 2: Main Three-Pane Selection Modal ═══ -->
 <p-dialog
   [(visible)]="snoozeModalVisible"
   [modal]="true"
-  [style]="{ width: '1080px', 'max-width': '95vw', 'border-radius': '24px', 'box-shadow': '0 25px 50px -12px rgba(0,0,0,0.35)' }"
+  [style]="{ width: '1080px', 'max-width': '95vw' }"
   styleClass="snooze-manager-dialog"
   [draggable]="false"
   [resizable]="false"
   [showHeader]="false"
 >
-  <div style="padding: 32px; position: relative;">
-    <!-- Close Button -->
-    <button class="snooze-modal-close-btn" (click)="snoozeModalVisible.set(false)" style="position: absolute; top: 24px; right: 24px; border: none; background: var(--bg-subtle, #f8fafc); color: var(--text-muted, #64748b); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 10;">
-      <i class="pi pi-times" style="font-size: 14px;"></i>
+  <div class="snooze-modal-inner">
+    <!-- Close -->
+    <button class="snooze-modal-close" (click)="snoozeModalVisible.set(false)">
+      <i class="pi pi-times"></i>
     </button>
 
-    <!-- Modal Loading Overlay -->
-    <div class="snooze-loader-overlay" *ngIf="snoozeLoading()" style="position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(var(--bg-card-rgb), 0.85); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; border-radius:24px;">
-      <p-progressspinner strokeWidth="4"></p-progressspinner>
-      <span style="font-weight:700; color:var(--text-dark); margin-top:12px;">Processing... Please wait</span>
-    </div>
-
-    <!-- Top Action Row -->
-    <div class="snooze-modal-top-bar" style="margin-right: 48px;">
-      <!-- Snooze vs UnSnooze tabs -->
+    <!-- Top Bar -->
+    <div class="snooze-modal-top-bar">
       <div class="snooze-tab-buttons">
-        <button 
-          class="tab-btn" 
-          [class.active]="snoozeTab() === 'snooze'" 
-          (click)="confirmSnoozeTabSwitch('snooze', 'modal')"
-        >
-          <i class="pi pi-bell-slash mr-1"></i> Snooze Items
+        <button class="tab-btn" [class.active]="snoozeTab() === 'snooze'" (click)="switchSnoozeTab('snooze', 'modal')">
+          <i class="pi pi-bell-slash"></i> Snooze
         </button>
-        <button 
-          class="tab-btn" 
-          [class.active]="snoozeTab() === 'unsnooze'" 
-          (click)="confirmSnoozeTabSwitch('unsnooze', 'modal')"
-        >
-          <i class="pi pi-bell mr-1"></i> UnSnooze Items
+        <button class="tab-btn" [class.active]="snoozeTab() === 'unsnooze'" (click)="switchSnoozeTab('unsnooze', 'modal')">
+          <i class="pi pi-bell"></i> UnSnooze
         </button>
       </div>
-
-      <!-- Date-Time Selected indicator -->
-      <div class="snooze-selected-info" *ngIf="snoozeTab() === 'snooze'" style="display: flex; align-items: center; gap: 8px; background: rgba(20, 184, 166, 0.08); padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(20, 184, 166, 0.2); color: #14b8a6; font-size: 13px; font-weight: 700;">
+      <div class="snooze-until-badge" *ngIf="snoozeTab() === 'snooze'">
         <i class="pi pi-calendar-clock"></i>
-        <span>Snooze until: {{ snoozeUntilDate }} {{ snoozeUntilTime }}</span>
+        <span>Until: {{ snoozeUntilDate }} {{ snoozeUntilTime }}</span>
       </div>
     </div>
 
-    <!-- Main Three-Pane Grid -->
+    <!-- Three-Pane Grid -->
     <div class="snooze-grid-layout">
-      <!-- 1. LEFT PANE: Selector Mode -->
+      <!-- LEFT: Mode -->
       <div class="grid-pane pane-left">
         <span class="pane-sec-title">Select Mode</span>
         <div class="mode-options-list">
-          <div 
-            class="mode-option-card" 
-            [class.active]="snoozeMode() === 'products'" 
-            (click)="setSnoozeMode('products')"
-          >
+          <div class="mode-option-card" [class.active]="snoozeMode() === 'products'" (click)="setSnoozeMode('products')">
             <i class="pi pi-box"></i>
-            <div class="card-info">
-              <h3>Products</h3>
-            </div>
+            <h3>Products</h3>
           </div>
-
-          <div 
-            class="mode-option-card" 
-            [class.active]="snoozeMode() === 'category'" 
-            (click)="setSnoozeMode('category')"
-          >
+          <div class="mode-option-card" [class.active]="snoozeMode() === 'category'" (click)="setSnoozeMode('category')">
             <i class="pi pi-tags"></i>
-            <div class="card-info">
-              <h3>Categories</h3>
-            </div>
+            <h3>Categories</h3>
           </div>
         </div>
       </div>
 
-      <!-- 2. MIDDLE PANE: Checklist Selection -->
+      <!-- MIDDLE: List + search + pagination -->
       <div class="grid-pane pane-middle">
         <div class="pane-header-with-search">
           <span class="pane-sec-title">Catalog Selection</span>
           <div class="snooze-pane-search">
             <i class="pi pi-search"></i>
-            <input 
-              type="text" 
-              placeholder="Search items..." 
-              [(ngModel)]="snoozeSearchQuery" 
-              (input)="filterSnoozeList()" 
+            <input
+              type="text"
+              placeholder="Search..."
+              [ngModel]="snoozeSearchQuery"
+              (ngModelChange)="onSnoozeSearch($event)"
             />
           </div>
         </div>
 
-        <div class="scrollable-checklist">
-          <!-- Selection Items -->
-          <div 
-            *ngFor="let item of snoozeFilteredItems()" 
+        <div class="scrollable-checklist" *ngIf="!loading()">
+          <div
+            *ngFor="let item of snoozeFilteredItems()"
             class="checklist-row"
             [class.checked]="isSnoozeItemSelected(item.id)"
             [class.disabled-item]="snoozeTab() === 'snooze' && item.snooze_until && isItemCurrentlySnoozed(item.snooze_until)"
@@ -751,22 +684,41 @@
             <div class="row-item-info">
               <span class="row-item-name">{{ item.name }}</span>
               <span class="row-item-meta active-snoozed" *ngIf="item.snooze_until && isItemCurrentlySnoozed(item.snooze_until)">
-                Already Snoozed until {{ getFormattedSnoozeUntil(item.snooze_until) }}
+                Snoozed until {{ getFormattedSnoozeUntil(item.snooze_until) }}
               </span>
             </div>
           </div>
 
-          <div class="empty-list-placeholder" *ngIf="snoozeFilteredItems().length === 0">
+          <div class="empty-list-placeholder" *ngIf="snoozeFilteredItems().length === 0 && !loading()">
             <i class="pi pi-folder-open"></i>
-            <p>No items match your search.</p>
+            <p>No items found.</p>
           </div>
+        </div>
+
+        <!-- Loading state -->
+        <div class="snooze-list-loading" *ngIf="loading()">
+          <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5]">
+            <div class="skeleton-bar" style="width: 70%; height: 14px; border-radius: 6px;"></div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="snooze-paginator-wrap" *ngIf="snoozeTotalRecords() > snoozeLimit">
+          <p-paginator
+            [first]="snoozeOffset"
+            [rows]="snoozeLimit"
+            [totalRecords]="snoozeTotalRecords()"
+            [rowsPerPageOptions]="[10, 20, 50]"
+            (onPageChange)="onSnoozePage($event)"
+            styleClass="snooze-paginator"
+          ></p-paginator>
         </div>
       </div>
 
-      <!-- 3. RIGHT PANE: Selected Preview -->
+      <!-- RIGHT: Selected Items -->
       <div class="grid-pane pane-right-preview">
         <span class="pane-sec-title">Selected Items ({{ snoozeSelectedItems.size }})</span>
-        
+
         <div class="scrollable-preview-list">
           <div *ngFor="let item of getSelectedSnoozeItemsList()" class="preview-row">
             <div class="preview-row-info">
@@ -781,15 +733,15 @@
           </div>
 
           <div class="empty-list-placeholder" *ngIf="snoozeSelectedItems.size === 0">
-            <i class="pi pi-shopping-cart"></i>
-            <p>No items selected yet.</p>
+            <i class="pi pi-list-check"></i>
+            <p>Nothing selected yet.</p>
           </div>
         </div>
 
         <div class="preview-footer-action">
-          <button 
-            class="action-confirm-btn" 
-            [disabled]="snoozeSelectedItems.size === 0" 
+          <button
+            class="action-confirm-btn"
+            [disabled]="snoozeSelectedItems.size === 0"
             (click)="triggerSnoozeConfirm()"
           >
             {{ snoozeTab() === 'snooze' ? 'Snooze Selected' : 'UnSnooze Selected' }}
@@ -800,89 +752,30 @@
   </div>
 </p-dialog>
 
-<!-- ═══ STEP 3: Switch Modes Confirmation Dialog ═══ -->
-<p-dialog
-  [(visible)]="switchConfirmVisible"
-  [modal]="true"
-  [style]="{ width: '400px', 'border-radius': '20px', 'box-shadow': '0 20px 40px rgba(0,0,0,0.2)' }"
-  [showHeader]="false"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="yelo-confirm-dialog"
-  appendTo="body"
->
-  <div style="padding: 36px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-      <i class="pi pi-exclamation-triangle" style="font-size: 22px; color: #f59e0b;"></i>
-    </div>
-    
-    <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark, #0f172a); margin: 0 0 8px 0;">Switch Modes?</h3>
-    <p style="font-size: 14px; color: var(--text-muted, #64748b); margin: 0 0 28px 0; line-height: 1.5; font-weight: 500;">
-      Changing tabs will discard any selections you've currently made. Do you want to proceed?
-    </p>
-    
-    <div style="display: flex; gap: 12px; width: 100%;">
-      <button 
-        type="button"
-        style="flex: 1; padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border, #e2e8f0); background: var(--bg-card, #ffffff); color: var(--text-muted, #64748b); font-weight: 700; cursor: pointer; transition: all 0.2s;"
-        (click)="switchConfirmVisible.set(false)"
-      >
-        No, Keep
-      </button>
-      <button 
-        type="button"
-        class="switch-confirm-action-btn"
-        style="flex: 1; padding: 12px 18px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-        (click)="executeTabSwitch()"
-      >
-        Yes, Switch
-      </button>
-    </div>
-  </div>
-</p-dialog>
-
-<!-- ═══ STEP 4: Final Operation Permission Confirmation Dialog ═══ -->
+<!-- ═══ Final Confirmation Dialog ═══ -->
 <p-dialog
   [(visible)]="snoozeConfirmVisible"
   [modal]="true"
-  [style]="{ width: '420px', 'border-radius': '20px', 'box-shadow': '0 20px 40px rgba(0,0,0,0.2)' }"
+  [style]="{ width: '400px' }"
   [showHeader]="false"
-  styleClass="yelo-confirm-dialog"
+  styleClass="snooze-confirm-dialog"
   [draggable]="false"
   [resizable]="false"
   appendTo="body"
 >
-  <div style="padding: 36px 28px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(20, 184, 166, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-      <i class="pi pi-clock" style="font-size: 22px; color: #14b8a6;"></i>
+  <div class="snooze-confirm-inner">
+    <div class="sc-icon-wrap">
+      <i class="pi pi-clock"></i>
     </div>
-    
-    <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark, #0f172a); margin: 0 0 8px 0;">
-      {{ snoozeTab() === 'snooze' ? 'Confirm Snooze' : 'Confirm UnSnooze' }}
-    </h3>
-    <p style="font-size: 14px; color: var(--text-muted, #64748b); margin: 0 0 28px 0; line-height: 1.5; font-weight: 500;">
-      Are you sure you want to {{ snoozeTab() === 'snooze' ? 'snooze' : 'unsnooze' }} these {{ snoozeSelectedItems.size }} catalogue items?
-      <span *ngIf="snoozeTab() === 'snooze'"><br/>They will be hidden until: <strong>{{ snoozeUntilDate }} {{ snoozeUntilTime }}</strong></span>
+    <h3 class="sc-title">{{ snoozeTab() === 'snooze' ? 'Confirm Snooze' : 'Confirm UnSnooze' }}</h3>
+    <p class="sc-desc">
+      {{ snoozeTab() === 'snooze' ? 'Snooze' : 'UnSnooze' }} {{ snoozeSelectedItems.size }} item(s)?
+      <ng-container *ngIf="snoozeTab() === 'snooze'"><br/>Hidden until: <strong>{{ snoozeUntilDate }} {{ snoozeUntilTime }}</strong></ng-container>
     </p>
-    
-    <div style="display: flex; gap: 12px; width: 100%;">
-      <button 
-        type="button"
-        style="flex: 1; padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border, #e2e8f0); background: var(--bg-card, #ffffff); color: var(--text-muted, #64748b); font-weight: 700; cursor: pointer; transition: all 0.2s;"
-        (click)="snoozeConfirmVisible.set(false)"
-      >
-        No
-      </button>
-      <button 
-        type="button"
-        class="final-confirm-action-btn"
-        style="flex: 1; padding: 12px 18px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s;"
-        (click)="executeSnoozeAction()"
-      >
-        Yes
-      </button>
+    <div class="sc-btns">
+      <button type="button" class="sc-btn-cancel" (click)="snoozeConfirmVisible.set(false)">No</button>
+      <button type="button" class="sc-btn-confirm" (click)="executeSnoozeAction()">Yes</button>
     </div>
   </div>
 </p-dialog>
-
 

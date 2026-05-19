@@ -136,23 +136,24 @@ export class ProductsComponent implements OnInit {
   snoozeTab = signal<'snooze' | 'unsnooze'>('snooze');
   snoozeMode = signal<'products' | 'category'>('products');
   snoozeSearchQuery = '';
+  snoozeSearchSubject = new Subject<string>();
   snoozeAllItems = signal<any[]>([]);
   snoozeFilteredItems = signal<any[]>([]);
   snoozeSelectedItems = new Set<number>();
   snoozeUntilDate = '';
   snoozeUntilTime = '';
 
-  // New Snooze UI controls
+  // Snooze Step 1 prompt
   snoozePromptVisible = signal(false);
   promptTab = signal<'snooze' | 'unsnooze'>('snooze');
   promptSnoozeDate: Date | null = null;
-  promptSnoozeTime: string = '';
-  snoozeLoading = signal(false);
+  promptSnoozeDateTime: Date | null = null;
+  todayDate: Date = new Date();
 
-  // Tab switch confirmation states
-  switchConfirmVisible = signal(false);
-  targetSwitchTab = signal<'snooze' | 'unsnooze'>('snooze');
-  switchTabSource = signal<'prompt' | 'modal'>('prompt');
+  // Snooze Pagination
+  snoozeOffset = 0;
+  snoozeLimit = 10;
+  snoozeTotalRecords = signal(0);
 
   hasVoiceAiAccess = computed(() => {
     if (this.auth.isAdmin()) return true;
@@ -1110,24 +1111,15 @@ export class ProductsComponent implements OnInit {
   }
 
   // Snooze Actions
-  confirmSnoozeTabSwitch(tab: 'snooze' | 'unsnooze', source: 'prompt' | 'modal') {
-    const currentTab = source === 'prompt' ? this.promptTab() : this.snoozeTab();
-    if (currentTab === tab) return;
 
-    this.targetSwitchTab.set(tab);
-    this.switchTabSource.set(source);
-    this.switchConfirmVisible.set(true);
-  }
-
-  executeTabSwitch() {
-    this.switchConfirmVisible.set(false);
-    const tab = this.targetSwitchTab();
-    const source = this.switchTabSource();
+  switchSnoozeTab(tab: 'snooze' | 'unsnooze', source: 'prompt' | 'modal') {
     if (source === 'prompt') {
       this.promptTab.set(tab);
     } else {
+      if (this.snoozeTab() === tab) return;
       this.snoozeTab.set(tab);
       this.snoozeSelectedItems.clear();
+      this.snoozeOffset = 0;
       this.loadSnoozeList();
     }
   }
@@ -1136,9 +1128,9 @@ export class ProductsComponent implements OnInit {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     this.promptSnoozeDate = tomorrow;
-    const hours = String(tomorrow.getHours()).padStart(2, '0');
-    const minutes = String(tomorrow.getMinutes()).padStart(2, '0');
-    this.promptSnoozeTime = `${hours}:${minutes}`;
+    // Prefill a datetime 24h from now
+    this.promptSnoozeDateTime = tomorrow;
+    this.todayDate = new Date();
 
     this.promptTab.set('snooze');
     this.snoozePromptVisible.set(true);
@@ -1146,32 +1138,27 @@ export class ProductsComponent implements OnInit {
 
   confirmSnoozePromptDetails() {
     if (this.promptTab() === 'snooze') {
-      if (!this.promptSnoozeDate || !this.promptSnoozeTime) {
-        this.messageService.add({ severity: 'error', summary: 'Required Fields', detail: 'Please select both Date and Time.' });
+      if (!this.promptSnoozeDateTime) {
+        this.messageService.add({ severity: 'error', summary: 'Required', detail: 'Please select date and time.' });
         return;
       }
-
-      // Check chosen date and time is in the future
-      const d = this.promptSnoozeDate;
-      const [hh, mm] = this.promptSnoozeTime.split(':');
-      const selectedDateTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), parseInt(hh), parseInt(mm));
       const now = new Date();
-
-      if (selectedDateTime <= now) {
-        this.messageService.add({ severity: 'error', summary: 'Choose Greater Time', detail: 'Snooze duration must be in the future. Please choose a greater time.' });
+      if (this.promptSnoozeDateTime <= now) {
+        this.messageService.add({ severity: 'error', summary: 'Choose Greater Time', detail: 'Snooze duration must be in the future.' });
         return;
       }
-
+      const d = this.promptSnoozeDateTime;
       this.snoozeUntilDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      this.snoozeUntilTime = this.promptSnoozeTime;
+      this.snoozeUntilTime = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     }
 
-    // Set tab, clear selected items, load items list
     this.snoozeTab.set(this.promptTab());
     this.snoozeMode.set('products');
     this.snoozeSelectedItems.clear();
     this.snoozeSearchQuery = '';
+    this.snoozeOffset = 0;
 
+    this.loading.set(true);
     this.loadSnoozeList();
     this.snoozePromptVisible.set(false);
     this.snoozeModalVisible.set(true);
@@ -1180,63 +1167,66 @@ export class ProductsComponent implements OnInit {
   setSnoozeMode(mode: 'products' | 'category') {
     this.snoozeMode.set(mode);
     this.snoozeSelectedItems.clear();
+    this.snoozeOffset = 0;
+    this.loading.set(true);
+    this.loadSnoozeList();
+  }
+
+  onSnoozeSearch(query: string) {
+    this.snoozeSearchQuery = query;
+    this.snoozeOffset = 0;
+    this.loading.set(true);
     this.loadSnoozeList();
   }
 
   loadSnoozeList() {
-    this.snoozeLoading.set(true);
+    const search = (this.snoozeSearchQuery || '').trim();
     if (this.snoozeMode() === 'products') {
-      this.api.get<any>('/products/inherited', {
+      const params: any = {
         include_unavailable: 'true',
-        limit: 1000,
-        offset: 0
-      }).subscribe({
+        limit: this.snoozeLimit,
+        offset: this.snoozeOffset
+      };
+      if (search) params.search = search;
+
+      this.api.get<any>('/products/inherited', params).subscribe({
         next: (res) => {
           const list = (res.data.products || []).map((p: any) => ({
             id: p.catalogue_id,
             name: p.effective_name,
             snooze_until: p.snooze_until
           }));
-          this.snoozeAllItems.set(list);
-          this.filterSnoozeList();
-          this.snoozeLoading.set(false);
+          this.snoozeFilteredItems.set(list);
+          this.snoozeTotalRecords.set(res.data.total || list.length);
+          this.loading.set(false);
         },
-        error: () => {
-          this.snoozeLoading.set(false);
-        }
+        error: () => { this.loading.set(false); }
       });
     } else {
-      this.snoozeAllItems.set(
-        this.categories().map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          snooze_until: null
-        }))
-      );
-      this.filterSnoozeList();
-      this.snoozeLoading.set(false);
+      // Categories — local filter (no pagination endpoint needed)
+      const cats = this.categories().map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        snooze_until: null
+      }));
+      const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
+      this.snoozeFilteredItems.set(filtered.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
+      this.snoozeTotalRecords.set(filtered.length);
+      this.loading.set(false);
     }
   }
 
-  filterSnoozeList() {
-    const q = (this.snoozeSearchQuery || '').toLowerCase().trim();
-    if (!q) {
-      this.snoozeFilteredItems.set(this.snoozeAllItems());
-      return;
-    }
-
-    const filtered = this.snoozeAllItems().filter(item => 
-      (item.name || '').toLowerCase().includes(q)
-    );
-    this.snoozeFilteredItems.set(filtered);
+  onSnoozePage(event: any) {
+    this.snoozeOffset = event.first;
+    this.snoozeLimit = event.rows;
+    this.loading.set(true);
+    this.loadSnoozeList();
   }
 
   toggleSnoozeItemSelection(item: any) {
-    // If we are in snooze tab and this item is currently snoozed, block selection!
     if (this.snoozeTab() === 'snooze' && item.snooze_until && this.isItemCurrentlySnoozed(item.snooze_until)) {
       return;
     }
-
     if (this.snoozeSelectedItems.has(item.id)) {
       this.snoozeSelectedItems.delete(item.id);
     } else {
@@ -1253,25 +1243,21 @@ export class ProductsComponent implements OnInit {
   }
 
   getSelectedSnoozeItemsList(): any[] {
-    return this.snoozeAllItems().filter(item => this.snoozeSelectedItems.has(item.id));
+    // Across all pages — keep a registry
+    return Array.from(this.snoozeSelectedItems).map(id => {
+      const found = this.snoozeFilteredItems().find(i => i.id === id);
+      return found || { id, name: '(item #' + id + ')' };
+    });
   }
 
   isItemCurrentlySnoozed(dateStr: string | null): boolean {
     if (!dateStr) return false;
-    const now = new Date();
-    const until = new Date(dateStr);
-    return until > now;
+    return new Date(dateStr) > new Date();
   }
 
   getFormattedSnoozeUntil(dateStr: string): string {
     const d = new Date(dateStr);
-    return d.toLocaleString('en-IN', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
+    return d.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
   triggerSnoozeConfirm() {
@@ -1281,51 +1267,43 @@ export class ProductsComponent implements OnInit {
 
   executeSnoozeAction() {
     this.snoozeConfirmVisible.set(false);
-    this.snoozeLoading.set(true);
-    
+    this.loading.set(true);
+
     const type = this.snoozeMode();
     const ids = Array.from(this.snoozeSelectedItems);
-    
+
     if (this.snoozeTab() === 'snooze') {
       const combinedDateTime = new Date(`${this.snoozeUntilDate}T${this.snoozeUntilTime}`);
       if (isNaN(combinedDateTime.getTime())) {
-        this.snoozeLoading.set(false);
-        this.messageService.add({ severity: 'error', summary: 'Invalid Date/Time', detail: 'Please select a valid date and time.' });
+        this.loading.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Invalid Date/Time', detail: 'Select a valid date and time.' });
         return;
       }
-
-      this.api.post('/products/snooze', {
-        type,
-        ids,
-        snooze_until: combinedDateTime.toISOString()
-      }).subscribe({
+      this.api.post('/products/snooze', { type, ids, snooze_until: combinedDateTime.toISOString() }).subscribe({
         next: () => {
-          this.snoozeLoading.set(false);
-          this.messageService.add({ severity: 'success', summary: 'Items Snoozed', detail: 'Selected items have been temporarily snoozed.' });
+          this.loading.set(false);
+          this.messageService.add({ severity: 'success', summary: 'Snoozed', detail: 'Items snoozed successfully.' });
           this.snoozeModalVisible.set(false);
           this.offset = 0;
           this.loadProducts();
         },
         error: (err) => {
-          this.snoozeLoading.set(false);
-          this.messageService.add({ severity: 'error', summary: 'Action Failed', detail: err.error?.message || 'Failed to snooze items.' });
+          this.loading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Could not snooze items.' });
         }
       });
     } else {
-      this.api.post('/products/unsnooze', {
-        type,
-        ids
-      }).subscribe({
+      this.api.post('/products/unsnooze', { type, ids }).subscribe({
         next: () => {
-          this.snoozeLoading.set(false);
-          this.messageService.add({ severity: 'success', summary: 'Items UnSnoozed', detail: 'Selected items have been unsnoozed.' });
+          this.loading.set(false);
+          this.messageService.add({ severity: 'success', summary: 'UnSnoozed', detail: 'Items restored successfully.' });
           this.snoozeModalVisible.set(false);
           this.offset = 0;
           this.loadProducts();
         },
         error: (err) => {
-          this.snoozeLoading.set(false);
-          this.messageService.add({ severity: 'error', summary: 'Action Failed', detail: err.error?.message || 'Failed to unsnooze items.' });
+          this.loading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Failed', detail: err.error?.message || 'Could not unsnooze items.' });
         }
       });
     }
