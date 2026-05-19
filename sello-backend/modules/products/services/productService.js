@@ -226,7 +226,7 @@ async function duplicateProduct(productId, masterbrandId, merchantId = null) {
 /**
  * Effective merchant catalogue view with both master and delinked values.
  */
-async function getInheritedProducts(merchantId, { categoryId = null, search = '', includeUnavailable = true, statusFilter = 'all', limit = 10, offset = 0 } = {}) {
+async function getInheritedProducts(merchantId, { categoryId = null, search = '', includeUnavailable = true, statusFilter = 'all', snoozeFilter = null, limit = 10, offset = 0 } = {}) {
   const params = [merchantId];
   let whereSql = 'WHERE ac.merchant_id = ? AND p.is_deleted = 0';
 
@@ -237,6 +237,10 @@ async function getInheritedProducts(merchantId, { categoryId = null, search = ''
     whereSql += ' AND COALESCE(mp.is_active, p.is_active) = 1';
   } else if (statusFilter === 'disabled') {
     whereSql += ' AND COALESCE(mp.is_active, p.is_active) = 0';
+  }
+  // snoozeFilter='active' -> only items currently snoozed (for unsnooze tab)
+  if (snoozeFilter === 'active') {
+    whereSql += ' AND ac.snooze_until IS NOT NULL AND ac.snooze_until > NOW()';
   }
   if (categoryId) {
     whereSql += ' AND COALESCE(mp.category_id, p.category_id) = ?';

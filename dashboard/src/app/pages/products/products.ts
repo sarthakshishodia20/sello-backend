@@ -1194,6 +1194,10 @@ export class ProductsComponent implements OnInit {
         offset: this.snoozeOffset
       };
       if (search) params.search = search;
+      // For unsnooze tab: only fetch items that are currently snoozed
+      if (this.snoozeTab() === 'unsnooze') {
+        params.snooze_filter = 'active';
+      }
 
       this.api.get<any>('/products/inherited', params).subscribe({
         next: (res) => {
@@ -1217,18 +1221,23 @@ export class ProductsComponent implements OnInit {
             snoozeMap[c.category_id] = c.snooze_until;
           });
 
-          const cats = this.categories().map((c: any) => ({
+          let cats = this.categories().map((c: any) => ({
             id: c.id,
             name: c.name,
             snooze_until: snoozeMap[c.id] || null
           }));
+
+          // For unsnooze tab: only show categories that are currently snoozed
+          if (this.snoozeTab() === 'unsnooze') {
+            cats = cats.filter(c => c.snooze_until && this.isItemCurrentlySnoozed(c.snooze_until));
+          }
+
           const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
           this.snoozeFilteredItems.set(filtered.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
           this.snoozeTotalRecords.set(filtered.length);
           this.loading.set(false);
         },
         error: () => {
-          // Fallback — no snooze status
           const cats = this.categories().map((c: any) => ({ id: c.id, name: c.name, snooze_until: null }));
           this.snoozeFilteredItems.set(cats.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
           this.snoozeTotalRecords.set(cats.length);
@@ -1237,6 +1246,7 @@ export class ProductsComponent implements OnInit {
       });
     }
   }
+
 
   onSnoozePage(event: any) {
     this.snoozeOffset = event.first;

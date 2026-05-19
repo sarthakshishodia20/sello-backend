@@ -201,9 +201,11 @@ async function getInheritedProducts(req, res) {
       search: req.query.search || '',
       includeUnavailable: String(req.query.include_unavailable || 'true') === 'true',
       statusFilter: req.query.status_filter || 'all',
+      snoozeFilter: req.query.snooze_filter || null,
       limit: Number(req.query.limit || 10),
       offset: Number(req.query.offset || 0)
     });
+
 
     return sendSuccess(res, 'Inherited products fetched', {
       products: formatProductImageUrls(req, products),

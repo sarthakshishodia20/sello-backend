@@ -1740,8 +1740,8 @@ body.dark-mode .snooze-until-badge {
 }
 
 body.dark-mode .grid-pane {
-  background: #2c2c2c;
-  border-color: #3f3f46;
+  background: #1a1a1a;
+  border-color: #333333;
 }
 
 .pane-sec-title {
@@ -1755,7 +1755,7 @@ body.dark-mode .grid-pane {
 }
 
 body.dark-mode .pane-sec-title {
-  color: #a1a1aa;
+  color: #888888;
 }
 
 /* Left Pane: Mode List */
@@ -1778,9 +1778,10 @@ body.dark-mode .pane-sec-title {
 }
 
 body.dark-mode .mode-option-card {
-  background: #18181b;
-  border-color: #27272a;
+  background: #262626;
+  border-color: #333333;
 }
+
 
 .mode-option-card i {
   font-size: 18px;
@@ -1877,8 +1878,8 @@ body.dark-mode .snooze-pane-search input {
 }
 
 body.dark-mode .checklist-row {
-  background: #18181b;
-  border-color: #27272a;
+  background: #222222;
+  border-color: #333333;
 }
 
 .checklist-row:hover {
@@ -2044,9 +2045,10 @@ body.dark-mode ::ng-deep .snooze-paginator .p-paginator-page.p-highlight {
 }
 
 body.dark-mode .preview-row {
-  background: #18181b;
-  border-color: #27272a;
+  background: #222222;
+  border-color: #333333;
 }
+
 
 .preview-row-info {
   display: flex;
