@@ -298,6 +298,7 @@ async function getInheritedProducts(merchantId, { categoryId = null, search = ''
       COALESCE(mp.image_url, p.image_url) AS effective_image_url,
       COALESCE(mp.is_active, p.is_active) AS effective_is_active,
       ac.is_out_of_stock,
+      ac.snooze_until,
       c.name AS category_name
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
@@ -629,7 +630,9 @@ module.exports = {
   duplicateProduct,
   archiveMerchantProduct,
   updateCatalogueStockStatus,
-  getSearchSuggestions
+  getSearchSuggestions,
+  snoozeItems,
+  unsnoozeItems
 };
 /**
  * Relink removes the merchant override and returns the catalogue item to follow masterbrand data.
@@ -643,4 +646,57 @@ async function relinkProduct(catalogueId, merchantId) {
   );
 
   logger.info(MODULE, 'PRODUCT_RELINKED', { merchantId, catalogueId });
+}
+
+async function snoozeItems(merchantId, { type, ids, snoozeUntil }) {
+  if (!ids || ids.length === 0) return;
+
+  const date = new Date(snoozeUntil);
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid snooze datetime');
+  }
+
+  if (type === 'products') {
+    await db.query(
+      `UPDATE tb_app_catalogue 
+       SET snooze_until = ? 
+       WHERE merchant_id = ? AND id IN (?)`,
+      [date, merchantId, ids]
+    );
+    logger.info(MODULE, 'PRODUCTS_SNOOZED', { merchantId, ids, snoozeUntil });
+  } else if (type === 'category') {
+    await db.query(
+      `UPDATE tb_app_catalogue ac
+       JOIN tb_products p ON p.id = ac.product_id
+       LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
+       SET ac.snooze_until = ?
+       WHERE ac.merchant_id = ? AND COALESCE(mp.category_id, p.category_id) IN (?)`,
+      [date, merchantId, ids]
+    );
+    logger.info(MODULE, 'CATEGORIES_SNOOZED', { merchantId, ids, snoozeUntil });
+  }
+}
+
+async function unsnoozeItems(merchantId, { type, ids }) {
+  if (!ids || ids.length === 0) return;
+
+  if (type === 'products') {
+    await db.query(
+      `UPDATE tb_app_catalogue 
+       SET snooze_until = NULL 
+       WHERE merchant_id = ? AND id IN (?)`,
+      [merchantId, ids]
+    );
+    logger.info(MODULE, 'PRODUCTS_UNSNOOZED', { merchantId, ids });
+  } else if (type === 'category') {
+    await db.query(
+      `UPDATE tb_app_catalogue ac
+       JOIN tb_products p ON p.id = ac.product_id
+       LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
+       SET ac.snooze_until = NULL
+       WHERE ac.merchant_id = ? AND COALESCE(mp.category_id, p.category_id) IN (?)`,
+      [merchantId, ids]
+    );
+    logger.info(MODULE, 'CATEGORIES_UNSNOOZED', { merchantId, ids });
+  }
 }

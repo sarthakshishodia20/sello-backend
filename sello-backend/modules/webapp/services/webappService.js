@@ -179,7 +179,8 @@ async function getProductsForStore(merchantId, { categoryId = null, search = '',
       COALESCE(mp.price, p.price) AS price,
       COALESCE(mp.stock_qty, p.stock_qty) AS stock_qty,
       COALESCE(mp.image_url, p.image_url) AS image_url,
-      ac.is_out_of_stock
+      ac.is_out_of_stock,
+      ac.snooze_until
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
     LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id

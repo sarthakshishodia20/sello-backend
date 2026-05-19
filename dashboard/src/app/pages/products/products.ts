@@ -126,6 +126,18 @@ export class ProductsComponent implements OnInit {
 
   voiceInterimText = signal('');
 
+  // Snooze Module States
+  snoozeModalVisible = signal(false);
+  snoozeConfirmVisible = signal(false);
+  snoozeTab = signal<'snooze' | 'unsnooze'>('snooze');
+  snoozeMode = signal<'products' | 'category'>('products');
+  snoozeSearchQuery = '';
+  snoozeAllItems = signal<any[]>([]);
+  snoozeFilteredItems = signal<any[]>([]);
+  snoozeSelectedItems = new Set<number>();
+  snoozeUntilDate = '';
+  snoozeUntilTime = '';
+
   hasVoiceAiAccess = computed(() => {
     if (this.auth.isAdmin()) return true;
     return this.settingsService.settings().voiceAiEnabled === true;
@@ -1079,5 +1091,170 @@ export class ProductsComponent implements OnInit {
 
   removeImage() {
     this.form.image_url = '';
+  }
+
+  // Snooze Actions
+  setSnoozeTab(tab: 'snooze' | 'unsnooze') {
+    this.snoozeTab.set(tab);
+    this.snoozeSelectedItems.clear();
+    this.loadSnoozeList();
+  }
+
+  setSnoozeMode(mode: 'products' | 'category') {
+    this.snoozeMode.set(mode);
+    this.snoozeSelectedItems.clear();
+    this.loadSnoozeList();
+  }
+
+  openSnoozeModal() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    this.snoozeUntilDate = tomorrow.toISOString().split('T')[0];
+    const hours = String(tomorrow.getHours()).padStart(2, '0');
+    const minutes = String(tomorrow.getMinutes()).padStart(2, '0');
+    this.snoozeUntilTime = `${hours}:${minutes}`;
+
+    this.snoozeTab.set('snooze');
+    this.snoozeMode.set('products');
+    this.snoozeSelectedItems.clear();
+    this.snoozeSearchQuery = '';
+    
+    this.loadSnoozeList();
+    this.snoozeModalVisible.set(true);
+  }
+
+  loadSnoozeList() {
+    if (this.snoozeMode() === 'products') {
+      this.api.get<any>('/products/inherited', {
+        include_unavailable: 'true',
+        limit: 1000,
+        offset: 0
+      }).subscribe({
+        next: (res) => {
+          const list = (res.data.products || []).map((p: any) => ({
+            id: p.catalogue_id,
+            name: p.effective_name,
+            sku: p.effective_sku,
+            snooze_until: p.snooze_until
+          }));
+          this.snoozeAllItems.set(list);
+          this.filterSnoozeList();
+        }
+      });
+    } else {
+      this.snoozeAllItems.set(
+        this.categories().map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          sku: '',
+          snooze_until: null
+        }))
+      );
+      this.filterSnoozeList();
+    }
+  }
+
+  filterSnoozeList() {
+    const q = (this.snoozeSearchQuery || '').toLowerCase().trim();
+    if (!q) {
+      this.snoozeFilteredItems.set(this.snoozeAllItems());
+      return;
+    }
+
+    const filtered = this.snoozeAllItems().filter(item => 
+      (item.name || '').toLowerCase().includes(q) || 
+      (item.sku || '').toLowerCase().includes(q)
+    );
+    this.snoozeFilteredItems.set(filtered);
+  }
+
+  toggleSnoozeItemSelection(item: any) {
+    if (this.snoozeSelectedItems.has(item.id)) {
+      this.snoozeSelectedItems.delete(item.id);
+    } else {
+      this.snoozeSelectedItems.add(item.id);
+    }
+  }
+
+  isSnoozeItemSelected(id: number): boolean {
+    return this.snoozeSelectedItems.has(id);
+  }
+
+  removeSnoozeItemSelection(id: number) {
+    this.snoozeSelectedItems.delete(id);
+  }
+
+  getSelectedSnoozeItemsList(): any[] {
+    return this.snoozeAllItems().filter(item => this.snoozeSelectedItems.has(item.id));
+  }
+
+  isItemCurrentlySnoozed(dateStr: string | null): boolean {
+    if (!dateStr) return false;
+    const now = new Date();
+    const until = new Date(dateStr);
+    return until > now;
+  }
+
+  getFormattedSnoozeUntil(dateStr: string): string {
+    const d = new Date(dateStr);
+    return d.toLocaleString('en-IN', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+
+  triggerSnoozeConfirm() {
+    if (this.snoozeSelectedItems.size === 0) return;
+    this.snoozeConfirmVisible.set(true);
+  }
+
+  executeSnoozeAction() {
+    this.snoozeConfirmVisible.set(false);
+    
+    const type = this.snoozeMode();
+    const ids = Array.from(this.snoozeSelectedItems);
+    
+    if (this.snoozeTab() === 'snooze') {
+      const combinedDateTime = new Date(`${this.snoozeUntilDate}T${this.snoozeUntilTime}`);
+      if (isNaN(combinedDateTime.getTime())) {
+        this.messageService.add({ severity: 'error', summary: 'Invalid Date/Time', detail: 'Please select a valid date and time.' });
+        return;
+      }
+
+      this.api.post('/products/snooze', {
+        type,
+        ids,
+        snooze_until: combinedDateTime.toISOString()
+      }).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Items Snoozed', detail: 'Selected items have been temporarily snoozed.' });
+          this.snoozeModalVisible.set(false);
+          this.offset = 0;
+          this.loadProducts();
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Action Failed', detail: err.error?.message || 'Failed to snooze items.' });
+        }
+      });
+    } else {
+      this.api.post('/products/unsnooze', {
+        type,
+        ids
+      }).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Items UnSnoozed', detail: 'Selected items have been unsnoozed.' });
+          this.snoozeModalVisible.set(false);
+          this.offset = 0;
+          this.loadProducts();
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Action Failed', detail: err.error?.message || 'Failed to unsnooze items.' });
+        }
+      });
+    }
   }
 }

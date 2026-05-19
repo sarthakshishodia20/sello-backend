@@ -110,6 +110,10 @@ export class DashboardShellComponent {
     this.settingsService.updateSettings({ voiceAiEnabled: val });
   }
 
+  toggleExtSnooze(val: boolean) {
+    this.settingsService.updateSettings({ snoozeEnabled: val });
+  }
+
 
 
   // Language options for the picker

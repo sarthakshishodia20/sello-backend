@@ -209,7 +209,27 @@ export class StoreComponent implements OnInit {
     this.loadProducts(true);
   }
 
+  isSnoozed(p: any): boolean {
+    if (!p.snooze_until) return false;
+    const now = new Date();
+    const until = new Date(p.snooze_until);
+    return until > now;
+  }
+
+  getFormattedSnoozeTime(p: any): string {
+    if (!p.snooze_until) return '';
+    const d = new Date(p.snooze_until);
+    return d.toLocaleString('en-IN', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+
   canAddToCart(p: any): boolean {
+    if (this.isSnoozed(p)) return false;
     if (p.is_out_of_stock) return false;
     if (p.stock_qty === -1 || p.stock_qty === null) return true;
     const inCart = this.cart.getItemQty(p.catalogue_id);

@@ -23,6 +23,8 @@ router.post('/inherited/:catalogueId/relink', merchantOnly, controller.relinkPro
 router.post('/merchant', merchantOnly, controller.createMerchantProduct);
 router.put('/merchant/:id', merchantOnly, validator.validateUpdateMerchantProduct, controller.updateMerchantProduct);
 router.put('/inherited/:catalogueId/stock-status', merchantOnly, controller.updateStockStatus);
+router.post('/snooze', merchantOnly, controller.snoozeCatalogItems);
+router.post('/unsnooze', merchantOnly, controller.unsnoozeCatalogItems);
 
 router.post('/generate-description', validator.validateGenerateDescription, controller.generateDescription);
 router.post('/swap', allowRoles('MASTERBRAND_ADMIN', 'MERCHANT_ADMIN'), controller.swapProducts);

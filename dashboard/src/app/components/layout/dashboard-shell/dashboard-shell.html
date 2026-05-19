@@ -181,6 +181,17 @@
               <p-toggleswitch [ngModel]="settingsService.settings().voiceAiEnabled" (ngModelChange)="toggleExtVoiceAI($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
             </div>
 
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(20,184,166,0.1); color: #14b8a6;">
+                <i class="pi pi-bell-slash"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>Snooze & UnSnooze</label>
+                <span>Enable temporary snooze on catalogue items</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().snoozeEnabled" (ngModelChange)="toggleExtSnooze($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
 
           </div>
         </div>

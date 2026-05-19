@@ -125,6 +125,18 @@ app.listen(PORT, () => {
   
   // Run on boot (with 5 sec delay to ensure DB pool is fully up)
   setTimeout(() => {
+    // Dynamic schema update for snooze_until column
+    db.query('ALTER TABLE tb_app_catalogue ADD COLUMN snooze_until DATETIME NULL;')
+      .then(() => {
+        console.log('[Migration] Successfully added snooze_until column to tb_app_catalogue.');
+      })
+      .catch(err => {
+        // Ignore column already exists errors
+        if (!err.message.includes('duplicate column') && !err.message.includes('Duplicate column')) {
+          console.log('[Migration] Column check completed:', err.message);
+        }
+      });
+
     checkAndUpdateMerchantAvailability().then(() => {
       console.log('[Availability Scheduler] Initial boot-time evaluation completed.');
     }).catch(console.error);

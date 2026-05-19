@@ -408,7 +408,9 @@ module.exports = {
   deleteMerchantProduct,
   updateStockStatus,
   uploadImage,
-  getSearchSuggestions
+  getSearchSuggestions,
+  snoozeCatalogItems,
+  unsnoozeCatalogItems
 };
 
 async function getSearchSuggestions(req, res) {
@@ -421,5 +423,45 @@ async function getSearchSuggestions(req, res) {
   } catch (err) {
     logger.error(MODULE, 'GET_SUGGESTIONS_ERROR', { error: err.message });
     return sendError(res, 'Failed to fetch suggestions', 500);
+  }
+}
+
+async function snoozeCatalogItems(req, res) {
+  try {
+    const merchantId = req.selloUser.merchantId;
+    if (!merchantId) {
+      return sendError(res, 'Only merchant users can snooze catalog items');
+    }
+
+    const { type, ids, snooze_until } = req.body;
+    if (!type || !ids || !ids.length || !snooze_until) {
+      return sendError(res, 'type, ids (array), and snooze_until are required', 400);
+    }
+
+    await productService.snoozeItems(merchantId, { type, ids, snoozeUntil: snooze_until });
+    return sendSuccess(res, 'Catalog items snoozed successfully');
+  } catch (err) {
+    logger.error(MODULE, 'SNOOZE_ITEMS_ERROR', { error: err.message });
+    return sendError(res, err.message || 'Failed to snooze items', 500);
+  }
+}
+
+async function unsnoozeCatalogItems(req, res) {
+  try {
+    const merchantId = req.selloUser.merchantId;
+    if (!merchantId) {
+      return sendError(res, 'Only merchant users can unsnooze catalog items');
+    }
+
+    const { type, ids } = req.body;
+    if (!type || !ids || !ids.length) {
+      return sendError(res, 'type and ids (array) are required', 400);
+    }
+
+    await productService.unsnoozeItems(merchantId, { type, ids });
+    return sendSuccess(res, 'Catalog items unsnoozed successfully');
+  } catch (err) {
+    logger.error(MODULE, 'UNSNOOZE_ITEMS_ERROR', { error: err.message });
+    return sendError(res, err.message || 'Failed to unsnooze items', 500);
   }
 }
