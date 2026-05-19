@@ -254,7 +254,7 @@ export class DashboardShellComponent {
     ];
 
     if (this.settingsService.settings().availabilityEnabled) {
-      items.push({ label: 'Availability', key: 'availability', icon: 'pi pi-calendar-clock', route: '/availability' });
+      items.push({ label: 'Availability', key: 'availability', icon: 'pi pi-calendar', route: '/availability' });
     }
 
     items.push(
