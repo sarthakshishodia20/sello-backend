@@ -385,6 +385,8 @@
                 <li><strong>Custom Brand:</strong> Inherit brand items and override prices/copy.</li>
                 <li><strong>COD Toggle:</strong> Turn on cash-on-delivery store checkout.</li>
                 <li><strong>Floating Icons:</strong> Toggle live support bubbles on storefront.</li>
+                <li><strong>Notification Sounds:</strong> Enable order alert tones for merchant dashboards.</li>
+                <li><strong>Marketplace Availability:</strong> Let merchants set weekly opening hours — stores auto-activate/deactivate based on the schedule.</li>
               </ul>
             </div>
           </div>
@@ -444,6 +446,100 @@
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Section: Marketplace Availability -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon bg-pink"><i class="pi pi-calendar"></i></div>
+        <h5>Marketplace Availability</h5>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 20px 0; line-height: 1.6;">
+          A weekly schedule system that lets merchant admins define exactly which days and hours their store is open — the platform then auto-enables or disables their store in real time.
+        </p>
+
+        <div class="help-two-col">
+
+          <!-- How to Enable -->
+          <div class="help-item-row">
+            <div class="dot indigo"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Step 1 — Enable via Extension
+                <span class="badge-role master">Master Admin</span>
+              </strong>
+              <p>Open the <strong>Extensions</strong> panel (tag icon in the top navbar) and toggle <em>Marketplace Availability</em> to ON. This immediately shows the <strong>Availability</strong> page in every Merchant Admin's sidebar.</p>
+            </div>
+          </div>
+
+          <!-- Configure Schedule -->
+          <div class="help-item-row">
+            <div class="dot blue"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Step 2 — Configure Weekly Schedule
+                <span class="badge-role merchant">Merchant Admin</span>
+              </strong>
+              <p>Go to <strong>Availability</strong> in the sidebar. Enable <em>Custom Availability Schedule</em>, then toggle each day Open/Closed. For days that should have limited hours, switch from <em>Open All Day</em> to <em>Specific Time</em> and add one timeslot.</p>
+            </div>
+          </div>
+
+          <!-- Auto Status Logic -->
+          <div class="help-item-row">
+            <div class="dot green"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Auto Store Activation
+                <span class="badge-role both">Automated</span>
+              </strong>
+              <p>
+                <strong>How it works:</strong> A background job runs every <strong>60 seconds</strong> and evaluates each merchant's schedule against the current day and time. The store is automatically set <em>Active</em> when open and <em>Inactive</em> when closed — no manual action needed.
+              </p>
+              <p style="margin-top: 6px; font-size: 0.78rem; color: #64748b; line-height: 1.4;">
+                Real-time checks also run whenever the dashboard fetches merchant profiles or the public storefront loads a store page.
+              </p>
+            </div>
+          </div>
+
+          <!-- Toggle Restriction -->
+          <div class="help-item-row">
+            <div class="dot orange"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Manual Toggle Restriction
+                <span class="badge-role master">Master Admin</span>
+              </strong>
+              <p>
+                <strong>Important:</strong> If a merchant's schedule marks them as <em>closed right now</em>, the Merchants table toggle will <strong>not</strong> allow you to force-enable them. A warning will appear: <em>"Delete the timeslot to manually enable."</em>
+              </p>
+              <p style="margin-top: 6px; font-size: 0.78rem; color: #64748b; line-height: 1.4;">
+                To override the schedule and force-enable a store, the merchant must go to Availability, remove the conflicting timeslot, and then the toggle will work normally.
+              </p>
+            </div>
+          </div>
+
+          <!-- Product Filter -->
+          <div class="help-item-row">
+            <div class="dot yellow"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Product Status Filter
+                <span class="badge-role both">Both Roles</span>
+              </strong>
+              <p>
+                <strong>Bonus feature:</strong> The Products page now has a <em>Show Items</em> dropdown below the search bar. Filter between <strong>All Products</strong>, <strong>Enabled Only</strong>, or <strong>Disabled Only</strong> — works for both Master Admin and Merchant Admin views.
+              </p>
+            </div>
+          </div>
+
+          <!-- Timeslot Limit -->
+          <div class="help-item-row">
+            <div class="dot pink"></div>
+            <div>
+              <strong>One Timeslot Per Day</strong>
+              <p>Each day supports exactly <strong>one</strong> timeslot (e.g. 09:00 – 18:00). Click <em>Edit Timeslot</em> on any day row to open the dialog — you'll see a tip reminding you of this limit. Outside these hours, the store is automatically deactivated.</p>
+            </div>
+          </div>
+
         </div>
       </div>
 
