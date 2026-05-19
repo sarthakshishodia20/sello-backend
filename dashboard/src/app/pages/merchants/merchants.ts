@@ -23,6 +23,7 @@ import { SearchService } from '../../services/search';
 import { AuthService } from '../../services/auth';
 import { ConfirmationService } from 'primeng/api';
 import { environment } from '../../../environments/environment';
+import { MerchantSettingsService } from '../../services/merchant-settings';
 
 @Component({
   selector: 'app-merchants',
@@ -54,6 +55,7 @@ export class MerchantsComponent implements OnInit {
   messageService = inject(MessageService);
   searchService = inject(SearchService);
   confirmationService = inject(ConfirmationService);
+  settingsService = inject(MerchantSettingsService);
 
   merchants = signal<any[]>([]);
   loading = signal(false);
@@ -141,8 +143,51 @@ export class MerchantsComponent implements OnInit {
   }
 
   toggle(merchant: any) {
-    // The [(ngModel)] has already updated merchant.is_active
+    // Revert optimistic update — we will set manually only after validation
     const newState = merchant.is_active;
+
+    // If availability scheduling is enabled and merchant has an active schedule, block toggle-on
+    if (newState && this.settingsService.settings().availabilityEnabled) {
+      // Check if merchant settings have availability schedule enabled
+      let mSettings: any = {};
+      try {
+        mSettings = typeof merchant.settings === 'string' ? JSON.parse(merchant.settings || '{}') : (merchant.settings || {});
+      } catch (e) {}
+      
+      const avail = mSettings?.availability;
+      if (avail?.enabled) {
+        // Determine if store should currently be closed based on schedule
+        const days: Record<string, string> = { 0: 'sunday', 1: 'monday', 2: 'tuesday', 3: 'wednesday', 4: 'thursday', 5: 'friday', 6: 'saturday' };
+        const today = days[new Date().getDay()];
+        const todayConfig = avail?.days?.[today];
+        const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+        let isCurrentlyScheduledClosed = false;
+
+        if (todayConfig && !todayConfig.enabled) {
+          isCurrentlyScheduledClosed = true;
+        } else if (todayConfig && !todayConfig.openAllDay && todayConfig.start && todayConfig.end) {
+          const [sh, sm] = todayConfig.start.split(':').map(Number);
+          const [eh, em] = todayConfig.end.split(':').map(Number);
+          const startMins = sh * 60 + sm;
+          const endMins = eh * 60 + em;
+          if (nowMins < startMins || nowMins > endMins) {
+            isCurrentlyScheduledClosed = true;
+          }
+        }
+
+        if (isCurrentlyScheduledClosed) {
+          // Rollback — store should stay inactive
+          merchant.is_active = false;
+          this.merchants.set([...this.merchants()]);
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Restricted by Schedule',
+            detail: `${merchant.merchant_name} is currently scheduled as closed. To manually enable, delete the timeslot from Availability settings first.`
+          });
+          return;
+        }
+      }
+    }
 
     this.api.put(`/merchants/${merchant.merchant_id}/status`, { is_active: newState }).subscribe({
       next: () => {
@@ -151,12 +196,10 @@ export class MerchantsComponent implements OnInit {
           summary: 'Merchant updated',
           detail: `Status updated for ${merchant.merchant_name}.`
         });
-        // No need to call load() here, the signal object is already updated by ngModel
       },
       error: () => {
         // Rollback on error
         merchant.is_active = !newState;
-        // Trigger a signal update to force UI refresh on rollback
         this.merchants.set([...this.merchants()]);
         this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Could not update merchant status.' });
       }

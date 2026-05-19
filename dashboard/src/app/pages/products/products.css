@@ -175,6 +175,40 @@
   z-index: 10;
 }
 
+/* Status Filter Bar */
+.product-status-filter-bar {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+::ng-deep .product-filter-dropdown .p-select-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+::ng-deep .product-filter-dropdown.p-select {
+  border-radius: 10px;
+  border-color: var(--border);
+  background: var(--surface-100);
+  height: 40px;
+}
+
+::ng-deep body.dark-mode .product-filter-dropdown.p-select {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border);
+}
+
+::ng-deep body.dark-mode .product-filter-dropdown .p-select-label {
+  color: var(--text-dark);
+}
+
+::ng-deep .product-filter-dropdown .p-select-dropdown-icon {
+  color: var(--text-muted);
+}
+
 .product-list-wrapper {
   flex: 1;
   min-height: 0;

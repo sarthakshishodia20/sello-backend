@@ -102,6 +102,10 @@ export class DashboardShellComponent {
     this.settingsService.updateSettings({ soundNotificationEnabled: val });
   }
 
+  toggleExtAvailability(val: boolean) {
+    this.settingsService.updateSettings({ availabilityEnabled: val });
+  }
+
 
 
   // Language options for the picker
@@ -240,15 +244,24 @@ export class DashboardShellComponent {
       ];
     }
 
-    return [
+    const items = [
       { label: this.langService.translate('nav.overview'), key: 'overview', icon: 'pi pi-home', route: '/overview' },
       { label: this.langService.translate('nav.analytics'), key: 'analytics', icon: 'pi pi-chart-bar', route: '/analytics' },
       { label: this.langService.translate('nav.products'), key: 'products', icon: 'pi pi-box', route: '/products' },
       { label: this.langService.translate('nav.customers'), key: 'customers', icon: 'pi pi-users', route: '/customers' },
       { label: this.langService.translate('nav.orders'), key: 'orders', icon: 'pi pi-shopping-cart', route: '/orders' },
-      { label: 'Activity', key: 'activity', icon: 'pi pi-history', route: '/activity' },
+      { label: 'Activity', key: 'activity', icon: 'pi pi-history', route: '/activity' }
+    ];
+
+    if (this.settingsService.settings().availabilityEnabled) {
+      items.push({ label: 'Availability', key: 'availability', icon: 'pi pi-calendar-clock', route: '/availability' });
+    }
+
+    items.push(
       { label: 'Settings', key: 'settings', icon: 'pi pi-cog', route: '/settings' },
       { label: this.langService.translate('nav.profile'), key: 'profile', icon: 'pi pi-user', route: '/profile' }
-    ];
+    );
+
+    return items;
   });
 }

@@ -1,0 +1,148 @@
+<div class="availability-page">
+  <!-- ══ Header Section ══ -->
+  <header class="availability-header">
+    <div class="header-content">
+      <div class="title-box">
+        <i class="pi pi-calendar-clock" style="font-size: 1.8rem; color: var(--accent-yellow);"></i>
+        <h1>Availability</h1>
+      </div>
+      <div class="header-actions">
+        <button 
+          class="btn-save" 
+          [disabled]="saving()" 
+          (click)="save()"
+        >
+          <i class="pi" [class.pi-check]="!saving()" [class.pi-spin]="saving()" [class.pi-spinner]="saving()"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="availability-content">
+    <!-- ══ Card 1: Feature Enable Switch ══ -->
+    <div class="glass-card main-switch-card">
+      <div class="card-header">
+        <div class="header-left">
+          <h3>Custom Availability Schedule</h3>
+          <p>Toggle this to restrict store active hours based on weekly timings</p>
+        </div>
+        <div class="header-right">
+          <p-toggleswitch [(ngModel)]="scheduleEnabled"></p-toggleswitch>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Card 2: Weekday List (Only when enabled) ══ -->
+    <div class="glass-card mt-24" *ngIf="scheduleEnabled()">
+      <div class="section-header">
+        <h3>Weekly Operating Hours</h3>
+        <p>Enable/disable days and configure opening hours for your marketplace</p>
+      </div>
+
+      <div class="days-list">
+        <div *ngFor="let day of weekdays" class="day-row" [class.disabled-row]="!daysConfig()[day.key].enabled">
+          
+          <!-- Day Name Column -->
+          <div class="day-name-col">
+            <span class="day-label">{{ day.label }}</span>
+          </div>
+
+          <!-- Toggle 1: Open/Closed Day -->
+          <div class="day-toggle-col">
+            <p-toggleswitch [(ngModel)]="daysConfig()[day.key].enabled"></p-toggleswitch>
+            <span class="status-badge" [class.badge-open]="daysConfig()[day.key].enabled" [class.badge-closed]="!daysConfig()[day.key].enabled">
+              {{ daysConfig()[day.key].enabled ? 'Open' : 'Closed' }}
+            </span>
+          </div>
+
+          <!-- Operational Type Column (All Day vs Specific Hours) -->
+          <div class="day-mode-col" *ngIf="daysConfig()[day.key].enabled">
+            <div class="mode-toggles-wrapper">
+              <span class="toggle-side-label">Specific Time</span>
+              <p-toggleswitch [(ngModel)]="daysConfig()[day.key].openAllDay"></p-toggleswitch>
+              <span class="toggle-side-label highlight">Open All Day</span>
+            </div>
+          </div>
+
+          <!-- Timeslot Configuration Column -->
+          <div class="day-timeslot-col" *ngIf="daysConfig()[day.key].enabled">
+            <div *ngIf="!daysConfig()[day.key].openAllDay" class="timeslot-info-box">
+              <span *ngIf="daysConfig()[day.key].start && daysConfig()[day.key].end" class="slot-text">
+                <i class="pi pi-clock mr-2" style="color: var(--accent-yellow); font-size: 0.95rem;"></i>
+                {{ daysConfig()[day.key].start }} - {{ daysConfig()[day.key].end }}
+              </span>
+              <span *ngIf="!daysConfig()[day.key].start || !daysConfig()[day.key].end" class="slot-empty-text">
+                <i class="pi pi-exclamation-circle mr-2" style="color: var(--accent); font-size: 0.95rem;"></i>
+                No slot added
+              </span>
+              <button class="btn-configure" (click)="openTimeslotDialog(day)">
+                <i class="pi" [class.pi-plus]="!daysConfig()[day.key].start" [class.pi-pencil]="daysConfig()[day.key].start"></i>
+                <span>{{ daysConfig()[day.key].start ? 'Edit Timeslot' : 'Add Timeslot' }}</span>
+              </button>
+            </div>
+            <div *ngIf="daysConfig()[day.key].openAllDay" class="all-day-text">
+              <i class="pi pi-sun mr-2" style="color: #f59e0b; font-size: 0.95rem;"></i>
+              Store is open 24 hours
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TIMESLOTS CONFIGURATION DIALOG ══ -->
+<p-dialog [(visible)]="timeslotDialogVisible" [modal]="true" [style]="{width: '450px'}" [showHeader]="false" styleClass="yelo-confirm-dialog timeslot-dialog-box" [draggable]="false" [resizable]="false">
+  <div style="padding: 32px 24px;">
+    <!-- Dialog Header -->
+    <div style="margin-bottom: 24px;">
+      <h3 style="font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+        <i class="pi pi-calendar-plus" style="color: var(--accent-yellow); font-size: 1.3rem;"></i>
+        Timeslots for {{ selectedDayLabel() }}
+      </h3>
+      <p style="font-size: 13px; color: var(--text-muted);">Set the specific operating hour for this day.</p>
+    </div>
+
+    <!-- Tip Banner -->
+    <div class="tip-banner">
+      <i class="pi pi-info-circle"></i>
+      <span>Tip: Only one timeslot can be added.</span>
+    </div>
+
+    <!-- Active Timeslots List -->
+    <div class="timeslots-container">
+      <div *ngIf="hasTimeslot()" class="active-timeslot-row">
+        <div class="time-field">
+          <label>Start Time</label>
+          <input type="time" [(ngModel)]="tempStart" class="timeslot-time-input" />
+        </div>
+        <div class="time-separator">to</div>
+        <div class="time-field">
+          <label>End Time</label>
+          <input type="time" [(ngModel)]="tempEnd" class="timeslot-time-input" />
+        </div>
+        <button class="btn-delete-slot" (click)="deleteTimeslot()" title="Delete Timeslot">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+
+      <div *ngIf="!hasTimeslot()" class="no-slots-placeholder">
+        <p>No active timeslots for this day.</p>
+        <button class="btn-add-slot-indigo" (click)="addTimeslot()">
+          <i class="pi pi-plus"></i>
+          <span>Add Timeslot</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="dialog-actions-row">
+      <button class="btn-dialog-cancel" (click)="timeslotDialogVisible.set(false)">Cancel</button>
+      <button class="btn-dialog-save" (click)="saveTimeslot()">Save Timeslot</button>
+    </div>
+  </div>
+</p-dialog>
+
+<app-loader [absolute]="true" [visible]="loading()"></app-loader>

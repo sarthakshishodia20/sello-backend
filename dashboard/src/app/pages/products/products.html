@@ -80,6 +80,20 @@
         class="product-search-input" />
     </div>
 
+    <!-- ══ Status Filter ══ -->
+    <div class="product-status-filter-bar">
+      <p-select
+        [options]="filterOptions"
+        [ngModel]="statusFilter()"
+        (onChange)="onFilterChange($event.value)"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="product-filter-dropdown"
+        [style]="{'width': '100%'}"
+        placeholder="Show Items"
+      ></p-select>
+    </div>
+
     <div class="product-list-wrapper">
       <div *ngIf="loading()" class="column-skeleton-loader">
         <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5]">

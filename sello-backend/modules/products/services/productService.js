@@ -7,11 +7,15 @@ const MODULE = 'ProductService';
 /**
  * Masterbrand product listing used by the admin dashboard.
  */
-async function getMasterProducts(masterbrandId, { categoryId = null, search = '', includeInactive = true, limit = 10, offset = 0 } = {}) {
+async function getMasterProducts(masterbrandId, { categoryId = null, search = '', includeInactive = true, statusFilter = 'all', limit = 10, offset = 0 } = {}) {
   const params = [masterbrandId];
   let whereSql = 'WHERE p.masterbrand_id = ? AND p.is_deleted = 0';
 
-  if (!includeInactive) {
+  if (statusFilter === 'enabled') {
+    whereSql += ' AND p.is_active = 1';
+  } else if (statusFilter === 'disabled') {
+    whereSql += ' AND p.is_active = 0';
+  } else if (!includeInactive) {
     whereSql += ' AND p.is_active = 1';
   }
   if (categoryId) {
@@ -222,12 +226,17 @@ async function duplicateProduct(productId, masterbrandId, merchantId = null) {
 /**
  * Effective merchant catalogue view with both master and delinked values.
  */
-async function getInheritedProducts(merchantId, { categoryId = null, search = '', includeUnavailable = true, limit = 10, offset = 0 } = {}) {
+async function getInheritedProducts(merchantId, { categoryId = null, search = '', includeUnavailable = true, statusFilter = 'all', limit = 10, offset = 0 } = {}) {
   const params = [merchantId];
   let whereSql = 'WHERE ac.merchant_id = ? AND p.is_deleted = 0';
 
   if (!includeUnavailable) {
     whereSql += ' AND ac.is_available = 1';
+  }
+  if (statusFilter === 'enabled') {
+    whereSql += ' AND COALESCE(mp.is_active, p.is_active) = 1';
+  } else if (statusFilter === 'disabled') {
+    whereSql += ' AND COALESCE(mp.is_active, p.is_active) = 0';
   }
   if (categoryId) {
     whereSql += ' AND COALESCE(mp.category_id, p.category_id) = ?';

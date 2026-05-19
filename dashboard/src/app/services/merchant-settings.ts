@@ -8,6 +8,7 @@ export interface MasterbrandSettings {
   codEnabled: boolean;
   floatingIcons: boolean;
   soundNotificationEnabled: boolean;
+  availabilityEnabled: boolean;
 }
 
 
@@ -23,7 +24,8 @@ export class MerchantSettingsService {
     brandCustom: false,
     codEnabled: true,
     floatingIcons: true,
-    soundNotificationEnabled: false
+    soundNotificationEnabled: false,
+    availabilityEnabled: false
   });
 
   loadSettings() {
@@ -35,7 +37,8 @@ export class MerchantSettingsService {
             brandCustom: res.data.settings.brandCustom === true,
             codEnabled: res.data.settings.codEnabled !== false,
             floatingIcons: res.data.settings.floatingIcons !== false,
-            soundNotificationEnabled: res.data.settings.soundNotificationEnabled === true
+            soundNotificationEnabled: res.data.settings.soundNotificationEnabled === true,
+            availabilityEnabled: res.data.settings.availabilityEnabled === true
           });
         }
       }

@@ -5,6 +5,9 @@ const { buildCategoryTree } = require('../../catalog/services/catalogService');
  * Public store discovery page with lightweight merchant stats.
  */
 async function getAllActiveStores(search = '', city = '', mode = 'ALL', limit = 12, offset = 0) {
+  const { checkAndUpdateMerchantAvailability } = require('../../merchants/services/merchantService');
+  await checkAndUpdateMerchantAvailability();
+
   const params = [];
   let whereSql = 'WHERE 1=1'; 
   
@@ -70,6 +73,9 @@ async function getAllActiveStores(search = '', city = '', mode = 'ALL', limit = 
  * Store hero data used by the webapp storefront page.
  */
 async function getStoreBySlug(slug) {
+  const { checkAndUpdateMerchantAvailability } = require('../../merchants/services/merchantService');
+  await checkAndUpdateMerchantAvailability();
+
   const rows = await db.query(`
     SELECT
       m.id,

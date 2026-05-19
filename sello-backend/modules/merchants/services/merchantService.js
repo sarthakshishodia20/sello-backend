@@ -7,6 +7,7 @@ const MODULE = 'MerchantService';
  * Merchant list powers the admin page with catalogue and order health indicators.
  */
 async function getAllMerchants(masterbrandId, { search = '', status = 'all', limit = 10, offset = 0 } = {}) {
+  await checkAndUpdateMerchantAvailability();
   const params = [masterbrandId];
   let whereSql = 'WHERE m.masterbrand_id = ?';
 
@@ -43,6 +44,7 @@ async function getAllMerchants(masterbrandId, { search = '', status = 'all', lim
       m.address,
       m.theme_color,
       m.is_active,
+      m.settings,
       m.created_at,
       owner.id AS owner_user_id,
       owner.name AS owner_name,
@@ -85,6 +87,7 @@ async function getAllMerchants(masterbrandId, { search = '', status = 'all', lim
  * Merchant detail is reused by profile pages and admin merchant drawer views.
  */
 async function getMerchantById(merchantId, masterbrandId) {
+  await checkAndUpdateMerchantAvailability();
   const rows = await db.query(`
     SELECT
       m.id AS merchant_id,
@@ -175,6 +178,7 @@ async function toggleMerchantStatus(merchantId, masterbrandId, isActive) {
  * Overview data intentionally mixes counts, recent orders, and notifications for fast dashboard rendering.
  */
 async function getOverview(user) {
+  await checkAndUpdateMerchantAvailability();
   const notifications = await getNotifications(user, { limit: 5 });
 
   let stats = {};
@@ -452,6 +456,74 @@ async function updateMasterbrandSettings(masterbrandId, settings) {
   logger.info(MODULE, 'MASTERBRAND_SETTINGS_UPDATED', { masterbrandId });
 }
 
+async function checkAndUpdateMerchantAvailability() {
+  try {
+    const masterbrands = await db.query('SELECT id, settings FROM tb_masterbrand');
+    for (const mb of masterbrands) {
+      let mbSettings = {};
+      try {
+        mbSettings = typeof mb.settings === 'string' ? JSON.parse(mb.settings) : (mb.settings || {});
+      } catch (e) {}
+
+      if (!mbSettings.availabilityEnabled) {
+        continue;
+      }
+
+      const merchants = await db.query(
+        'SELECT id, settings, is_active FROM tb_merchants WHERE masterbrand_id = ?',
+        [mb.id]
+      );
+
+      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const now = new Date();
+      const currentDay = daysOfWeek[now.getDay()];
+      const currentHHMM = now.toTimeString().slice(0, 5);
+
+      for (const m of merchants) {
+        let mSettings = {};
+        try {
+          mSettings = typeof m.settings === 'string' ? JSON.parse(m.settings) : (m.settings || {});
+        } catch (e) {}
+
+        const avail = mSettings.availability;
+        if (avail && avail.enabled) {
+          const dayConfig = avail.days?.[currentDay];
+          let targetActiveState = 1;
+
+          if (!dayConfig || !dayConfig.enabled) {
+            targetActiveState = 0;
+          } else {
+            if (dayConfig.openAllDay) {
+              targetActiveState = 1;
+            } else {
+              const start = dayConfig.start || '00:00';
+              const end = dayConfig.end || '23:59';
+              if (currentHHMM >= start && currentHHMM <= end) {
+                targetActiveState = 1;
+              } else {
+                targetActiveState = 0;
+              }
+            }
+          }
+
+          if (m.is_active !== targetActiveState) {
+            await db.query('UPDATE tb_merchants SET is_active = ? WHERE id = ?', [targetActiveState, m.id]);
+            await db.query('UPDATE tb_users SET is_active = ? WHERE merchant_id = ?', [targetActiveState, m.id]);
+            logger.info(MODULE, 'AUTO_MERCHANT_AVAILABILITY_STATE_UPDATED', {
+              merchantId: m.id,
+              isActive: targetActiveState,
+              day: currentDay,
+              time: currentHHMM
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    logger.error(MODULE, 'AUTO_AVAILABILITY_SCHEDULER_ERROR', { error: err.message });
+  }
+}
+
 module.exports = {
   getAllMerchants,
   getMerchantById,
@@ -464,5 +536,6 @@ module.exports = {
   markNotificationRead,
   deleteMerchant,
   getMasterbrandSettings,
-  updateMasterbrandSettings
+  updateMasterbrandSettings,
+  checkAndUpdateMerchantAvailability
 };

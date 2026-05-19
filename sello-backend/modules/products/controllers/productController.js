@@ -56,6 +56,7 @@ async function getMasterProducts(req, res) {
       categoryId: req.query.category_id ? Number(req.query.category_id) : null,
       search: req.query.search || '',
       includeInactive: String(req.query.include_inactive || 'true') === 'true',
+      statusFilter: req.query.status_filter || 'all',
       limit: Number(req.query.limit || 10),
       offset: Number(req.query.offset || 0)
     });
@@ -199,6 +200,7 @@ async function getInheritedProducts(req, res) {
       categoryId: req.query.category_id ? Number(req.query.category_id) : null,
       search: req.query.search || '',
       includeUnavailable: String(req.query.include_unavailable || 'true') === 'true',
+      statusFilter: req.query.status_filter || 'all',
       limit: Number(req.query.limit || 10),
       offset: Number(req.query.offset || 0)
     });

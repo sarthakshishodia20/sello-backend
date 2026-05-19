@@ -119,6 +119,21 @@ app.listen(PORT, () => {
   console.log(`\nSelo backend running at http://localhost:${PORT}`);
   console.log(`Health: http://localhost:${PORT}/health`);
   console.log(`API:    http://localhost:${PORT}/api\n`);
+
+  // Start the background availability scheduler
+  const { checkAndUpdateMerchantAvailability } = require('./modules/merchants/services/merchantService');
+  
+  // Run on boot (with 5 sec delay to ensure DB pool is fully up)
+  setTimeout(() => {
+    checkAndUpdateMerchantAvailability().then(() => {
+      console.log('[Availability Scheduler] Initial boot-time evaluation completed.');
+    }).catch(console.error);
+  }, 5000);
+
+  // Run every 60 seconds
+  setInterval(() => {
+    checkAndUpdateMerchantAvailability();
+  }, 60000);
 });
 
 module.exports = app;

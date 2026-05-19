@@ -158,6 +158,17 @@
               <p-toggleswitch [ngModel]="settingsService.settings().soundNotificationEnabled" (ngModelChange)="toggleExtSoundNotification($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
             </div>
 
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(236,72,153,0.1); color: #ec4899;">
+                <i class="pi pi-clock"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>Marketplace Availability</label>
+                <span>Enable custom merchant availability hours</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().availabilityEnabled" (ngModelChange)="toggleExtAvailability($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
+
 
           </div>
         </div>

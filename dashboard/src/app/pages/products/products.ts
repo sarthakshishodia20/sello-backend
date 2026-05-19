@@ -66,6 +66,14 @@ export class ProductsComponent implements OnInit {
   offset = 0;
   search = '';
   searchSubject = new Subject<string>();
+
+  // Status Filter
+  statusFilter = signal<string>('all');
+  filterOptions = [
+    { label: 'All Products', value: 'all' },
+    { label: 'Enabled Only', value: 'enabled' },
+    { label: 'Disabled Only', value: 'disabled' }
+  ];
   // AI & Dialog states
   aiLoading = signal(false);
   aiImageLoading = signal(false);
@@ -259,6 +267,8 @@ export class ProductsComponent implements OnInit {
     const catId = this.selectedCategoryId();
     if (catId) params.category_id = catId;
     if (this.search) params.search = this.search;
+    const sf = this.statusFilter();
+    if (sf !== 'all') params.status_filter = sf;
 
     const endpoint = this.viewMode() === 'master' ? '/products/master' : '/products/inherited';
 
@@ -282,6 +292,12 @@ export class ProductsComponent implements OnInit {
   onPageChange(event: any) {
     this.offset = event.first;
     this.limit = event.rows;
+    this.loadProducts();
+  }
+
+  onFilterChange(value: string) {
+    this.statusFilter.set(value);
+    this.offset = 0;
     this.loadProducts();
   }
 
