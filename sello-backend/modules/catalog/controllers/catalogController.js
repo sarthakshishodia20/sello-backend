@@ -1,4 +1,5 @@
 const catalogService = require('../services/catalogService');
+const productService = require('../../products/services/productService');
 const { sendSuccess, sendError, sendNotFound } = require('../../../utilities/responseUtil');
 const logger = require('../../../utilities/loggingUtil');
 
@@ -101,4 +102,21 @@ async function swapCategories(req, res) {
   }
 }
 
-module.exports = { getCategories, createCategory, updateCategory, deleteCategory, swapCategories };
+/**
+ * POST /api/catalog/categories/generate-description
+ * Uses Gemini AI to generate a description for a category.
+ */
+async function generateCategoryDescription(req, res) {
+  try {
+    const { category_name } = req.body;
+    if (!category_name) return sendError(res, 'category_name is required', 400);
+    // Reuse the same Gemini function from productService
+    const description = await productService.generateAiDescription(category_name, 'Category');
+    return sendSuccess(res, 'Description generated', { description });
+  } catch (err) {
+    logger.error(MODULE, 'GENERATE_CATEGORY_DESCRIPTION_ERROR', { error: err.message });
+    return sendError(res, 'Failed to generate description', 500);
+  }
+}
+
+module.exports = { getCategories, createCategory, updateCategory, deleteCategory, swapCategories, generateCategoryDescription };

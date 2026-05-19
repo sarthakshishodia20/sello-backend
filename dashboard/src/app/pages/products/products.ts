@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -62,10 +62,22 @@ export class ProductsComponent implements OnInit {
   // Pagination & Search
   products = signal<any[]>([]);
   totalRecords = signal(0);
-  limit = 20;
+  limit = 10;
   offset = 0;
   search = '';
   searchSubject = new Subject<string>();
+  suggestionSubject = new Subject<string>();
+  suggestions = signal<string[]>([]);
+  showSuggestions = signal(false);
+  searchInputValue = signal('');
+
+  // Voice Search
+  isListening = signal(false);
+  private recognition: any = null;
+
+  // Infinite Scroll
+  loadingMore = signal(false);
+  hasMore = signal(true);
 
   // Status Filter
   statusFilter = signal<string>('all');
@@ -76,6 +88,7 @@ export class ProductsComponent implements OnInit {
   ];
   // AI & Dialog states
   aiLoading = signal(false);
+  catAiLoading = signal(false);
   aiImageLoading = signal(false);
   imageUploading = signal(false);
   showRawUrlInput = signal(false);
@@ -107,7 +120,7 @@ export class ProductsComponent implements OnInit {
   merchantEditContext = signal<any | null>(null);
 
   form: any = {};
-  catForm: any = { id: null, name: '', description: '', parent_id: null };
+  catForm: any = { id: null, name: '', description: '', ai_description: '', parent_id: null };
 
   viewMode = computed(() => (this.auth.isAdmin() ? 'master' : 'merchant'));
 
@@ -124,28 +137,48 @@ export class ProductsComponent implements OnInit {
     this.loadCategories();
     this.loadProducts();
 
+    // Main search with 400ms debounce
     this.searchSubject.pipe(
       debounceTime(400),
       distinctUntilChanged()
     ).subscribe(value => {
       this.search = value;
       this.offset = 0;
+      this.hasMore.set(true);
       this.loadProducts();
     });
 
-    // Close menus on outside click
+    // Suggestion fetch with 300ms debounce (faster)
+    this.suggestionSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(value => {
+      if (!value || value.length < 2) {
+        this.suggestions.set([]);
+        this.showSuggestions.set(false);
+        return;
+      }
+      this.fetchSuggestions(value);
+    });
+
+    // Close suggestions on outside click
     document.addEventListener('click', () => {
       this.catMenuVisible.set(false);
       this.prodMenuVisible.set(false);
       this.catMenuTarget.set(null);
       this.prodMenuTarget.set(null);
+      this.showSuggestions.set(false);
     });
+
+    // Init voice recognition if available
+    this.initVoiceSearch();
   }
 
   selectCategory(id: number | null) {
     this.selectedCategoryId.set(id);
     this.selectedProduct.set(null);
     this.offset = 0;
+    this.hasMore.set(true);
     this.loadProducts();
   }
 
@@ -154,13 +187,13 @@ export class ProductsComponent implements OnInit {
       this.messageService.add({ severity: 'warn', summary: 'Admin only', detail: 'Only masterbrand admins can create root categories.' });
       return;
     }
-    this.catForm = { id: null, name: '', description: '', parent_id: null };
+    this.catForm = { id: null, name: '', description: '', ai_description: '', parent_id: null };
     this.catDialogVisible.set(true);
   }
 
   openCatEdit(cat: any) {
     if (!this.auth.isAdmin()) return;
-    this.catForm = { id: cat.id, name: cat.name, description: cat.description || '', parent_id: cat.parent_id };
+    this.catForm = { id: cat.id, name: cat.name, description: cat.description || '', ai_description: cat.ai_description || '', parent_id: cat.parent_id };
     this.catDialogVisible.set(true);
     this.catMenuVisible.set(false);
   }
@@ -169,9 +202,13 @@ export class ProductsComponent implements OnInit {
     if (!this.catForm.name) return;
     this.catSaving.set(true);
     
+    // Use AI description as description if provided
+    const payload = { ...this.catForm };
+    if (payload.ai_description) payload.description = payload.ai_description;
+
     const request = this.catForm.id 
-      ? this.api.put(`/catalog/categories/${this.catForm.id}`, this.catForm)
-      : this.api.post('/catalog/categories', this.catForm);
+      ? this.api.put(`/catalog/categories/${this.catForm.id}`, payload)
+      : this.api.post('/catalog/categories', payload);
 
     request.subscribe({
       next: () => {
@@ -181,6 +218,23 @@ export class ProductsComponent implements OnInit {
         this.loadCategories();
       },
       error: () => this.catSaving.set(false)
+    });
+  }
+
+  /** Generate AI description for category */
+  generateCatAiDescription() {
+    if (!this.catForm.name) {
+      this.messageService.add({ severity: 'warn', summary: 'Name required', detail: 'Please enter a category name first.' });
+      return;
+    }
+    this.catAiLoading.set(true);
+    this.api.post<any>('/catalog/categories/generate-description', { category_name: this.catForm.name }).subscribe({
+      next: (response) => {
+        this.catForm.ai_description = response.data.description;
+        this.catForm.description = response.data.description;
+        this.catAiLoading.set(false);
+      },
+      error: () => this.catAiLoading.set(false)
     });
   }
 
@@ -260,6 +314,45 @@ export class ProductsComponent implements OnInit {
 
   loadProducts() {
     this.loading.set(true);
+    this.offset = 0;
+    const params: any = {
+      limit: this.limit,
+      offset: 0
+    };
+    const catId = this.selectedCategoryId();
+    if (catId) params.category_id = catId;
+    if (this.search) params.search = this.search;
+    const sf = this.statusFilter();
+    if (sf !== 'all') params.status_filter = sf;
+
+    const endpoint = this.viewMode() === 'master' ? '/products/master' : '/products/inherited';
+
+    this.api.get<any>(endpoint, params).subscribe({
+      next: (response) => {
+        const fetched = response.data.products || [];
+        const total = response.data.total || 0;
+        this.products.set(fetched);
+        this.totalRecords.set(total);
+        this.hasMore.set(fetched.length < total);
+        this.offset = fetched.length;
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Load failed',
+          detail: 'Failed to fetch products.'
+        });
+      }
+    });
+  }
+
+  /** Load next batch and append to existing list */
+  loadMore() {
+    if (this.loadingMore() || !this.hasMore()) return;
+    this.loadingMore.set(true);
+
     const params: any = {
       limit: this.limit,
       offset: this.offset
@@ -274,35 +367,150 @@ export class ProductsComponent implements OnInit {
 
     this.api.get<any>(endpoint, params).subscribe({
       next: (response) => {
-        this.products.set(response.data.products || []);
-        this.totalRecords.set(response.data.total || 0);
-        this.loading.set(false);
+        const fetched = response.data.products || [];
+        const total = response.data.total || 0;
+        this.products.set([...this.products(), ...fetched]);
+        this.totalRecords.set(total);
+        this.offset += fetched.length;
+        this.hasMore.set(this.products().length < total);
+        this.loadingMore.set(false);
       },
       error: () => {
-        this.loading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Load failed',
-          detail: 'Failed to fetch products.'
-        });
+        this.loadingMore.set(false);
       }
     });
   }
 
-  onPageChange(event: any) {
-    this.offset = event.first;
-    this.limit = event.rows;
-    this.loadProducts();
+  /** Infinite scroll handler — fires when product list is scrolled */
+  onListScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    const threshold = 60; // px from bottom
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    if (atBottom) {
+      this.loadMore();
+    }
   }
 
   onFilterChange(value: string) {
     this.statusFilter.set(value);
     this.offset = 0;
+    this.hasMore.set(true);
     this.loadProducts();
   }
 
   onSearch(event: any) {
-    this.searchSubject.next(event.target.value);
+    const val = (event.target as HTMLInputElement).value;
+    this.searchInputValue.set(val);
+    this.searchSubject.next(val);
+    this.suggestionSubject.next(val);
+    this.showSuggestions.set(true);
+  }
+
+  onSearchInputClick(event: Event) {
+    event.stopPropagation();
+    if (this.searchInputValue().length >= 2) {
+      this.showSuggestions.set(true);
+    }
+  }
+
+  selectSuggestion(name: string) {
+    this.searchInputValue.set(name);
+    this.search = name;
+    this.showSuggestions.set(false);
+    this.suggestions.set([]);
+    this.offset = 0;
+    this.hasMore.set(true);
+    this.loadProducts();
+  }
+
+  /** Fetch product name suggestions from backend */
+  fetchSuggestions(query: string) {
+    const params: any = { limit: 6, offset: 0, search: query };
+    const catId = this.selectedCategoryId();
+    if (catId) params.category_id = catId;
+    const endpoint = this.viewMode() === 'master' ? '/products/master' : '/products/inherited';
+
+    this.api.get<any>(endpoint, params).subscribe({
+      next: (response) => {
+        const names = (response.data.products || [])
+          .map((p: any) => p.effective_name ?? p.name)
+          .filter((n: string) => n && n.toLowerCase().includes(query.toLowerCase()));
+        this.suggestions.set([...new Set<string>(names)]);
+        this.showSuggestions.set(names.length > 0);
+      },
+      error: () => this.suggestions.set([])
+    });
+  }
+
+  /** Init browser Web Speech API for voice search */
+  initVoiceSearch() {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    this.recognition = new SpeechRecognition();
+    this.recognition.lang = 'en-IN';
+    this.recognition.continuous = false;
+    this.recognition.interimResults = false;
+
+    this.recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      this.searchInputValue.set(transcript);
+      this.search = transcript;
+      this.isListening.set(false);
+      this.offset = 0;
+      this.hasMore.set(true);
+      this.searchSubject.next(transcript);
+    };
+
+    this.recognition.onerror = () => {
+      this.isListening.set(false);
+      this.messageService.add({ severity: 'warn', summary: 'Voice Error', detail: 'Could not recognise speech. Try again.' });
+    };
+
+    this.recognition.onend = () => {
+      this.isListening.set(false);
+    };
+  }
+
+  startVoiceSearch() {
+    if (!this.recognition) {
+      this.messageService.add({ severity: 'warn', summary: 'Not Supported', detail: 'Voice search is not supported in this browser. Use Chrome or Edge.' });
+      return;
+    }
+    if (this.isListening()) {
+      this.recognition.stop();
+      this.isListening.set(false);
+      return;
+    }
+    this.isListening.set(true);
+    this.recognition.start();
+  }
+
+  /** Convert base64 data URL to Blob for upload */
+  private base64ToBlob(dataUrl: string): Blob {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
+  }
+
+  /** Upload base64 image before saving, returns a promise of the upload URL */
+  private async uploadBase64Image(dataUrl: string): Promise<string> {
+    const blob = this.base64ToBlob(dataUrl);
+    const ext = blob.type.split('/')[1] || 'jpg';
+    const file = new File([blob], `image.${ext}`, { type: blob.type });
+    const formData = new FormData();
+    formData.append('image', file);
+
+    return new Promise<string>((resolve, reject) => {
+      this.api.post<any>('/products/upload', formData, true).subscribe({
+        next: (res) => resolve(res.data.imageUrl),
+        error: (err) => reject(err)
+      });
+    });
   }
 
   openMasterCreate() {
@@ -440,8 +648,19 @@ export class ProductsComponent implements OnInit {
 
 
 
-  save() {
+  async save() {
     this.saving.set(true);
+
+    // Auto-convert base64 image to uploaded URL before saving
+    if (this.form.image_url && this.form.image_url.startsWith('data:image')) {
+      try {
+        this.form.image_url = await this.uploadBase64Image(this.form.image_url);
+      } catch {
+        this.saving.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Image failed', detail: 'Could not upload embedded image. Try again.' });
+        return;
+      }
+    }
 
     const stockQty = this.form.inventory_enabled ? Number(this.form.stock_qty ?? 0) : -1;
 

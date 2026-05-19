@@ -70,14 +70,33 @@
       </div>
     </div>
 
-    <div class="product-search-bar">
+    <div class="product-search-bar" (click)="onSearchInputClick($event)">
       <i class="pi pi-search search-icon"></i>
       <input 
         pInputText 
         type="text" 
         placeholder="Search ID, Name or SKU..." 
+        [value]="searchInputValue()"
         (input)="onSearch($event)" 
         class="product-search-input" />
+      <button 
+        class="voice-search-btn" 
+        [class.listening]="isListening()"
+        (click)="$event.stopPropagation(); startVoiceSearch()"
+        [title]="isListening() ? 'Stop listening' : 'Search by voice'">
+        <i class="pi" [class.pi-microphone]="!isListening()" [class.pi-stop-circle]="isListening()"></i>
+      </button>
+
+      <!-- Suggestions Dropdown -->
+      <div class="search-suggestions" *ngIf="showSuggestions() && suggestions().length > 0" (click)="$event.stopPropagation()">
+        <div 
+          class="suggestion-item" 
+          *ngFor="let s of suggestions()" 
+          (click)="selectSuggestion(s)">
+          <i class="pi pi-search suggestion-icon"></i>
+          <span>{{ s }}</span>
+        </div>
+      </div>
     </div>
 
     <!-- ══ Status Filter ══ -->
@@ -102,7 +121,7 @@
         </div>
       </div>
 
-      <div *ngIf="!loading()" class="product-list scrollable" cdkDropList [cdkDropListDisabled]="viewMode() !== 'merchant'" (cdkDropListDropped)="onProductDrop($event)">
+      <div *ngIf="!loading()" class="product-list scrollable" (scroll)="onListScroll($event)" cdkDropList [cdkDropListDisabled]="viewMode() !== 'merchant'" (cdkDropListDropped)="onProductDrop($event)">
       <div
         *ngFor="let p of products()"
         class="product-row"
@@ -134,6 +153,14 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Infinite Scroll Loader -->
+      <div class="scroll-loader" *ngIf="loadingMore()">
+        <div class="scroll-spinner"></div>
+      </div>
+      <div class="scroll-end-hint" *ngIf="!hasMore() && products().length > 0">
+        <span>All {{ totalRecords() }} products loaded</span>
       </div>
     </div>
   </div>
@@ -389,7 +416,7 @@
   [(visible)]="catDialogVisible"
   [header]="catForm.id ? 'Edit Category' : 'New Category'"
   [modal]="true"
-  [style]="{ width: '400px' }"
+  [style]="{ width: '440px' }"
   styleClass="yelo-product-dialog"
 >
   <div class="dialog-field">
@@ -399,6 +426,15 @@
   <div class="dialog-field mt-3">
     <label>Description</label>
     <textarea pInputTextarea [(ngModel)]="catForm.description" rows="3" placeholder="Optional description"></textarea>
+  </div>
+  <div class="dialog-field mt-3">
+    <div class="label-row">
+      <label>AI Description</label>
+      <button class="ai-regen-btn" (click)="generateCatAiDescription()" [disabled]="catAiLoading()">
+        <i class="pi pi-sparkles"></i> AI Generate
+      </button>
+    </div>
+    <textarea pInputTextarea [(ngModel)]="catForm.ai_description" rows="3" class="ai-textarea" placeholder="AI-generated category description..."></textarea>
   </div>
   <ng-template pTemplate="footer">
     <button class="yelo-btn-secondary" (click)="catDialogVisible.set(false)">Cancel</button>
