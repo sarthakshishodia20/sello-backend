@@ -1516,7 +1516,7 @@ body.dark-mode .skeleton-circle {
   display: grid;
   grid-template-columns: 240px 1fr 280px;
   gap: 20px;
-  height: 500px;
+  height: 520px;
   min-height: 0;
 }
 .grid-pane {
@@ -1563,7 +1563,7 @@ body.dark-mode .skeleton-circle {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-dark);
-  margin: 0 0 2px 0;
+  margin: 0;
 }
 .mode-option-card .card-info span {
   font-size: 11px;
@@ -1619,7 +1619,7 @@ body.dark-mode .skeleton-circle {
   gap: 12px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.15s;
@@ -1648,6 +1648,7 @@ body.dark-mode .skeleton-circle {
 .row-item-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 .row-item-name {
   font-size: 13px;
@@ -1661,6 +1662,22 @@ body.dark-mode .skeleton-circle {
 .row-item-meta.active-snoozed {
   color: #14b8a6;
   font-weight: 600;
+}
+
+/* Checklist Muted / Disabled Item Classes */
+.checklist-row.disabled-item {
+  opacity: 0.6;
+  cursor: not-allowed !important;
+  background: var(--bg-subtle, #f8fafc) !important;
+  border-style: dashed;
+}
+.checklist-row.disabled-item:hover {
+  background: var(--bg-subtle, #f8fafc) !important;
+}
+.row-checkbox.disabled-cb {
+  border-color: var(--border) !important;
+  background: var(--bg-subtle) !important;
+  cursor: not-allowed;
 }
 
 /* Pane Right: Preview */
@@ -1748,6 +1765,100 @@ body.dark-mode .skeleton-circle {
 .action-confirm-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ── Light Mode / White Theme Button Defaults ── */
+.prompt-cancel-btn {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--border, #cbd5e1);
+  background: var(--bg-card, #ffffff);
+  color: var(--text-muted, #475569);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.prompt-cancel-btn:hover {
+  background: var(--bg-subtle, #f1f5f9);
+}
+
+.prompt-confirm-btn, .final-confirm-action-btn, .switch-confirm-action-btn {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  background: #0f172a !important; /* Pure Slate-Black button background */
+  color: #ffffff !important;      /* White text/content */
+  transition: all 0.2s ease-in-out;
+}
+.prompt-confirm-btn:hover, .final-confirm-action-btn:hover, .switch-confirm-action-btn:hover {
+  background: #1e293b !important;
+}
+
+/* ── Dark Mode Consistency and Overrides ── */
+body.dark-mode .snooze-tab-buttons {
+  background: #1e1e24;
+}
+body.dark-mode .mode-option-card {
+  background: #18181b;
+}
+body.dark-mode .checklist-row {
+  background: #18181b;
+}
+body.dark-mode .preview-row {
+  background: #18181b;
+}
+
+/* PrimeNG Datepicker Dark override */
+::ng-deep body.dark-mode .p-datepicker {
+  background: #18181b !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+}
+::ng-deep body.dark-mode .p-datepicker-header {
+  background: #18181b !important;
+  color: #ffffff !important;
+  border-color: #27272a !important;
+}
+::ng-deep body.dark-mode .p-datepicker-day:not(.p-datepicker-day-selected):not(.p-datepicker-day-selected-range):hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Dark mode buttons override (Yellow Accent) */
+:host-context(body.dark-mode) .prompt-confirm-btn,
+:host-context(body.dark-mode) .final-confirm-action-btn,
+:host-context(body.dark-mode) .switch-confirm-action-btn {
+  background: #eab308 !important; /* Premium Amber Yellow accent */
+  color: #0f172a !important;      /* Dark text on yellow background */
+}
+:host-context(body.dark-mode) .prompt-confirm-btn:hover,
+:host-context(body.dark-mode) .final-confirm-action-btn:hover,
+:host-context(body.dark-mode) .switch-confirm-action-btn:hover {
+  background: #f59e0b !important;
+}
+
+/* ══ RESPONSIVE LAYOUTS (Grid column stack & media overrides) ══ */
+@media (max-width: 991px) {
+  .snooze-grid-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    gap: 16px !important;
+  }
+  .snooze-manager-dialog {
+    width: 95vw !important;
+  }
+  .grid-pane {
+    height: 380px !important;
+  }
+  .snooze-modal-top-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px;
+  }
 }
 
 /* ══ RESPONSIVE LAYOUT (Screens <= 1024px) ══ */
