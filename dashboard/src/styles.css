@@ -597,6 +597,8 @@ body.dark-mode .p-datepicker .p-datepicker-trigger {
   top: 75px;
   right: 32px;
   width: 340px;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;

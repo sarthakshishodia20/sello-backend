@@ -632,7 +632,8 @@ module.exports = {
   updateCatalogueStockStatus,
   getSearchSuggestions,
   snoozeItems,
-  unsnoozeItems
+  unsnoozeItems,
+  getCategorySnoozeStatus
 };
 /**
  * Relink removes the merchant override and returns the catalogue item to follow masterbrand data.
@@ -650,27 +651,24 @@ async function relinkProduct(catalogueId, merchantId) {
 
 async function snoozeItems(merchantId, { type, ids, snoozeUntil }) {
   if (!ids || ids.length === 0) return;
-
   const date = new Date(snoozeUntil);
-  if (isNaN(date.getTime())) {
-    throw new Error('Invalid snooze datetime');
-  }
-
+  if (isNaN(date.getTime())) throw new Error('Invalid snooze datetime');
   if (type === 'products') {
     await db.query(
-      `UPDATE tb_app_catalogue 
-       SET snooze_until = ? 
+      `UPDATE tb_app_catalogue SET snooze_until = ?, snooze_source = 'product'
        WHERE merchant_id = ? AND id IN (?)`,
       [date, merchantId, ids]
     );
     logger.info(MODULE, 'PRODUCTS_SNOOZED', { merchantId, ids, snoozeUntil });
   } else if (type === 'category') {
+    // Only snooze products not already individually snoozed
     await db.query(
       `UPDATE tb_app_catalogue ac
        JOIN tb_products p ON p.id = ac.product_id
        LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
-       SET ac.snooze_until = ?
-       WHERE ac.merchant_id = ? AND COALESCE(mp.category_id, p.category_id) IN (?)`,
+       SET ac.snooze_until = ?, ac.snooze_source = 'category'
+       WHERE ac.merchant_id = ? AND COALESCE(mp.category_id, p.category_id) IN (?)
+         AND (ac.snooze_source IS NULL OR ac.snooze_source = 'category')`,
       [date, merchantId, ids]
     );
     logger.info(MODULE, 'CATEGORIES_SNOOZED', { merchantId, ids, snoozeUntil });
@@ -679,24 +677,42 @@ async function snoozeItems(merchantId, { type, ids, snoozeUntil }) {
 
 async function unsnoozeItems(merchantId, { type, ids }) {
   if (!ids || ids.length === 0) return;
-
   if (type === 'products') {
     await db.query(
-      `UPDATE tb_app_catalogue 
-       SET snooze_until = NULL 
+      `UPDATE tb_app_catalogue SET snooze_until = NULL, snooze_source = NULL
        WHERE merchant_id = ? AND id IN (?)`,
       [merchantId, ids]
     );
     logger.info(MODULE, 'PRODUCTS_UNSNOOZED', { merchantId, ids });
   } else if (type === 'category') {
+    // Only clear snooze for products snoozed via category batch action
+    // Products individually snoozed (snooze_source = 'product') remain snoozed
     await db.query(
       `UPDATE tb_app_catalogue ac
        JOIN tb_products p ON p.id = ac.product_id
        LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
-       SET ac.snooze_until = NULL
-       WHERE ac.merchant_id = ? AND COALESCE(mp.category_id, p.category_id) IN (?)`,
+       SET ac.snooze_until = NULL, ac.snooze_source = NULL
+       WHERE ac.merchant_id = ? AND COALESCE(mp.category_id, p.category_id) IN (?)
+         AND (ac.snooze_source = 'category' OR ac.snooze_source IS NULL)`,
       [merchantId, ids]
     );
     logger.info(MODULE, 'CATEGORIES_UNSNOOZED', { merchantId, ids });
   }
+}
+
+async function getCategorySnoozeStatus(merchantId) {
+  // Returns each category_id with earliest/max snooze_until across its products
+  // A category is considered snoozed if ALL its active products are currently snoozed via category source
+  const rows = await db.query(
+    `SELECT
+       COALESCE(mp.category_id, p.category_id) AS category_id,
+       MAX(ac.snooze_until) AS snooze_until
+     FROM tb_app_catalogue ac
+     JOIN tb_products p ON p.id = ac.product_id
+     LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
+     WHERE ac.merchant_id = ? AND ac.snooze_source = 'category' AND ac.snooze_until > NOW()
+     GROUP BY category_id`,
+    [merchantId]
+  );
+  return rows;
 }

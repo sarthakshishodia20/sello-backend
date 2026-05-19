@@ -25,6 +25,8 @@ router.put('/merchant/:id', merchantOnly, validator.validateUpdateMerchantProduc
 router.put('/inherited/:catalogueId/stock-status', merchantOnly, controller.updateStockStatus);
 router.post('/snooze', merchantOnly, controller.snoozeCatalogItems);
 router.post('/unsnooze', merchantOnly, controller.unsnoozeCatalogItems);
+router.get('/category-snooze', merchantOnly, controller.getCategorySnoozeStatus);
+
 
 router.post('/generate-description', validator.validateGenerateDescription, controller.generateDescription);
 router.post('/swap', allowRoles('MASTERBRAND_ADMIN', 'MERCHANT_ADMIN'), controller.swapProducts);

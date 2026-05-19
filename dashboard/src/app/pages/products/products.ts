@@ -147,13 +147,14 @@ export class ProductsComponent implements OnInit {
   snoozePromptVisible = signal(false);
   promptTab = signal<'snooze' | 'unsnooze'>('snooze');
   promptSnoozeDate: Date | null = null;
-  promptSnoozeDateTime: Date | null = null;
+  promptSnoozeTime: Date | null = null;
   todayDate: Date = new Date();
 
   // Snooze Pagination
   snoozeOffset = 0;
   snoozeLimit = 10;
   snoozeTotalRecords = signal(0);
+
 
   hasVoiceAiAccess = computed(() => {
     if (this.auth.isAdmin()) return true;
@@ -1120,6 +1121,7 @@ export class ProductsComponent implements OnInit {
       this.snoozeTab.set(tab);
       this.snoozeSelectedItems.clear();
       this.snoozeOffset = 0;
+      this.loading.set(true);
       this.loadSnoozeList();
     }
   }
@@ -1128,28 +1130,32 @@ export class ProductsComponent implements OnInit {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     this.promptSnoozeDate = tomorrow;
-    // Prefill a datetime 24h from now
-    this.promptSnoozeDateTime = tomorrow;
+    // Default time: now + 24h as separate Date for time-only picker
+    const defaultTime = new Date();
+    defaultTime.setDate(defaultTime.getDate() + 1);
+    this.promptSnoozeTime = defaultTime;
     this.todayDate = new Date();
-
     this.promptTab.set('snooze');
     this.snoozePromptVisible.set(true);
   }
 
   confirmSnoozePromptDetails() {
     if (this.promptTab() === 'snooze') {
-      if (!this.promptSnoozeDateTime) {
-        this.messageService.add({ severity: 'error', summary: 'Required', detail: 'Please select date and time.' });
+      if (!this.promptSnoozeDate || !this.promptSnoozeTime) {
+        this.messageService.add({ severity: 'error', summary: 'Required', detail: 'Please select both date and time.' });
         return;
       }
+      // Combine separate date + time pickers
+      const d = this.promptSnoozeDate;
+      const t = this.promptSnoozeTime;
+      const combined = new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), 0);
       const now = new Date();
-      if (this.promptSnoozeDateTime <= now) {
+      if (combined <= now) {
         this.messageService.add({ severity: 'error', summary: 'Choose Greater Time', detail: 'Snooze duration must be in the future.' });
         return;
       }
-      const d = this.promptSnoozeDateTime;
       this.snoozeUntilDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      this.snoozeUntilTime = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      this.snoozeUntilTime = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
     }
 
     this.snoozeTab.set(this.promptTab());
@@ -1203,16 +1209,32 @@ export class ProductsComponent implements OnInit {
         error: () => { this.loading.set(false); }
       });
     } else {
-      // Categories — local filter (no pagination endpoint needed)
-      const cats = this.categories().map((c: any) => ({
-        id: c.id,
-        name: c.name,
-        snooze_until: null
-      }));
-      const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
-      this.snoozeFilteredItems.set(filtered.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
-      this.snoozeTotalRecords.set(filtered.length);
-      this.loading.set(false);
+      // Categories — fetch snooze status from API
+      this.api.get<any>('/products/category-snooze').subscribe({
+        next: (snoozeRes) => {
+          const snoozeMap: Record<number, string> = {};
+          (snoozeRes.data.categories || []).forEach((c: any) => {
+            snoozeMap[c.category_id] = c.snooze_until;
+          });
+
+          const cats = this.categories().map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            snooze_until: snoozeMap[c.id] || null
+          }));
+          const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
+          this.snoozeFilteredItems.set(filtered.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
+          this.snoozeTotalRecords.set(filtered.length);
+          this.loading.set(false);
+        },
+        error: () => {
+          // Fallback — no snooze status
+          const cats = this.categories().map((c: any) => ({ id: c.id, name: c.name, snooze_until: null }));
+          this.snoozeFilteredItems.set(cats.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
+          this.snoozeTotalRecords.set(cats.length);
+          this.loading.set(false);
+        }
+      });
     }
   }
 
@@ -1243,7 +1265,6 @@ export class ProductsComponent implements OnInit {
   }
 
   getSelectedSnoozeItemsList(): any[] {
-    // Across all pages — keep a registry
     return Array.from(this.snoozeSelectedItems).map(id => {
       const found = this.snoozeFilteredItems().find(i => i.id === id);
       return found || { id, name: '(item #' + id + ')' };
@@ -1297,7 +1318,11 @@ export class ProductsComponent implements OnInit {
         next: () => {
           this.loading.set(false);
           this.messageService.add({ severity: 'success', summary: 'UnSnoozed', detail: 'Items restored successfully.' });
-          this.snoozeModalVisible.set(false);
+          // Reload snooze list to reflect updates
+          this.snoozeSelectedItems.clear();
+          this.snoozeOffset = 0;
+          this.loadSnoozeList();
+          this.loading.set(true);
           this.offset = 0;
           this.loadProducts();
         },

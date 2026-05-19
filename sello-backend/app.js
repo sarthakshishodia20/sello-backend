@@ -131,9 +131,19 @@ app.listen(PORT, () => {
         console.log('[Migration] Successfully added snooze_until column to tb_app_catalogue.');
       })
       .catch(err => {
-        // Ignore column already exists errors
         if (!err.message.includes('duplicate column') && !err.message.includes('Duplicate column')) {
           console.log('[Migration] Column check completed:', err.message);
+        }
+      });
+
+    // Dynamic schema update for snooze_source column
+    db.query(`ALTER TABLE tb_app_catalogue ADD COLUMN snooze_source ENUM('product','category') NULL;`)
+      .then(() => {
+        console.log('[Migration] Successfully added snooze_source column to tb_app_catalogue.');
+      })
+      .catch(err => {
+        if (!err.message.includes('duplicate column') && !err.message.includes('Duplicate column')) {
+          console.log('[Migration] snooze_source check completed:', err.message);
         }
       });
 
@@ -141,6 +151,7 @@ app.listen(PORT, () => {
       console.log('[Availability Scheduler] Initial boot-time evaluation completed.');
     }).catch(console.error);
   }, 5000);
+
 
   // Run every 60 seconds
   setInterval(() => {

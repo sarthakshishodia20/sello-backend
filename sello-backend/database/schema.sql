@@ -166,6 +166,7 @@ CREATE TABLE tb_app_catalogue (
   is_available        TINYINT(1) NOT NULL DEFAULT 1,
   is_out_of_stock     TINYINT(1) NOT NULL DEFAULT 0,
   snooze_until        DATETIME NULL,
+  snooze_source       ENUM('product', 'category') NULL COMMENT 'Tracks whether snooze was set individually or via category',
   created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_tb_app_catalogue_merchant

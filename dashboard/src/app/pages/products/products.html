@@ -575,24 +575,35 @@
 
     <ng-container *ngIf="promptTab() === 'snooze'">
       <h3 class="sp-title">Choose snooze duration</h3>
-      <p class="sp-desc">Items will become unavailable until this date & time.</p>
+      <p class="sp-desc">Items hidden until selected date & time.</p>
       <div class="sp-datetime-row">
         <div class="sp-field">
-          <label class="sp-label">Date & Time</label>
+          <label class="sp-label">Date</label>
           <p-datepicker
-            [(ngModel)]="promptSnoozeDateTime"
+            [(ngModel)]="promptSnoozeDate"
             [showIcon]="true"
             iconDisplay="input"
-            [showTime]="true"
-            [hourFormat]="'24'"
             [minDate]="todayDate"
-            placeholder="Select date & time"
+            placeholder="Select date"
+            appendTo="body"
+            styleClass="snooze-datepicker"
+          ></p-datepicker>
+        </div>
+        <div class="sp-field">
+          <label class="sp-label">Time</label>
+          <p-datepicker
+            [(ngModel)]="promptSnoozeTime"
+            [timeOnly]="true"
+            [showIcon]="true"
+            iconDisplay="input"
+            placeholder="Select time"
             appendTo="body"
             styleClass="snooze-datepicker"
           ></p-datepicker>
         </div>
       </div>
     </ng-container>
+
 
     <ng-container *ngIf="promptTab() === 'unsnooze'">
       <h3 class="sp-title">UnSnooze catalog items</h3>
@@ -708,7 +719,8 @@
             [first]="snoozeOffset"
             [rows]="snoozeLimit"
             [totalRecords]="snoozeTotalRecords()"
-            [rowsPerPageOptions]="[10, 20, 50]"
+            [rowsPerPageOptions]="[10, 25, 100]"
+
             (onPageChange)="onSnoozePage($event)"
             styleClass="snooze-paginator"
           ></p-paginator>
