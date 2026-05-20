@@ -414,19 +414,31 @@
             </div>
           </div>
 
-          <!-- Feature 3: Out of Stock (Snooze) -->
+          <!-- Feature 3: Catalogue Snooze & UnSnooze -->
           <div class="help-item-row">
             <div class="dot pink"></div>
             <div>
               <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
-                Out of Stock (Snooze)
-                <span class="badge-role merchant">Merchant Toggled</span>
+                Catalogue Snooze & UnSnooze
+                <span class="badge-role merchant">Merchant Only</span>
+                <span class="badge-role master">Extension Required</span>
               </strong>
               <p>
-                <strong>What it is:</strong> Instantly snooze ordering on products. The item remains visible for customer storefront branding but hides checkout and adds an "Out of Stock" warning.
+                <strong>What it is:</strong> Merchants can temporarily hide products or entire categories from ordering — without deleting them. Once the snooze timer expires, items automatically become available again.
               </p>
+              <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.78rem; color: var(--text-muted); list-style-type: disc; display: flex; flex-direction: column; gap: 5px;">
+                <li><strong>How to access:</strong> Click the <em>Snooze</em> button in the Products page header (only visible when the "Snooze &amp; UnSnooze" extension is enabled by Masterbrand Admin).</li>
+                <li><strong>Step 1 — Set duration:</strong> A prompt asks you to pick a <em>Date</em> and <em>Time</em> for when the snooze should end (only future dates allowed). For UnSnooze, click Continue directly.</li>
+                <li><strong>Step 2 — Select items:</strong> Choose either <em>Products</em> or <em>Categories</em> mode in the left pane. Check items from the scrollable catalogue list. Selected items appear in the right preview pane.</li>
+                <li><strong>Category snooze cascade:</strong> Snoozing a category automatically snoozes all products in that category — <em>except</em> any products that were already individually snoozed (their own snooze is preserved).</li>
+                <li><strong>Category unsnooze:</strong> Unsnoozing a category restores all products that were snoozed via that category action. Products snoozed individually remain snoozed.</li>
+                <li><strong>UnSnooze tab:</strong> Only shows currently-snoozed items. Select any snoozed products/categories and click UnSnooze Selected to restore them immediately.</li>
+                <li><strong>Already-snoozed items:</strong> Items with an active snooze are shown as disabled (greyed out, dashed border) in the Snooze tab and cannot be re-snoozed until they are unsnoozed first.</li>
+                <li><strong>Auto-restore:</strong> When a snooze timer expires, the backend automatically marks the item as available again without any merchant action.</li>
+              </ul>
             </div>
           </div>
+
 
           <!-- Feature 4: Gemini AI Description -->
           <div class="help-item-row">

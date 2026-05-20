@@ -1617,8 +1617,9 @@ body.dark-mode .action-confirm-btn:not(:disabled) {
 ::ng-deep .snooze-confirm-dialog .p-dialog-content {
   padding: 0 !important;
   border-radius: 16px !important;
-  overflow: hidden;
+  overflow-y: auto !important;  /* must be auto not hidden for scroll to work */
 }
+
 
 /* On small screens the dialog must be scrollable */
 ::ng-deep .snooze-manager-dialog .p-dialog {
