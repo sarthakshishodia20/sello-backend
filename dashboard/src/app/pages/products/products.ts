@@ -1190,7 +1190,7 @@ export class ProductsComponent implements OnInit {
     if (this.snoozeMode() === 'products') {
       const params: any = {
         include_unavailable: 'true',
-        limit: 10,
+        limit: 25,
         offset: this.snoozeOffset
       };
       if (search) params.search = search;
@@ -1231,7 +1231,7 @@ export class ProductsComponent implements OnInit {
           }
           const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
           this.snoozeTotalRecords.set(filtered.length);
-          const sliced = filtered.slice(this.snoozeOffset, this.snoozeOffset + 10);
+          const sliced = filtered.slice(this.snoozeOffset, this.snoozeOffset + 25);
           if (this.snoozeOffset === 0) {
             this.snoozeFilteredItems.set(sliced);
           } else {
@@ -1242,7 +1242,7 @@ export class ProductsComponent implements OnInit {
         error: () => {
           const cats = this.categories().map((c: any) => ({ id: c.id, name: c.name, snooze_until: null }));
           this.snoozeTotalRecords.set(cats.length);
-          const sliced = cats.slice(this.snoozeOffset, this.snoozeOffset + 10);
+          const sliced = cats.slice(this.snoozeOffset, this.snoozeOffset + 25);
           if (this.snoozeOffset === 0) {
             this.snoozeFilteredItems.set(sliced);
           } else {
@@ -1258,7 +1258,7 @@ export class ProductsComponent implements OnInit {
     const el = event.target;
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
       if (!this.loading() && this.snoozeFilteredItems().length < this.snoozeTotalRecords()) {
-        this.snoozeOffset += 10;
+        this.snoozeOffset += 25;
         this.loading.set(true);
         this.loadSnoozeList();
       }

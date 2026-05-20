@@ -5,7 +5,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 41px); /* Fill available viewport height */
+  height: calc(100vh - 120px); /* Fill available viewport height perfectly without page scrolling */
   padding: 24px;
   background-color: var(--bg-main);
   transition: background 0.3s;
@@ -1793,7 +1793,7 @@ body.dark-mode .snooze-tab-buttons .tab-btn.active {
 }
 
 
-body.dark-mode .grid-pane {
+:host-context(body.dark-mode) .grid-pane {
   background: #141414;
   border-color: #242424;
 }
@@ -1811,9 +1811,10 @@ body.dark-mode .grid-pane {
   flex-shrink: 0;
 }
 
-body.dark-mode .pane-sec-title {
-  color: #666666;
+:host-context(body.dark-mode) .pane-sec-title {
+  color: #a1a1aa;
 }
+
 
 
 
@@ -1837,7 +1838,7 @@ body.dark-mode .pane-sec-title {
   transition: all 0.18s;
 }
 
-body.dark-mode .mode-option-card {
+:host-context(body.dark-mode) .mode-option-card {
   background: var(--bg-main);
   border-color: var(--border);
 }
@@ -1860,7 +1861,7 @@ body.dark-mode .mode-option-card {
   background: var(--surface-100);
 }
 
-body.dark-mode .mode-option-card.active {
+:host-context(body.dark-mode) .mode-option-card.active {
   background: var(--surface-100);
 }
 
@@ -1872,9 +1873,10 @@ body.dark-mode .mode-option-card.active {
   color: var(--accent-yellow);
 }
 
-body.dark-mode .mode-option-card.active h3 {
+:host-context(body.dark-mode) .mode-option-card.active h3 {
   color: var(--accent-yellow);
 }
+
 
 
 /* ─── Middle Pane: Search + Checklist ────────────── */
@@ -1918,7 +1920,7 @@ body.dark-mode .mode-option-card.active h3 {
   outline: none;
 }
 
-body.dark-mode .snooze-pane-search input {
+:host-context(body.dark-mode) .snooze-pane-search input {
   border-color: #2e2e2e;
   background: #1c1c1c;
   color: #e0e0e0;
@@ -1953,7 +1955,7 @@ body.dark-mode .snooze-pane-search input {
   flex-shrink: 0;
 }
 
-body.dark-mode .checklist-row {
+:host-context(body.dark-mode) .checklist-row {
   background: #1c1c1c;
   border-color: #2e2e2e;
 }
@@ -1977,7 +1979,7 @@ body.dark-mode .checklist-row {
   background: #ffffff;
 }
 
-body.dark-mode .row-checkbox {
+:host-context(body.dark-mode) .row-checkbox {
   border-color: #404040;
   background: #2a2a2a;
 }
@@ -1992,9 +1994,10 @@ body.dark-mode .row-checkbox {
   font-size: 8px;
 }
 
-body.dark-mode .checklist-row.checked .row-checkbox i {
+:host-context(body.dark-mode) .checklist-row.checked .row-checkbox i {
   color: #000000;   /* black tick on yellow (dark) */
 }
+
 
 
 /* Disabled (already snoozed) rows */
@@ -2030,7 +2033,7 @@ body.dark-mode .checklist-row.checked .row-checkbox i {
   text-overflow: ellipsis;
 }
 
-body.dark-mode .row-item-name {
+:host-context(body.dark-mode) .row-item-name {
   color: #e8e8e8;
 }
 
@@ -2039,7 +2042,7 @@ body.dark-mode .row-item-name {
   color: #777777;
 }
 
-body.dark-mode .row-item-meta {
+:host-context(body.dark-mode) .row-item-meta {
   color: #666666;
 }
 
@@ -2061,9 +2064,10 @@ body.dark-mode .row-item-meta {
   z-index: 10;
 }
 
-body.dark-mode .snooze-paginator-wrap {
+:host-context(body.dark-mode) .snooze-paginator-wrap {
   border-top-color: #2a2a2a;
 }
+
 
 /* Force the rows-per-page select panel above everything */
 ::ng-deep .snooze-paginator .p-select-overlay,
@@ -2421,211 +2425,202 @@ body.dark-mode .snooze-trigger-btn:hover {
 }
 
 /* Scoping bypass for PrimeNG overlays (Light & Dark Mode) */
-::ng-deep {
-  /* Yellow buttons text color strictly black */
-  .snooze-prompt-dialog .sp-btn-confirm,
-  .snooze-manager-dialog .action-confirm-btn,
-  .snooze-confirm-dialog .sc-btn-confirm,
-  .snooze-tab-buttons .tab-btn.active {
-    background: #facc15 !important;
-    color: #000000 !important;
-  }
-
-  /* Dark mode overrides for dialogs attached to body */
-  body.dark-mode {
-    .snooze-prompt-dialog .p-dialog,
-    .snooze-manager-dialog .p-dialog,
-    .snooze-confirm-dialog .p-dialog {
-      background: #141414 !important;
-      border: 1px solid #282828 !important;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
-      color: #e4e4e7 !important;
-    }
-
-    .snooze-prompt-dialog .p-dialog-content,
-    .snooze-manager-dialog .p-dialog-content,
-    .snooze-confirm-dialog .p-dialog-content {
-      background: #141414 !important;
-      color: #e4e4e7 !important;
-    }
-
-    /* Modal inside */
-    .snooze-modal-inner, .snooze-prompt-wrapper, .snooze-confirm-inner {
-      background: #141414 !important;
-      color: #e4e4e7 !important;
-    }
-
-    /* Header tabs */
-    .snooze-modal-top-bar {
-      border-bottom-color: #282828 !important;
-    }
-
-    .snooze-tab-buttons {
-      background: #0a0a0a !important;
-      border-color: #282828 !important;
-    }
-
-    .snooze-tab-buttons .tab-btn {
-      color: #a1a1aa !important;
-    }
-
-    .snooze-tab-buttons .tab-btn.active {
-      background: #facc15 !important;
-      color: #000000 !important;
-    }
-
-    .snooze-until-badge {
-      background: #1c1c1c !important;
-      border-color: #282828 !important;
-      color: #facc15 !important;
-    }
-
-    .snooze-modal-close {
-      background: #1c1c1c !important;
-      border-color: #282828 !important;
-      color: #a1a1aa !important;
-    }
-
-    .snooze-modal-close:hover {
-      background: #27272a !important;
-      color: #ffffff !important;
-    }
-
-    /* Panes background: sleek dark grey shade */
-    .grid-pane {
-      background: #1c1c1c !important;
-      border-color: #282828 !important;
-    }
-
-    .pane-sec-title {
-      color: #a1a1aa !important;
-    }
-
-    /* Mode option card */
-    .mode-option-card {
-      background: #242424 !important;
-      border-color: #282828 !important;
-    }
-
-    .mode-option-card h3 {
-      color: #e4e4e7 !important;
-    }
-
-    .mode-option-card.active {
-      border-color: #facc15 !important;
-      background: rgba(250, 204, 21, 0.1) !important;
-    }
-
-    .mode-option-card.active h3,
-    .mode-option-card.active i {
-      color: #facc15 !important;
-    }
-
-    /* Checklist Row */
-    .checklist-row {
-      background: #242424 !important;
-      border-color: #282828 !important;
-    }
-
-    .checklist-row:hover {
-      border-color: #facc15 !important;
-    }
-
-    .checklist-row.checked {
-      border-color: #facc15 !important;
-    }
-
-    .row-item-name {
-      color: #e4e4e7 !important;
-    }
-
-    .row-checkbox {
-      background: #141414 !important;
-      border-color: #3f3f46 !important;
-    }
-
-    .checklist-row.checked .row-checkbox {
-      background: #facc15 !important;
-      border-color: #facc15 !important;
-    }
-
-    .checklist-row.checked .row-checkbox i {
-      color: #000000 !important;
-    }
-
-    .snooze-pane-search input {
-      background: #242424 !important;
-      border-color: #282828 !important;
-      color: #ffffff !important;
-    }
-
-    /* Selected preview items */
-    .selected-item-pill {
-      background: #242424 !important;
-      border-color: #282828 !important;
-      color: #e4e4e7 !important;
-    }
-
-    .selected-item-pill span {
-      color: #e4e4e7 !important;
-    }
-
-    .selected-item-pill i {
-      color: #a1a1aa !important;
-    }
-
-    .selected-item-pill i:hover {
-      color: #ef4444 !important;
-    }
-
-    .selected-summary {
-      color: #a1a1aa !important;
-    }
-
-    /* Prompt details */
-    .sp-title {
-      color: #ffffff !important;
-    }
-
-    .sp-desc {
-      color: #a1a1aa !important;
-    }
-
-    .sp-label {
-      color: #a1a1aa !important;
-    }
-
-    .sp-btn-cancel, .sc-btn-cancel {
-      background: #242424 !important;
-      border: 1px solid #282828 !important;
-      color: #e4e4e7 !important;
-    }
-
-    .sp-btn-cancel:hover, .sc-btn-cancel:hover {
-      background: #27272a !important;
-    }
-
-    /* Datepicker styling inside overlay */
-    .snooze-datepicker input {
-      background: #242424 !important;
-      border-color: #282828 !important;
-      color: #ffffff !important;
-    }
-
-    /* Confirm Dialog */
-    .sc-icon-wrap {
-      background: #1c1c1c !important;
-      border-color: #282828 !important;
-      color: #facc15 !important;
-    }
-
-    .sc-title {
-      color: #ffffff !important;
-    }
-
-    .sc-desc {
-      color: #a1a1aa !important;
-    }
-  }
+::ng-deep .snooze-prompt-dialog .sp-btn-confirm,
+::ng-deep .snooze-manager-dialog .action-confirm-btn,
+::ng-deep .snooze-confirm-dialog .sc-btn-confirm,
+::ng-deep .snooze-tab-buttons .tab-btn.active {
+  background: #facc15 !important;
+  color: #000000 !important;
 }
+
+/* Dark mode overrides for dialogs attached to body */
+::ng-deep body.dark-mode .snooze-prompt-dialog .p-dialog,
+::ng-deep body.dark-mode .snooze-manager-dialog .p-dialog,
+::ng-deep body.dark-mode .snooze-confirm-dialog .p-dialog {
+  background: #141414 !important;
+  border: 1px solid #282828 !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .snooze-prompt-dialog .p-dialog-content,
+::ng-deep body.dark-mode .snooze-manager-dialog .p-dialog-content,
+::ng-deep body.dark-mode .snooze-confirm-dialog .p-dialog-content {
+  background: #141414 !important;
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .snooze-modal-inner, 
+::ng-deep body.dark-mode .snooze-prompt-wrapper, 
+::ng-deep body.dark-mode .snooze-confirm-inner {
+  background: #141414 !important;
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .snooze-modal-top-bar {
+  border-bottom-color: #282828 !important;
+}
+
+::ng-deep body.dark-mode .snooze-tab-buttons {
+  background: #0a0a0a !important;
+  border-color: #282828 !important;
+}
+
+::ng-deep body.dark-mode .snooze-tab-buttons .tab-btn {
+  color: #a1a1aa !important;
+}
+
+::ng-deep body.dark-mode .snooze-tab-buttons .tab-btn.active {
+  background: #facc15 !important;
+  color: #000000 !important;
+}
+
+::ng-deep body.dark-mode .snooze-until-badge {
+  background: #1c1c1c !important;
+  border-color: #282828 !important;
+  color: #facc15 !important;
+}
+
+::ng-deep body.dark-mode .snooze-modal-close {
+  background: #1c1c1c !important;
+  border-color: #282828 !important;
+  color: #a1a1aa !important;
+}
+
+::ng-deep body.dark-mode .snooze-modal-close:hover {
+  background: #27272a !important;
+  color: #ffffff !important;
+}
+
+::ng-deep body.dark-mode .grid-pane {
+  background: #1c1c1c !important;
+  border-color: #282828 !important;
+}
+
+::ng-deep body.dark-mode .pane-sec-title {
+  color: #a1a1aa !important;
+}
+
+::ng-deep body.dark-mode .mode-option-card {
+  background: #242424 !important;
+  border-color: #282828 !important;
+}
+
+::ng-deep body.dark-mode .mode-option-card h3 {
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .mode-option-card.active {
+  border-color: #facc15 !important;
+  background: rgba(250, 204, 21, 0.1) !important;
+}
+
+::ng-deep body.dark-mode .mode-option-card.active h3,
+::ng-deep body.dark-mode .mode-option-card.active i {
+  color: #facc15 !important;
+}
+
+::ng-deep body.dark-mode .checklist-row {
+  background: #242424 !important;
+  border-color: #282828 !important;
+}
+
+::ng-deep body.dark-mode .checklist-row:hover {
+  border-color: #facc15 !important;
+}
+
+::ng-deep body.dark-mode .checklist-row.checked {
+  border-color: #facc15 !important;
+}
+
+::ng-deep body.dark-mode .row-item-name {
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .row-checkbox {
+  background: #141414 !important;
+  border-color: #3f3f46 !important;
+}
+
+::ng-deep body.dark-mode .checklist-row.checked .row-checkbox {
+  background: #facc15 !important;
+  border-color: #facc15 !important;
+}
+
+::ng-deep body.dark-mode .checklist-row.checked .row-checkbox i {
+  color: #000000 !important;
+}
+
+::ng-deep body.dark-mode .snooze-pane-search input {
+  background: #242424 !important;
+  border-color: #282828 !important;
+  color: #ffffff !important;
+}
+
+::ng-deep body.dark-mode .selected-item-pill {
+  background: #242424 !important;
+  border-color: #282828 !important;
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .selected-item-pill span {
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .selected-item-pill i {
+  color: #a1a1aa !important;
+}
+
+::ng-deep body.dark-mode .selected-item-pill i:hover {
+  color: #ef4444 !important;
+}
+
+::ng-deep body.dark-mode .selected-summary {
+  color: #a1a1aa !important;
+}
+
+::ng-deep body.dark-mode .sp-title {
+  color: #ffffff !important;
+}
+
+::ng-deep body.dark-mode .sp-desc {
+  color: #a1a1aa !important;
+}
+
+::ng-deep body.dark-mode .sp-label {
+  color: #a1a1aa !important;
+}
+
+::ng-deep body.dark-mode .sp-btn-cancel, 
+::ng-deep body.dark-mode .sc-btn-cancel {
+  background: #242424 !important;
+  border: 1px solid #282828 !important;
+  color: #e4e4e7 !important;
+}
+
+::ng-deep body.dark-mode .sp-btn-cancel:hover, 
+::ng-deep body.dark-mode .sc-btn-cancel:hover {
+  background: #27272a !important;
+}
+
+::ng-deep body.dark-mode .snooze-datepicker input {
+  background: #242424 !important;
+  border-color: #282828 !important;
+  color: #ffffff !important;
+}
+
+::ng-deep body.dark-mode .sc-icon-wrap {
+  background: #1c1c1c !important;
+  border-color: #282828 !important;
+  color: #facc15 !important;
+}
+
+::ng-deep body.dark-mode .sc-title {
+  color: #ffffff !important;
+}
+
+::ng-deep body.dark-mode .sc-desc {
+  color: #a1a1aa !important;
+}
+
 

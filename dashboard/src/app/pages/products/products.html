@@ -606,7 +606,11 @@
             placeholder="Select time"
             appendTo="body"
             styleClass="snooze-datepicker"
-          ></p-datepicker>
+          >
+            <ng-template pTemplate="inputicon">
+              <i class="pi pi-clock"></i>
+            </ng-template>
+          </p-datepicker>
         </div>
       </div>
     </ng-container>
@@ -716,10 +720,12 @@
           <p>No items found.</p>
         </div>
 
-        <!-- Initial loading state -->
-        <div class="snooze-mini-loader" *ngIf="loading() && snoozeOffset === 0">
-          <span class="mini-spinner"></span>
-          <span class="mini-loader-text">Loading...</span>
+        <!-- Initial loading state: Premium Shimmer Loader -->
+        <div *ngIf="loading() && snoozeOffset === 0" class="column-skeleton-loader" style="padding: 0; gap: 8px; width: 100%;">
+          <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5,6]" style="padding: 10px; border-radius: 8px; justify-content: flex-start; gap: 10px;">
+            <div class="skeleton-circle" style="width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;"></div>
+            <div class="skeleton-bar" style="width: 60%; height: 14px; border-radius: 6px; flex-shrink: 0;"></div>
+          </div>
         </div>
 
 
