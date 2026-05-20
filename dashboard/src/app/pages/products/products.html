@@ -693,16 +693,16 @@
           </div>
         </div>
 
-        <!-- Initial loading state: Premium Shimmer Loader — only on first fetch -->
-        <div *ngIf="loading() && snoozeOffset === 0" class="column-skeleton-loader" style="padding: 0; gap: 8px; width: 100%;">
+        <!-- Initial loading state: Premium Shimmer (only when no items loaded yet) -->
+        <div *ngIf="loading() && snoozeOffset === 0 && snoozeFilteredItems().length === 0" class="column-skeleton-loader" style="padding: 0; gap: 8px; width: 100%;">
           <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5,6]" style="padding: 10px; border-radius: 8px; justify-content: flex-start; gap: 10px;">
             <div class="skeleton-circle" style="width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;"></div>
             <div class="skeleton-bar" style="width: 60%; height: 14px; border-radius: 6px; flex-shrink: 0;"></div>
           </div>
         </div>
 
-        <!-- List — shown whenever items exist (incl. during scroll pagination loading) -->
-        <div class="scrollable-checklist" (scroll)="onSnoozeScroll($event)" *ngIf="snoozeFilteredItems().length > 0 && !(loading() && snoozeOffset === 0)">
+        <!-- List — stays visible during scroll-appends, hidden only during initial load -->
+        <div class="scrollable-checklist" (scroll)="onSnoozeScroll($event)" *ngIf="snoozeFilteredItems().length > 0">
           <div
             *ngFor="let item of snoozeFilteredItems()"
             class="checklist-row"
@@ -716,7 +716,7 @@
             <span class="row-item-name">{{ item.name }}</span>
           </div>
 
-          <!-- Bottom mini spinner during scroll pagination -->
+          <!-- Bottom append spinner for subsequent pages -->
           <div class="snooze-mini-loader" *ngIf="loading() && snoozeOffset > 0">
             <span class="mini-spinner"></span>
             <span class="mini-loader-text">Loading more...</span>

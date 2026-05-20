@@ -1187,6 +1187,12 @@ export class ProductsComponent implements OnInit {
 
   loadSnoozeList() {
     const search = (this.snoozeSearchQuery || '').trim();
+
+    // Clear stale data immediately on fresh load so shimmer shows cleanly
+    if (this.snoozeOffset === 0) {
+      this.snoozeFilteredItems.set([]);
+    }
+
     if (this.snoozeMode() === 'products') {
       const params: any = {
         include_unavailable: 'true',

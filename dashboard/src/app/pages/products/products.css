@@ -16,7 +16,7 @@
 
 .catalogue-shell {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   flex: 1; /* Fill remaining height */
   min-height: 0;
   overflow-x: auto;
@@ -100,7 +100,7 @@
 
 /* ── Category List ── */
 .cat-all-btn {
-  padding: 16px 24px;
+  padding: 18px 24px;
   border-bottom: 1px solid var(--border);
   font-weight: 700;
   color: var(--text-mid);
@@ -109,6 +109,7 @@
   align-items: center;
   background: var(--bg-card);
   transition: all 0.2s;
+  min-height: 56px;
 }
 
 .cat-all-btn:hover { background: var(--surface-100); }
@@ -125,7 +126,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 16px 16px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--bg-card);
@@ -134,6 +135,7 @@
   font-weight: 600;
   margin-bottom: 8px;
   transition: all 0.2s;
+  min-height: 52px;
 }
 
 .cat-row:hover { 
@@ -337,7 +339,7 @@
 }
 
 .product-row {
-  padding: 16px;
+  padding: 18px 16px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--bg-card);
@@ -347,6 +349,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 56px;
 }
 
 .product-row:hover {
