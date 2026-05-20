@@ -1291,6 +1291,7 @@ export class ProductsComponent implements OnInit {
     return d.toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
   }
 
+
   triggerSnoozeConfirm() {
     if (this.snoozeSelectedItems.size === 0) return;
     this.snoozeConfirmVisible.set(true);
@@ -1313,8 +1314,9 @@ export class ProductsComponent implements OnInit {
       this.api.post('/products/snooze', { type, ids, snooze_until: combinedDateTime.toISOString() }).subscribe({
         next: () => {
           this.loading.set(false);
-          this.messageService.add({ severity: 'success', summary: 'Snoozed', detail: 'Items snoozed successfully.' });
           this.snoozeModalVisible.set(false);
+          this.snoozeSelectedItems.clear();
+          this.messageService.add({ severity: 'success', summary: 'Snoozed', detail: `${ids.length} item(s) snoozed successfully.` });
           this.offset = 0;
           this.loadProducts();
         },
@@ -1327,12 +1329,9 @@ export class ProductsComponent implements OnInit {
       this.api.post('/products/unsnooze', { type, ids }).subscribe({
         next: () => {
           this.loading.set(false);
-          this.messageService.add({ severity: 'success', summary: 'UnSnoozed', detail: 'Items restored successfully.' });
-          // Reload snooze list to reflect updates
+          this.snoozeModalVisible.set(false);
           this.snoozeSelectedItems.clear();
-          this.snoozeOffset = 0;
-          this.loadSnoozeList();
-          this.loading.set(true);
+          this.messageService.add({ severity: 'success', summary: 'UnSnoozed', detail: `${ids.length} item(s) restored successfully.` });
           this.offset = 0;
           this.loadProducts();
         },

@@ -1730,34 +1730,39 @@ body.dark-mode .snooze-tab-buttons .tab-btn.active {
 
 .snooze-grid-layout {
   display: grid;
-  grid-template-columns: 185px 1fr 240px;
+  grid-template-columns: 200px 1fr 280px;
   gap: 12px;
-  height: 490px;
+  height: 560px;
   min-height: 0;
 }
 
+
+
 /* Each pane */
 .grid-pane {
-  background: #dfdfdf;
-  border: 1px solid #c4c4c4;
+  background: #f0f0f0;
+  border: 1px solid #d8d8d8;
   border-radius: 12px;
   padding: 12px;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
+
 body.dark-mode .grid-pane {
-  background: var(--bg-card);     /* #18181b — follows codebase dark */
-  border-color: var(--border);    /* #27272a */
+  background: #141414;
+  border-color: #242424;
 }
+
 
 /* Pane section title */
 .pane-sec-title {
   font-size: 10px;
   font-weight: 800;
-  color: #333333;
+  color: #555555;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   margin-bottom: 8px;
@@ -1766,8 +1771,9 @@ body.dark-mode .grid-pane {
 }
 
 body.dark-mode .pane-sec-title {
-  color: var(--text-muted);
+  color: #666666;
 }
+
 
 
 /* ─── Left Pane: Mode Selector ───────────────────── */
@@ -1863,17 +1869,24 @@ body.dark-mode .mode-option-card.active h3 {
   width: 100%;
   padding: 6px 10px 6px 26px;
   border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text-dark);
+  border: 1px solid #cccccc;
+  background: #ffffff;
+  color: #222222;
   font-size: 12px;
   font-weight: 500;
   outline: none;
 }
 
+body.dark-mode .snooze-pane-search input {
+  border-color: #2e2e2e;
+  background: #1c1c1c;
+  color: #e0e0e0;
+}
+
 .snooze-pane-search input:focus {
   border-color: var(--accent-yellow);
 }
+
 
 /* Scrollable checklist */
 .scrollable-checklist {
@@ -1890,8 +1903,8 @@ body.dark-mode .mode-option-card.active h3 {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
   padding: 9px 10px;
   border-radius: 8px;
   cursor: pointer;
@@ -1900,31 +1913,32 @@ body.dark-mode .mode-option-card.active h3 {
 }
 
 body.dark-mode .checklist-row {
-  background: var(--bg-main);
-  border-color: var(--border);
+  background: #1c1c1c;
+  border-color: #2e2e2e;
 }
 
 .checklist-row:hover {
   border-color: var(--accent-yellow);
 }
 
+
 /* Checkbox */
 .row-checkbox {
   width: 16px;
   height: 16px;
-  border: 1.5px solid #9ca3af;
+  border: 1.5px solid #bbbbbb;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.15s;
-  background: var(--bg-card);
+  background: #ffffff;
 }
 
 body.dark-mode .row-checkbox {
-  border-color: #52525b;
-  background: var(--surface-100);
+  border-color: #404040;
+  background: #2a2a2a;
 }
 
 .checklist-row.checked .row-checkbox {
@@ -1933,13 +1947,14 @@ body.dark-mode .row-checkbox {
 }
 
 .checklist-row.checked .row-checkbox i {
-  color: #ffffff;            /* white on indigo in light mode */
+  color: #ffffff;   /* white tick on indigo (light) */
   font-size: 8px;
 }
 
 body.dark-mode .checklist-row.checked .row-checkbox i {
-  color: #000000;            /* black on yellow in dark mode */
+  color: #000000;   /* black tick on yellow (dark) */
 }
+
 
 /* Disabled (already snoozed) rows */
 .checklist-row.disabled-item {
@@ -1968,16 +1983,25 @@ body.dark-mode .checklist-row.checked .row-checkbox i {
 .row-item-name {
   font-size: 12px;
   font-weight: 700;
-  color: var(--text-dark);
+  color: #222222;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+body.dark-mode .row-item-name {
+  color: #e8e8e8;
+}
+
 .row-item-meta {
   font-size: 10px;
-  color: var(--text-muted);
+  color: #777777;
 }
+
+body.dark-mode .row-item-meta {
+  color: #666666;
+}
+
 
 .row-item-meta.active-snoozed {
   color: #f59e0b;
@@ -1987,10 +2011,26 @@ body.dark-mode .checklist-row.checked .row-checkbox i {
 /* Paginator */
 .snooze-paginator-wrap {
   margin-top: 6px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #d0d0d0;
   padding-top: 6px;
   flex-shrink: 0;
+  /* Let the paginator dropdown overflow above the pane */
+  overflow: visible;
+  position: relative;
+  z-index: 10;
 }
+
+body.dark-mode .snooze-paginator-wrap {
+  border-top-color: #2a2a2a;
+}
+
+/* Force the rows-per-page select panel above everything */
+::ng-deep .snooze-paginator .p-select-overlay,
+::ng-deep .snooze-paginator .p-dropdown-panel {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
 
 ::ng-deep .snooze-paginator.p-paginator {
   background: transparent !important;
@@ -2042,16 +2082,16 @@ body.dark-mode ::ng-deep .snooze-paginator .p-paginator-page.p-highlight {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1px solid #d8d8d8;
   padding: 7px 9px;
   border-radius: 7px;
   flex-shrink: 0;
 }
 
 body.dark-mode .preview-row {
-  background: var(--bg-main);
-  border-color: var(--border);
+  background: #1c1c1c;
+  border-color: #2e2e2e;
 }
 
 .preview-row-info {
@@ -2064,11 +2104,16 @@ body.dark-mode .preview-row {
 .preview-name {
   font-size: 12px;
   font-weight: 700;
-  color: var(--text-dark);
+  color: #222222;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+body.dark-mode .preview-name {
+  color: #e8e8e8;
+}
+
 
 .preview-badge {
   font-size: 9px;
@@ -2237,22 +2282,22 @@ body.dark-mode .snooze-trigger-btn:hover {
     justify-content: center;
   }
 
+  /* ≤ 767px: stacked panes, each scrollable */
   .snooze-grid-layout {
     display: flex !important;
     flex-direction: column !important;
     height: auto !important;
     gap: 10px;
-    /* Allow the whole grid to scroll as part of the dialog */
     overflow-y: visible !important;
   }
 
   .grid-pane {
     height: auto !important;
-    max-height: 260px;         /* each pane capped so all three fit */
+    max-height: 280px;         /* each pane capped so all three are visible */
     overflow-y: auto !important;
   }
 
-  /* Let mode selector auto-height (it's short) */
+  /* Mode selector is short — let it be natural height */
   .pane-left {
     max-height: none !important;
   }
