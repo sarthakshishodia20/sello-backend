@@ -693,8 +693,16 @@
           </div>
         </div>
 
-        <!-- List -->
-        <div class="scrollable-checklist" (scroll)="onSnoozeScroll($event)" *ngIf="snoozeFilteredItems().length > 0">
+        <!-- Initial loading state: Premium Shimmer Loader (shown first, hides list) -->
+        <div *ngIf="loading() && snoozeOffset === 0" class="column-skeleton-loader" style="padding: 0; gap: 8px; width: 100%;">
+          <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5,6]" style="padding: 10px; border-radius: 8px; justify-content: flex-start; gap: 10px;">
+            <div class="skeleton-circle" style="width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;"></div>
+            <div class="skeleton-bar" style="width: 60%; height: 14px; border-radius: 6px; flex-shrink: 0;"></div>
+          </div>
+        </div>
+
+        <!-- List — only shown when NOT in initial load -->
+        <div class="scrollable-checklist" (scroll)="onSnoozeScroll($event)" *ngIf="!loading() && snoozeFilteredItems().length > 0">
           <div
             *ngFor="let item of snoozeFilteredItems()"
             class="checklist-row"
@@ -708,7 +716,7 @@
             <span class="row-item-name">{{ item.name }}</span>
           </div>
 
-          <!-- Bottom append spinner -->
+          <!-- Bottom append spinner for subsequent pages -->
           <div class="snooze-mini-loader" *ngIf="loading() && snoozeOffset > 0">
             <span class="mini-spinner"></span>
             <span class="mini-loader-text">Loading more...</span>
@@ -718,14 +726,6 @@
         <div class="empty-list-placeholder" *ngIf="snoozeFilteredItems().length === 0 && !loading()">
           <i class="pi pi-folder-open"></i>
           <p>No items found.</p>
-        </div>
-
-        <!-- Initial loading state: Premium Shimmer Loader -->
-        <div *ngIf="loading() && snoozeOffset === 0" class="column-skeleton-loader" style="padding: 0; gap: 8px; width: 100%;">
-          <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5,6]" style="padding: 10px; border-radius: 8px; justify-content: flex-start; gap: 10px;">
-            <div class="skeleton-circle" style="width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0;"></div>
-            <div class="skeleton-bar" style="width: 60%; height: 14px; border-radius: 6px; flex-shrink: 0;"></div>
-          </div>
         </div>
 
 

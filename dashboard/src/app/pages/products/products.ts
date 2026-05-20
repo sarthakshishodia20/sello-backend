@@ -1217,36 +1217,48 @@ export class ProductsComponent implements OnInit {
     } else {
       this.api.get<any>('/products/category-snooze').subscribe({
         next: (snoozeRes) => {
-          const snoozeMap: Record<number, string> = {};
-          (snoozeRes.data.categories || []).forEach((c: any) => {
-            snoozeMap[c.category_id] = c.snooze_until;
-          });
-          let cats = this.categories().map((c: any) => ({
-            id: c.id,
-            name: c.name,
-            snooze_until: snoozeMap[c.id] || null
-          }));
+          const apiCategories: Array<{ category_id: number; snooze_until: string }> = snoozeRes.data.categories || [];
+
           if (this.snoozeTab() === 'unsnooze') {
-            cats = cats.filter(c => c.snooze_until && this.isItemCurrentlySnoozed(c.snooze_until));
-          }
-          const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
-          this.snoozeTotalRecords.set(filtered.length);
-          const sliced = filtered.slice(this.snoozeOffset, this.snoozeOffset + 25);
-          if (this.snoozeOffset === 0) {
-            this.snoozeFilteredItems.set(sliced);
+            // UnSnooze: ONLY show categories that the API confirmed are actively snoozed
+            // The API already filters snooze_until > NOW(), so just map names from local categories list
+            const catNameMap: Record<number, string> = {};
+            this.categories().forEach((c: any) => { catNameMap[c.id] = c.name; });
+            let cats = apiCategories.map(ac => ({
+              id: ac.category_id,
+              name: catNameMap[ac.category_id] || `Category #${ac.category_id}`,
+              snooze_until: ac.snooze_until
+            }));
+            if (search) cats = cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+            this.snoozeTotalRecords.set(cats.length);
+            const sliced = cats.slice(this.snoozeOffset, this.snoozeOffset + 25);
+            this.snoozeFilteredItems.set(this.snoozeOffset === 0 ? sliced : [...this.snoozeFilteredItems(), ...sliced]);
           } else {
-            this.snoozeFilteredItems.set([...this.snoozeFilteredItems(), ...sliced]);
+            // Snooze: show all categories, marking which ones are already snoozed (disabled)
+            const snoozeMap: Record<number, string> = {};
+            apiCategories.forEach((c: any) => { snoozeMap[c.category_id] = c.snooze_until; });
+            let cats = this.categories().map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              snooze_until: snoozeMap[c.id] || null
+            }));
+            if (search) cats = cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+            this.snoozeTotalRecords.set(cats.length);
+            const sliced = cats.slice(this.snoozeOffset, this.snoozeOffset + 25);
+            this.snoozeFilteredItems.set(this.snoozeOffset === 0 ? sliced : [...this.snoozeFilteredItems(), ...sliced]);
           }
           this.loading.set(false);
         },
         error: () => {
-          const cats = this.categories().map((c: any) => ({ id: c.id, name: c.name, snooze_until: null }));
-          this.snoozeTotalRecords.set(cats.length);
-          const sliced = cats.slice(this.snoozeOffset, this.snoozeOffset + 25);
-          if (this.snoozeOffset === 0) {
-            this.snoozeFilteredItems.set(sliced);
+          if (this.snoozeTab() === 'unsnooze') {
+            // On error in unsnooze mode: show empty (can't determine which are snoozed)
+            this.snoozeFilteredItems.set([]);
+            this.snoozeTotalRecords.set(0);
           } else {
-            this.snoozeFilteredItems.set([...this.snoozeFilteredItems(), ...sliced]);
+            const cats = this.categories().map((c: any) => ({ id: c.id, name: c.name, snooze_until: null }));
+            this.snoozeTotalRecords.set(cats.length);
+            const sliced = cats.slice(this.snoozeOffset, this.snoozeOffset + 25);
+            this.snoozeFilteredItems.set(this.snoozeOffset === 0 ? sliced : [...this.snoozeFilteredItems(), ...sliced]);
           }
           this.loading.set(false);
         }

@@ -5,7 +5,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px); /* Fill available viewport height perfectly without page scrolling */
+  height: calc(100vh - 80px); /* Matches dashboard topbar height exactly */
   padding: 24px;
   background-color: var(--bg-main);
   transition: background 0.3s;
