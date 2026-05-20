@@ -2394,25 +2394,17 @@ body.dark-mode .snooze-trigger-btn:hover {
   }
 }
 
-/* ≤ 1024px: catalogue shell stack */
+/* ≤ 1024px: keep panes horizontal, just allow horizontal scroll */
 @media (max-width: 1024px) {
   :host {
-    height: auto;
-    overflow-y: auto;
+    height: calc(100vh - 80px);
+    overflow: hidden;
   }
 
   .catalogue-shell {
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: auto;
-    gap: 20px;
-  }
-
-  .cat-pane, .product-pane, .detail-pane {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 450px !important;
+    flex-direction: row; /* Always horizontal — scroll sideways on small screens */
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .products-header-new {
