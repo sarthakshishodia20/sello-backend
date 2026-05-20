@@ -104,6 +104,7 @@
               <span class="ext-panel-sub">Webapp feature controls</span>
             </div>
 
+            <div class="ext-grid-wrap">
             <div class="ext-item">
               <div class="ext-item-icon" style="background: rgba(239,68,68,0.1); color: #ef4444;">
                 <i class="pi pi-box"></i>
@@ -191,6 +192,7 @@
               </div>
               <p-toggleswitch [ngModel]="settingsService.settings().snoozeEnabled" (ngModelChange)="toggleExtSnooze($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
             </div>
+            </div><!-- /ext-grid-wrap -->
 
 
           </div>

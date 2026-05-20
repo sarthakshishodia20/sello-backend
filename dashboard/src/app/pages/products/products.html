@@ -22,15 +22,21 @@
     </div>
 
     <!-- Snooze Trigger Button next to filter -->
-    <button 
+    <div
       *ngIf="viewMode() === 'merchant' && settingsService.settings().snoozeEnabled"
-      class="snooze-trigger-btn"
-      (click)="openSnoozePrompt()"
-      title="Snooze / UnSnooze Products & Categories"
+      class="snooze-trigger-wrap"
+      pTooltip="Temporarily hide products or entire categories from ordering. Set a date &amp; time and items auto-restore when the timer expires."
+      tooltipPosition="bottom"
+      [showDelay]="400"
     >
-      <i class="pi pi-clock"></i>
-      <span>Snooze</span>
-    </button>
+      <button
+        class="snooze-trigger-btn"
+        (click)="openSnoozePrompt()"
+      >
+        <i class="pi pi-clock"></i>
+        <span>Snooze</span>
+      </button>
+    </div>
 
     <div class="view-mode-badge" [class.master-mode]="viewMode() === 'master'">
       <i class="pi" [class.pi-globe]="viewMode() === 'master'" [class.pi-shop]="viewMode() !== 'master'"></i>
@@ -683,6 +689,7 @@
           </div>
         </div>
 
+        <!-- List -->
         <div class="scrollable-checklist" *ngIf="!loading()">
           <div
             *ngFor="let item of snoozeFilteredItems()"
@@ -694,39 +701,21 @@
             <div class="row-checkbox" [class.disabled-cb]="snoozeTab() === 'snooze' && item.snooze_until && isItemCurrentlySnoozed(item.snooze_until)">
               <i class="pi" [class.pi-check]="isSnoozeItemSelected(item.id)"></i>
             </div>
-            <div class="row-item-info">
-              <span class="row-item-name">{{ item.name }}</span>
-              <span class="row-item-meta active-snoozed" *ngIf="item.snooze_until && isItemCurrentlySnoozed(item.snooze_until)">
-                Snoozed until {{ getFormattedSnoozeUntil(item.snooze_until) }}
-              </span>
-            </div>
+            <span class="row-item-name">{{ item.name }}</span>
           </div>
 
-          <div class="empty-list-placeholder" *ngIf="snoozeFilteredItems().length === 0 && !loading()">
+          <div class="empty-list-placeholder" *ngIf="snoozeFilteredItems().length === 0">
             <i class="pi pi-folder-open"></i>
             <p>No items found.</p>
           </div>
         </div>
 
-        <!-- Loading state -->
-        <div class="snooze-list-loading" *ngIf="loading()">
-          <div class="skeleton-item" *ngFor="let i of [1,2,3,4,5]">
-            <div class="skeleton-bar" style="width: 70%; height: 14px; border-radius: 6px;"></div>
-          </div>
+        <!-- Inline mini loader -->
+        <div class="snooze-mini-loader" *ngIf="loading()">
+          <span class="mini-spinner"></span>
+          <span class="mini-loader-text">Loading...</span>
         </div>
 
-        <!-- Pagination -->
-        <div class="snooze-paginator-wrap" *ngIf="snoozeTotalRecords() > snoozeLimit">
-          <p-paginator
-            [first]="snoozeOffset"
-            [rows]="snoozeLimit"
-            [totalRecords]="snoozeTotalRecords()"
-            [rowsPerPageOptions]="[10, 25, 100]"
-
-            (onPageChange)="onSnoozePage($event)"
-            styleClass="snooze-paginator"
-          ></p-paginator>
-        </div>
       </div>
 
       <!-- RIGHT: Selected Items -->

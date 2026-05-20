@@ -1190,15 +1190,13 @@ export class ProductsComponent implements OnInit {
     if (this.snoozeMode() === 'products') {
       const params: any = {
         include_unavailable: 'true',
-        limit: this.snoozeLimit,
-        offset: this.snoozeOffset
+        limit: 999,
+        offset: 0
       };
       if (search) params.search = search;
-      // For unsnooze tab: only fetch items that are currently snoozed
       if (this.snoozeTab() === 'unsnooze') {
         params.snooze_filter = 'active';
       }
-
       this.api.get<any>('/products/inherited', params).subscribe({
         next: (res) => {
           const list = (res.data.products || []).map((p: any) => ({
@@ -1207,52 +1205,39 @@ export class ProductsComponent implements OnInit {
             snooze_until: p.snooze_until
           }));
           this.snoozeFilteredItems.set(list);
-          this.snoozeTotalRecords.set(res.data.total || list.length);
+          this.snoozeTotalRecords.set(list.length);
           this.loading.set(false);
         },
         error: () => { this.loading.set(false); }
       });
     } else {
-      // Categories — fetch snooze status from API
       this.api.get<any>('/products/category-snooze').subscribe({
         next: (snoozeRes) => {
           const snoozeMap: Record<number, string> = {};
           (snoozeRes.data.categories || []).forEach((c: any) => {
             snoozeMap[c.category_id] = c.snooze_until;
           });
-
           let cats = this.categories().map((c: any) => ({
             id: c.id,
             name: c.name,
             snooze_until: snoozeMap[c.id] || null
           }));
-
-          // For unsnooze tab: only show categories that are currently snoozed
           if (this.snoozeTab() === 'unsnooze') {
             cats = cats.filter(c => c.snooze_until && this.isItemCurrentlySnoozed(c.snooze_until));
           }
-
           const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
-          this.snoozeFilteredItems.set(filtered.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
+          this.snoozeFilteredItems.set(filtered);
           this.snoozeTotalRecords.set(filtered.length);
           this.loading.set(false);
         },
         error: () => {
           const cats = this.categories().map((c: any) => ({ id: c.id, name: c.name, snooze_until: null }));
-          this.snoozeFilteredItems.set(cats.slice(this.snoozeOffset, this.snoozeOffset + this.snoozeLimit));
+          this.snoozeFilteredItems.set(cats);
           this.snoozeTotalRecords.set(cats.length);
           this.loading.set(false);
         }
       });
     }
-  }
-
-
-  onSnoozePage(event: any) {
-    this.snoozeOffset = event.first;
-    this.snoozeLimit = event.rows;
-    this.loading.set(true);
-    this.loadSnoozeList();
   }
 
   toggleSnoozeItemSelection(item: any) {

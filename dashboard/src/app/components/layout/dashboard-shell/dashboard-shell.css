@@ -386,24 +386,38 @@ body.dark-mode .yelo-logout-btn-icon:hover {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  width: 340px;
+  width: 560px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  overflow: hidden;
   z-index: 2000;
   animation: slideDownPanel 0.2s cubic-bezier(0.16,1,0.3,1);
 }
 
-@media (max-width: 480px) {
+/* 2-column grid wrapper inside the panel */
+.ext-grid-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 8px 0;
+}
+
+@media (max-width: 600px) {
   .ext-panel {
     position: fixed;
-    top: 80px;
+    top: 70px;
     left: 10px;
     right: 10px;
     width: calc(100% - 20px);
     border-radius: 16px;
+    max-height: calc(100vh - 90px);
+  }
+  .ext-grid-wrap {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -440,14 +454,15 @@ body.dark-mode .yelo-logout-btn-icon:hover {
 .ext-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 14px 18px;
   border-bottom: 1px solid var(--border);
   transition: background 0.15s;
 }
 
 .ext-item:last-child { border-bottom: none; }
-.ext-item:hover { background: var(--surface-100); }
+.ext-item:hover { background: var(--surface-100); border-radius: 12px; }
+
 
 .ext-item-icon {
   width: 40px;
@@ -858,7 +873,9 @@ body.dark-mode .yelo-logout-btn-icon:hover {
   .help-hero-banner { padding: 28px 24px 20px; }
   .help-hero-banner h4 { font-size: 1.2rem; }
 
-  .ext-panel { width: 290px; right: -10px; }
+  .ext-panel { width: calc(100vw - 32px); right: -8px; max-height: calc(100vh - 90px); }
+  .ext-grid-wrap { grid-template-columns: 1fr; }
+
   .ext-toggle-btn { padding: 8px 10px; }
 }
 
