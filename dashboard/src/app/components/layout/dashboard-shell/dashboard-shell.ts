@@ -84,34 +84,60 @@ export class DashboardShellComponent {
 
   toggleExtOutOfStock(val: boolean) {
     this.settingsService.updateSettings({ outOfStock: val });
+    this.showExtensionToast('Out of Stock', val);
   }
 
   toggleExtCustomBrand(val: boolean) {
     this.settingsService.updateSettings({ brandCustom: val });
+    this.showExtensionToast('Custom Brand', val);
   }
 
   toggleExtCOD(val: boolean) {
     this.settingsService.updateSettings({ codEnabled: val });
+    this.showExtensionToast('COD Available', val);
   }
 
   toggleExtFloatingIcons(val: boolean) {
     this.settingsService.updateSettings({ floatingIcons: val });
+    this.showExtensionToast('Floating Icons', val);
   }
 
   toggleExtSoundNotification(val: boolean) {
     this.settingsService.updateSettings({ soundNotificationEnabled: val });
+    this.showExtensionToast('Notification Sounds', val);
   }
 
   toggleExtAvailability(val: boolean) {
     this.settingsService.updateSettings({ availabilityEnabled: val });
+    this.showExtensionToast('Marketplace Availability', val);
   }
 
   toggleExtVoiceAI(val: boolean) {
     this.settingsService.updateSettings({ voiceAiEnabled: val });
+    this.showExtensionToast('AI & Voice Assistant', val);
   }
 
   toggleExtSnooze(val: boolean) {
     this.settingsService.updateSettings({ snoozeEnabled: val });
+    this.showExtensionToast('Snooze & UnSnooze', val);
+  }
+
+  private showExtensionToast(name: string, val: boolean) {
+    if (val) {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Extension Enabled',
+        detail: `${name} has been activated successfully.`,
+        life: 3000
+      });
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Extension Disabled',
+        detail: `${name} has been deactivated.`,
+        life: 3000
+      });
+    }
   }
 
 
