@@ -414,12 +414,14 @@ body.dark-mode .yelo-logout-btn-icon:hover {
     right: 10px;
     width: calc(100% - 20px);
     border-radius: 16px;
-    max-height: calc(100vh - 90px);
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
   }
   .ext-grid-wrap {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr !important;
   }
 }
+
 
 
 :host-context(body.dark-mode) .ext-panel {
@@ -641,14 +643,13 @@ body.dark-mode .yelo-logout-btn-icon:hover {
 /* ─────────────────────────────
    HELP DRAWER
 ───────────────────────────── */
-.help-content { height: 100%; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.help-content { height: 100%; display: block; padding: 0; overflow-y: auto; }
 
 .help-hero-banner {
   padding: 40px 40px 32px;
   background: var(--surface-100);
   border-bottom: 1px solid var(--border);
   text-align: center;
-  flex-shrink: 0;
 }
 
 .hero-logo {
@@ -674,10 +675,10 @@ body.dark-mode .yelo-logout-btn-icon:hover {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  flex: 1;
-  overflow-y: auto;
+  overflow: visible;
   scrollbar-width: none;
 }
+
 .help-sections::-webkit-scrollbar { display: none; }
 
 .help-card {
@@ -873,11 +874,28 @@ body.dark-mode .yelo-logout-btn-icon:hover {
   .help-hero-banner { padding: 28px 24px 20px; }
   .help-hero-banner h4 { font-size: 1.2rem; }
 
-  .ext-panel { width: calc(100vw - 32px); right: -8px; max-height: calc(100vh - 90px); }
-  .ext-grid-wrap { grid-template-columns: 1fr; }
-
+  .ext-panel { width: calc(100vw - 32px); right: -8px; max-height: calc(100vh - 120px) !important; overflow-y: auto !important; }
+  .ext-grid-wrap { grid-template-columns: 1fr 1fr !important; }
   .ext-toggle-btn { padding: 8px 10px; }
+
+  /* Compact extensions on mobile */
+  .ext-item {
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+  .ext-item-icon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.85rem !important;
+  }
+  .ext-item-info label {
+    font-size: 0.78rem !important;
+  }
+  .ext-item-info span {
+    display: none !important;
+  }
 }
+
 
 @media screen and (max-width: 480px) {
   .dashboard-topbar { padding: 0 8px !important; }

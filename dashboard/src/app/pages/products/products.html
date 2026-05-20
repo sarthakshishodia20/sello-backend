@@ -690,7 +690,7 @@
         </div>
 
         <!-- List -->
-        <div class="scrollable-checklist" *ngIf="!loading()">
+        <div class="scrollable-checklist" (scroll)="onSnoozeScroll($event)" *ngIf="snoozeFilteredItems().length > 0">
           <div
             *ngFor="let item of snoozeFilteredItems()"
             class="checklist-row"
@@ -704,17 +704,24 @@
             <span class="row-item-name">{{ item.name }}</span>
           </div>
 
-          <div class="empty-list-placeholder" *ngIf="snoozeFilteredItems().length === 0">
-            <i class="pi pi-folder-open"></i>
-            <p>No items found.</p>
+          <!-- Bottom append spinner -->
+          <div class="snooze-mini-loader" *ngIf="loading() && snoozeOffset > 0">
+            <span class="mini-spinner"></span>
+            <span class="mini-loader-text">Loading more...</span>
           </div>
         </div>
 
-        <!-- Inline mini loader -->
-        <div class="snooze-mini-loader" *ngIf="loading()">
+        <div class="empty-list-placeholder" *ngIf="snoozeFilteredItems().length === 0 && !loading()">
+          <i class="pi pi-folder-open"></i>
+          <p>No items found.</p>
+        </div>
+
+        <!-- Initial loading state -->
+        <div class="snooze-mini-loader" *ngIf="loading() && snoozeOffset === 0">
           <span class="mini-spinner"></span>
           <span class="mini-loader-text">Loading...</span>
         </div>
+
 
       </div>
 

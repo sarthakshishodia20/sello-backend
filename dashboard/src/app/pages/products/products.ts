@@ -1190,8 +1190,8 @@ export class ProductsComponent implements OnInit {
     if (this.snoozeMode() === 'products') {
       const params: any = {
         include_unavailable: 'true',
-        limit: 999,
-        offset: 0
+        limit: 10,
+        offset: this.snoozeOffset
       };
       if (search) params.search = search;
       if (this.snoozeTab() === 'unsnooze') {
@@ -1204,8 +1204,12 @@ export class ProductsComponent implements OnInit {
             name: p.effective_name,
             snooze_until: p.snooze_until
           }));
-          this.snoozeFilteredItems.set(list);
-          this.snoozeTotalRecords.set(list.length);
+          if (this.snoozeOffset === 0) {
+            this.snoozeFilteredItems.set(list);
+          } else {
+            this.snoozeFilteredItems.set([...this.snoozeFilteredItems(), ...list]);
+          }
+          this.snoozeTotalRecords.set(res.data.total || list.length);
           this.loading.set(false);
         },
         error: () => { this.loading.set(false); }
@@ -1226,19 +1230,41 @@ export class ProductsComponent implements OnInit {
             cats = cats.filter(c => c.snooze_until && this.isItemCurrentlySnoozed(c.snooze_until));
           }
           const filtered = search ? cats.filter(c => c.name.toLowerCase().includes(search.toLowerCase())) : cats;
-          this.snoozeFilteredItems.set(filtered);
           this.snoozeTotalRecords.set(filtered.length);
+          const sliced = filtered.slice(this.snoozeOffset, this.snoozeOffset + 10);
+          if (this.snoozeOffset === 0) {
+            this.snoozeFilteredItems.set(sliced);
+          } else {
+            this.snoozeFilteredItems.set([...this.snoozeFilteredItems(), ...sliced]);
+          }
           this.loading.set(false);
         },
         error: () => {
           const cats = this.categories().map((c: any) => ({ id: c.id, name: c.name, snooze_until: null }));
-          this.snoozeFilteredItems.set(cats);
           this.snoozeTotalRecords.set(cats.length);
+          const sliced = cats.slice(this.snoozeOffset, this.snoozeOffset + 10);
+          if (this.snoozeOffset === 0) {
+            this.snoozeFilteredItems.set(sliced);
+          } else {
+            this.snoozeFilteredItems.set([...this.snoozeFilteredItems(), ...sliced]);
+          }
           this.loading.set(false);
         }
       });
     }
   }
+
+  onSnoozeScroll(event: any) {
+    const el = event.target;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
+      if (!this.loading() && this.snoozeFilteredItems().length < this.snoozeTotalRecords()) {
+        this.snoozeOffset += 10;
+        this.loading.set(true);
+        this.loadSnoozeList();
+      }
+    }
+  }
+
 
   toggleSnoozeItemSelection(item: any) {
     if (this.snoozeTab() === 'snooze' && item.snooze_until && this.isItemCurrentlySnoozed(item.snooze_until)) {

@@ -5,13 +5,14 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 80px); /* Fill available viewport height */
+  height: calc(100vh - 41px); /* Fill available viewport height */
   padding: 24px;
   background-color: var(--bg-main);
   transition: background 0.3s;
   overflow: hidden; /* No page scroll */
   gap: 20px;
 }
+
 
 .catalogue-shell {
   display: flex;
@@ -2418,3 +2419,213 @@ body.dark-mode .snooze-trigger-btn:hover {
     justify-content: space-between;
   }
 }
+
+/* Scoping bypass for PrimeNG overlays (Light & Dark Mode) */
+::ng-deep {
+  /* Yellow buttons text color strictly black */
+  .snooze-prompt-dialog .sp-btn-confirm,
+  .snooze-manager-dialog .action-confirm-btn,
+  .snooze-confirm-dialog .sc-btn-confirm,
+  .snooze-tab-buttons .tab-btn.active {
+    background: #facc15 !important;
+    color: #000000 !important;
+  }
+
+  /* Dark mode overrides for dialogs attached to body */
+  body.dark-mode {
+    .snooze-prompt-dialog .p-dialog,
+    .snooze-manager-dialog .p-dialog,
+    .snooze-confirm-dialog .p-dialog {
+      background: #141414 !important;
+      border: 1px solid #282828 !important;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+      color: #e4e4e7 !important;
+    }
+
+    .snooze-prompt-dialog .p-dialog-content,
+    .snooze-manager-dialog .p-dialog-content,
+    .snooze-confirm-dialog .p-dialog-content {
+      background: #141414 !important;
+      color: #e4e4e7 !important;
+    }
+
+    /* Modal inside */
+    .snooze-modal-inner, .snooze-prompt-wrapper, .snooze-confirm-inner {
+      background: #141414 !important;
+      color: #e4e4e7 !important;
+    }
+
+    /* Header tabs */
+    .snooze-modal-top-bar {
+      border-bottom-color: #282828 !important;
+    }
+
+    .snooze-tab-buttons {
+      background: #0a0a0a !important;
+      border-color: #282828 !important;
+    }
+
+    .snooze-tab-buttons .tab-btn {
+      color: #a1a1aa !important;
+    }
+
+    .snooze-tab-buttons .tab-btn.active {
+      background: #facc15 !important;
+      color: #000000 !important;
+    }
+
+    .snooze-until-badge {
+      background: #1c1c1c !important;
+      border-color: #282828 !important;
+      color: #facc15 !important;
+    }
+
+    .snooze-modal-close {
+      background: #1c1c1c !important;
+      border-color: #282828 !important;
+      color: #a1a1aa !important;
+    }
+
+    .snooze-modal-close:hover {
+      background: #27272a !important;
+      color: #ffffff !important;
+    }
+
+    /* Panes background: sleek dark grey shade */
+    .grid-pane {
+      background: #1c1c1c !important;
+      border-color: #282828 !important;
+    }
+
+    .pane-sec-title {
+      color: #a1a1aa !important;
+    }
+
+    /* Mode option card */
+    .mode-option-card {
+      background: #242424 !important;
+      border-color: #282828 !important;
+    }
+
+    .mode-option-card h3 {
+      color: #e4e4e7 !important;
+    }
+
+    .mode-option-card.active {
+      border-color: #facc15 !important;
+      background: rgba(250, 204, 21, 0.1) !important;
+    }
+
+    .mode-option-card.active h3,
+    .mode-option-card.active i {
+      color: #facc15 !important;
+    }
+
+    /* Checklist Row */
+    .checklist-row {
+      background: #242424 !important;
+      border-color: #282828 !important;
+    }
+
+    .checklist-row:hover {
+      border-color: #facc15 !important;
+    }
+
+    .checklist-row.checked {
+      border-color: #facc15 !important;
+    }
+
+    .row-item-name {
+      color: #e4e4e7 !important;
+    }
+
+    .row-checkbox {
+      background: #141414 !important;
+      border-color: #3f3f46 !important;
+    }
+
+    .checklist-row.checked .row-checkbox {
+      background: #facc15 !important;
+      border-color: #facc15 !important;
+    }
+
+    .checklist-row.checked .row-checkbox i {
+      color: #000000 !important;
+    }
+
+    .snooze-pane-search input {
+      background: #242424 !important;
+      border-color: #282828 !important;
+      color: #ffffff !important;
+    }
+
+    /* Selected preview items */
+    .selected-item-pill {
+      background: #242424 !important;
+      border-color: #282828 !important;
+      color: #e4e4e7 !important;
+    }
+
+    .selected-item-pill span {
+      color: #e4e4e7 !important;
+    }
+
+    .selected-item-pill i {
+      color: #a1a1aa !important;
+    }
+
+    .selected-item-pill i:hover {
+      color: #ef4444 !important;
+    }
+
+    .selected-summary {
+      color: #a1a1aa !important;
+    }
+
+    /* Prompt details */
+    .sp-title {
+      color: #ffffff !important;
+    }
+
+    .sp-desc {
+      color: #a1a1aa !important;
+    }
+
+    .sp-label {
+      color: #a1a1aa !important;
+    }
+
+    .sp-btn-cancel, .sc-btn-cancel {
+      background: #242424 !important;
+      border: 1px solid #282828 !important;
+      color: #e4e4e7 !important;
+    }
+
+    .sp-btn-cancel:hover, .sc-btn-cancel:hover {
+      background: #27272a !important;
+    }
+
+    /* Datepicker styling inside overlay */
+    .snooze-datepicker input {
+      background: #242424 !important;
+      border-color: #282828 !important;
+      color: #ffffff !important;
+    }
+
+    /* Confirm Dialog */
+    .sc-icon-wrap {
+      background: #1c1c1c !important;
+      border-color: #282828 !important;
+      color: #facc15 !important;
+    }
+
+    .sc-title {
+      color: #ffffff !important;
+    }
+
+    .sc-desc {
+      color: #a1a1aa !important;
+    }
+  }
+}
+
