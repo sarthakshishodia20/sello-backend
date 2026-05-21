@@ -14,9 +14,35 @@
     <!-- Actions & Filter -->
     <div class="header-actions">
       <!-- Search Box -->
-      <div class="search-box-pill">
-        <i class="pi pi-search"></i>
-        <input type="text" placeholder="Search item..." (input)="onSearch($event)">
+      <div class="product-search-bar" (click)="$event.stopPropagation()">
+        <i class="pi pi-search search-icon"></i>
+        <input 
+          type="text" 
+          placeholder="Search item..." 
+          [value]="search"
+          (input)="onSearch($event)"
+          class="product-search-input" />
+        
+        <!-- Voice Search Button -->
+        <button 
+          *ngIf="hasVoiceAiAccess()"
+          class="voice-search-btn" 
+          [class.listening]="isListening()"
+          (click)="$event.stopPropagation(); startVoiceSearch()"
+          [title]="isListening() ? 'Stop listening' : 'Search by voice'">
+          <i class="pi" [class.pi-microphone]="!isListening()" [class.pi-stop-circle]="isListening()"></i>
+        </button>
+
+        <!-- Suggestions Dropdown -->
+        <div class="search-suggestions" *ngIf="hasVoiceAiAccess() && showSuggestions() && suggestions().length > 0" (click)="$event.stopPropagation()">
+          <div 
+            class="suggestion-item" 
+            *ngFor="let s of suggestions()" 
+            (click)="selectSuggestion(s)">
+            <i class="pi pi-search suggestion-icon"></i>
+            <span>{{ s }}</span>
+          </div>
+        </div>
       </div>
 
       <!-- Action Buttons Wrapper -->
@@ -49,7 +75,7 @@
   <!-- ══ Products Settings Table with Page Pagination ══ -->
   <section class="table-section">
     <p-table 
-      [value]="getFilteredProducts()" 
+      [value]="products()" 
       [loading]="loading()"
       [paginator]="true" 
       [rows]="10"

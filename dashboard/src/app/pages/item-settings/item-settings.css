@@ -212,13 +212,13 @@
   }
 }
 
-/* Standard search-box-pill and btn-action-icon styles */
-.search-box-pill {
+/* Product Search Bar */
+.product-search-bar {
   position: relative;
   width: 250px;
 }
 
-.search-box-pill i {
+.product-search-bar .search-icon {
   position: absolute;
   left: 14px;
   top: 50%;
@@ -226,24 +226,102 @@
   color: #64748b;
   font-size: 0.9rem;
   pointer-events: none;
+  z-index: 10;
 }
 
-.search-box-pill input {
-  width: 100%;
-  padding: 10px 14px 10px 38px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-  background: var(--primary-light);
-  color: var(--text-dark);
-  font-size: 0.9rem;
+.product-search-input {
+  width: 100% !important;
+  padding: 10px 40px 10px 38px !important;
+  border-radius: 100px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--primary-light) !important;
+  color: var(--text-dark) !important;
+  font-size: 0.9rem !important;
+  height: 42px !important;
+  transition: all 0.2s !important;
+}
+
+.product-search-input:focus {
+  background: var(--white) !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.05) !important;
+  outline: none !important;
+}
+
+/* Voice Search Button */
+.voice-search-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   transition: all 0.2s;
+  z-index: 10;
+  font-size: 13px;
 }
 
-.search-box-pill input:focus {
+.voice-search-btn:hover {
+  color: var(--primary);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.voice-search-btn.listening {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* Search Suggestions Dropdown */
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
   background: var(--white);
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
-  outline: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  z-index: 9999;
+  overflow: hidden;
+  animation: fadeSlideDown 0.15s ease;
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+
+.suggestion-item:last-child { border-bottom: none; }
+
+.suggestion-item:hover {
+  background: var(--primary-light);
+}
+
+.suggestion-icon {
+  font-size: 11px;
+  color: #64748b;
+  flex-shrink: 0;
 }
 
 .btn-action-icon {
@@ -272,13 +350,41 @@
 }
 
 /* Dark Mode overrides specifically for these elements */
-:host-context(body.dark-mode) .search-box-pill input {
+:host-context(body.dark-mode) .product-search-input {
   background: #18181b !important;
   color: #fafafa !important;
   border-color: #27272a !important;
 }
 
-:host-context(body.dark-mode) .search-box-pill i {
+:host-context(body.dark-mode) .product-search-bar .search-icon {
+  color: #a1a1aa !important;
+}
+
+:host-context(body.dark-mode) .voice-search-btn {
+  color: #a1a1aa !important;
+}
+
+:host-context(body.dark-mode) .voice-search-btn:hover {
+  color: #fbbf24 !important;
+  background: rgba(251, 191, 36, 0.08) !important;
+}
+
+:host-context(body.dark-mode) .search-suggestions {
+  background: #18181b !important;
+  border-color: #27272a !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+:host-context(body.dark-mode) .suggestion-item {
+  color: #e4e4e7 !important;
+  border-bottom-color: #27272a !important;
+}
+
+:host-context(body.dark-mode) .suggestion-item:hover {
+  background: #27272a !important;
+}
+
+:host-context(body.dark-mode) .suggestion-icon {
   color: #a1a1aa !important;
 }
 
