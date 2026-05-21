@@ -3,8 +3,20 @@ const { sendSuccess, sendError, sendNotFound } = require('../../../utilities/res
 const { trackError }              = require('../../../utilities/errorTracker');
 const { formatImageUrls, cleanImageUrl } = require('../../../utilities/imageUtil');
 const logger                      = require('../../../utilities/loggingUtil');
+const fs                          = require('fs');
+const cloudinary                  = require('cloudinary').v2;
 
 const MODULE = 'ProductController';
+
+// Configure Cloudinary only if environment variables are set
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+  });
+}
+
 
 // ─── Private Helpers ─────────────────────────────────────────────────────────
 
@@ -395,14 +407,40 @@ async function uploadImage(req, res) {
     if (!req.file) {
       return sendError(res, 'No file uploaded', 400);
     }
+
+    // Check if Cloudinary is configured
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+      logger.info(MODULE, 'UPLOADING_TO_CLOUDINARY', { path: req.file.path });
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'sello_products'
+      });
+
+      // Cleanup local temp file
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkErr) {
+        logger.error(MODULE, 'UNLINK_TEMP_FILE_ERROR', { error: unlinkErr.message });
+      }
+
+      return sendSuccess(res, 'Image uploaded successfully to Cloudinary', { imageUrl: result.secure_url });
+    }
+
+    // Fallback to local static serving
     const host     = `${req.protocol}://${req.get('host')}`;
     const imageUrl = `${host}/uploads/${req.file.filename}`;
-    return sendSuccess(res, 'Image uploaded successfully', { imageUrl });
+    return sendSuccess(res, 'Image uploaded successfully (fallback to local server)', { imageUrl });
   } catch (err) {
     logger.error(MODULE, 'UPLOAD_IMAGE_ERROR', { error: err.message });
+    // Attempt cleanup if local file exists
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (_) {}
+    }
     return sendError(res, 'Failed to upload image', 500);
   }
 }
+
 
 /**
  * POST /api/products/generate-description
