@@ -76,8 +76,12 @@
           </td>
           <td>
             <div class="prod-img-box">
-              <img *ngIf="product.effective_image_url" [src]="product.effective_image_url" class="tbl-prod-img" [alt]="product.effective_name" />
-              <div *ngIf="!product.effective_image_url" class="tbl-prod-placeholder"><i class="pi pi-image"></i></div>
+              <img 
+                [src]="product.effective_image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" 
+                class="tbl-prod-img" 
+                [alt]="product.effective_name" 
+                (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+              />
             </div>
           </td>
           <td>

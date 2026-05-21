@@ -82,8 +82,12 @@
           <div class="top-selling-slider">
             <div class="ts-card" *ngFor="let tp of topSellingProducts()">
               <div class="ts-img-container" (click)="openLightbox(tp.image_url)">
-                <img *ngIf="tp.image_url" [src]="tp.image_url" class="ts-img" [alt]="tp.name" />
-                <div *ngIf="!tp.image_url" class="ts-img-placeholder"><i class="pi pi-image"></i></div>
+                <img 
+                  [src]="tp.image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" 
+                  class="ts-img" 
+                  [alt]="tp.name" 
+                  (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+                />
                 <div class="ts-oos-overlay" *ngIf="!canAddToCart(tp)">
                   <span>{{ isSnoozed(tp) ? 'Snoozed' : 'Out of Stock' }}</span>
                 </div>
@@ -143,8 +147,12 @@
           <!-- Image + Action Side -->
           <div class="prod-right">
             <div class="prod-img-wrap" (click)="openLightbox(p.image_url)">
-              <img *ngIf="p.image_url" [src]="p.image_url" [alt]="p.name" class="prod-img" />
-              <div *ngIf="!p.image_url" class="prod-img-placeholder"><i class="pi pi-image"></i></div>
+              <img 
+                [src]="p.image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" 
+                [alt]="p.name" 
+                class="prod-img" 
+                (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+              />
               <span class="oos-badge snooze-oos-badge" *ngIf="isSnoozed(p)" style="background: #14b8a6; color: #fff;"><i class="pi pi-clock" style="font-size: 10px;"></i> Snoozed</span>
               <span class="oos-badge" *ngIf="!isSnoozed(p) && !canAddToCart(p)">Out of Stock</span>
               <button
