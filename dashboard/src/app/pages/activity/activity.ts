@@ -40,8 +40,8 @@ export class ActivityComponent implements OnInit {
     
     this.api.get(`/activity/${role}?page=${page}&limit=${rows}`).subscribe({
       next: (res: any) => {
-        this.activities.set(res.data || []);
-        this.totalRecords.set(res.total || 0);
+        this.activities.set(res.data?.data || []);
+        this.totalRecords.set(res.data?.total || 0);
         this.loading.set(false);
       },
       error: () => {
@@ -53,6 +53,16 @@ export class ActivityComponent implements OnInit {
   showDetails(activity: any) {
     this.selectedActivity.set(activity);
     this.detailsVisible.set(true);
+    
+    // Fetch request/response payload details securely on demand
+    this.api.get(`/activity/detail/${activity.id}`).subscribe({
+      next: (res: any) => {
+        if (res && res.data) {
+          this.selectedActivity.set(res.data);
+        }
+      },
+      error: (err) => console.error('Failed to load activity details:', err)
+    });
   }
 
   formatIP(ip: string): string {

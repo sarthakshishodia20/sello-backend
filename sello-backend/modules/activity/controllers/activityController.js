@@ -89,6 +89,46 @@ async function getMerchantActivity(req, res, next) {
   }
 }
 
+async function getActivityDetail(req, res, next) {
+  try {
+    const { id } = req.params;
+    const user = req.selloUser;
+
+    if (user.role === 'MASTERBRAND_ADMIN' || user.role === 'SUPER_ADMIN') {
+      const rows = await db.query(
+        `SELECT a.*, u.name as user_name 
+         FROM tb_masterbrand_activity a
+         LEFT JOIN tb_users u ON a.user_id = u.id
+         WHERE a.id = ? AND a.masterbrand_id = ?
+         LIMIT 1`,
+        [id, user.masterbrandId || 1]
+      );
+      if (rows.length === 0) {
+        return sendForbidden(res, 'Activity log not found or access denied');
+      }
+      return sendSuccess(res, 'Admin activity detail fetched', rows[0]);
+    } else if (user.role === 'MERCHANT_ADMIN') {
+      const rows = await db.query(
+        `SELECT a.*, u.name as user_name 
+         FROM tb_merchant_activity a
+         LEFT JOIN tb_users u ON a.user_id = u.id
+         WHERE a.id = ? AND a.merchant_id = ?
+         LIMIT 1`,
+        [id, user.merchantId]
+      );
+      if (rows.length === 0) {
+        return sendForbidden(res, 'Activity log not found or access denied');
+      }
+      return sendSuccess(res, 'Merchant activity detail fetched', rows[0]);
+    } else {
+      return sendForbidden(res, 'You do not have permission to view activity details');
+    }
+  } catch (err) {
+    logger.error(MODULE, 'GET_ACTIVITY_DETAIL_ERROR', { error: err.message });
+    next(err);
+  }
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
-module.exports = { getAdminActivity, getMerchantActivity };
+module.exports = { getAdminActivity, getMerchantActivity, getActivityDetail };
