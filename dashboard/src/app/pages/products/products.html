@@ -360,19 +360,15 @@
         <textarea pInputTextarea [(ngModel)]="form.ai_description" rows="4" class="ai-textarea" placeholder="AI-generated description..."></textarea>
       </div>
 
-      <!-- AI Image Generator Button -->
-      <div class="ai-image-trigger-row">
-        <div class="ai-image-trigger-left">
-          <div class="ai-img-icon-wrap"><i class="pi pi-image"></i></div>
-          <div>
-            <div class="ai-img-label">AI Product Image</div>
-            <div class="ai-img-sub">Generate 4 AI images from product name</div>
-          </div>
+      <!-- AI Image Search -->
+      <div class="dialog-field" style="margin-top: 4px;">
+        <div class="label-row">
+          <label>AI Product Image</label>
+          <button class="ai-regen-btn" (click)="generateAiImages()" [disabled]="aiImagePickerLoading()">
+            <i class="pi" [class.pi-sparkles]="!aiImagePickerLoading()" [class.pi-spin]="aiImagePickerLoading()" [class.pi-spinner]="aiImagePickerLoading()"></i>
+            {{ aiImagePickerLoading() ? 'Searching...' : 'Find Images' }}
+          </button>
         </div>
-        <button class="ai-regen-btn ai-img-trigger-btn" (click)="generateAiImages()" [disabled]="aiImagePickerLoading()">
-          <i class="pi" [class.pi-sparkles]="!aiImagePickerLoading()" [class.pi-spin]="aiImagePickerLoading()" [class.pi-spinner]="aiImagePickerLoading()"></i>
-          {{ aiImagePickerLoading() ? 'Generating...' : 'Generate Images' }}
-        </button>
       </div>
 
       <div class="dialog-field" style="margin-top: 16px;">
@@ -453,66 +449,49 @@
   </ng-template>
 </p-drawer>
 
-<!-- ═══ AI Image Picker Modal ═══ -->
+<!-- ═══ AI Image Picker Dialog ═══ -->
 <p-dialog
   [(visible)]="aiImagePickerVisible"
+  [header]="'Find Image — ' + (form.name || 'Product')"
   [modal]="true"
-  [style]="{ width: 'min(96vw, 680px)' }"
-  [showHeader]="false"
+  [style]="{ width: 'min(96vw, 600px)' }"
   [draggable]="false"
   [resizable]="false"
-  styleClass="ai-image-picker-dialog"
+  styleClass="yelo-product-dialog"
   appendTo="body"
 >
-  <div class="aip-wrapper">
 
-    <!-- Header -->
-    <div class="aip-header">
-      <div class="aip-title-group">
-        <div class="aip-icon-wrap"><i class="pi pi-sparkles"></i></div>
-        <div>
-          <div class="aip-title">AI Image Generator</div>
-          <div class="aip-subtitle">{{ form.name || 'Product' }} &mdash; Select one image</div>
+  <!-- Image Grid -->
+  <div class="aip-grid">
+    <ng-container *ngIf="aiImagePickerLoading()">
+      <div class="aip-card" *ngFor="let i of [1,2,3,4]">
+        <div class="aip-shimmer"></div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!aiImagePickerLoading()">
+      <div
+        *ngFor="let imgUrl of aiImageOptions(); let i = index"
+        class="aip-card"
+        [class.aip-selected]="selectedAiImageIndex() === i"
+        (click)="selectedAiImageIndex.set(i)"
+      >
+        <img [src]="imgUrl" alt="Option {{ i + 1 }}" class="aip-img" loading="lazy" />
+        <div class="aip-check" *ngIf="selectedAiImageIndex() === i">
+          <i class="pi pi-check"></i>
         </div>
       </div>
-      <button class="aip-close-btn" (click)="aiImagePickerVisible.set(false)">
-        <i class="pi pi-times"></i>
-      </button>
-    </div>
+    </ng-container>
+  </div>
 
-    <!-- Image Grid -->
-    <div class="aip-grid">
-      <ng-container *ngFor="let imgUrl of aiImageOptions(); let i = index">
-
-        <!-- Shimmer while loading -->
-        <div class="aip-card" *ngIf="aiImagePickerLoading()">
-          <div class="aip-shimmer"></div>
-        </div>
-
-        <!-- Loaded image -->
-        <div
-          class="aip-card"
-          *ngIf="!aiImagePickerLoading()"
-          [class.aip-selected]="selectedAiImageIndex() === i"
-          (click)="selectedAiImageIndex.set(i)"
-        >
-          <img [src]="imgUrl" alt="AI option {{ i + 1 }}" class="aip-img" loading="lazy" />
-          <div class="aip-check" *ngIf="selectedAiImageIndex() === i">
-            <i class="pi pi-check"></i>
-          </div>
-          <div class="aip-card-badge">Option {{ i + 1 }}</div>
-        </div>
-
-      </ng-container>
-    </div>
-
-    <!-- Footer Actions -->
-    <div class="aip-footer">
-      <button class="aip-regen-btn" (click)="regenerateAiImages()" [disabled]="aiImagePickerLoading() || aiImageApplying()">
+  <!-- Footer -->
+  <ng-template pTemplate="footer">
+    <div class="drawer-footer-actions">
+      <button class="yelo-btn-secondary" (click)="regenerateAiImages()" [disabled]="aiImagePickerLoading() || aiImageApplying()">
         <i class="pi pi-refresh"></i> Regenerate
       </button>
       <button
-        class="aip-apply-btn"
+        class="yelo-btn-primary"
         [disabled]="selectedAiImageIndex() === null || aiImageApplying()"
         (click)="applyAiImage()"
       >
@@ -520,8 +499,8 @@
         {{ aiImageApplying() ? 'Saving...' : 'Use this Image' }}
       </button>
     </div>
+  </ng-template>
 
-  </div>
 </p-dialog>
 
 <!-- ═══ Category Dialog ═══ -->
