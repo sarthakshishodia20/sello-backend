@@ -184,7 +184,11 @@ async function getProductsForStore(merchantId, { categoryId = null, search = '',
       ac.snooze_until,
       COALESCE(ac.discount_percent, 0) AS discount_percent,
       COALESCE(ac.gst_percent, 0) AS gst_percent,
-      COALESCE(ac.delivery_charge, 0) AS delivery_charge
+      COALESCE(ac.delivery_charge, 0) AS delivery_charge,
+      ROUND(
+        (COALESCE(mp.price, p.price) * (1 - COALESCE(ac.discount_percent, 0) / 100) * (1 + COALESCE(ac.gst_percent, 0) / 100))
+        + COALESCE(ac.delivery_charge, 0)
+      , 2) AS final_price
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
     LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
@@ -291,7 +295,11 @@ async function getTopSellingProductsForStore(merchantId) {
       ac.snooze_until,
       COALESCE(ac.discount_percent, 0) AS discount_percent,
       COALESCE(ac.gst_percent, 0) AS gst_percent,
-      COALESCE(ac.delivery_charge, 0) AS delivery_charge
+      COALESCE(ac.delivery_charge, 0) AS delivery_charge,
+      ROUND(
+        (COALESCE(mp.price, p.price) * (1 - COALESCE(ac.discount_percent, 0) / 100) * (1 + COALESCE(ac.gst_percent, 0) / 100))
+        + COALESCE(ac.delivery_charge, 0)
+      , 2) AS final_price
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
     LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
