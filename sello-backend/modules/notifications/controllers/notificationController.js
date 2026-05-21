@@ -1,79 +1,34 @@
-const db = require('../../../database/mysqlLib');
+const notificationService                      = require('../services/notificationService');
+const { sendSuccess, sendError }               = require('../../../utilities/responseUtil');
+const logger                                   = require('../../../utilities/loggingUtil');
+
+const MODULE = 'NotificationController';
+
+// ─── History ──────────────────────────────────────────────────────────────────
 
 async function getHistory(req, res, next) {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const offset = (page - 1) * limit;
-    const user = req.selloUser;
+    const { rows, total }          = await notificationService.getHistory(req.selloUser, {
+      page:  parseInt(page),
+      limit: parseInt(limit)
+    });
 
-    let query = `SELECT * FROM tb_notification_received WHERE `;
-    let countQuery = `SELECT COUNT(*) as count FROM tb_notification_received WHERE `;
-    let params = [];
-    let countParams = [];
-
-    if (user.role === 'MASTERBRAND_ADMIN' || user.role === 'SUPER_ADMIN') {
-      const cond = `(user_id = ? OR (user_id IS NULL AND merchant_id IS NULL))`;
-      query += cond;
-      countQuery += cond;
-      params.push(user.id);
-      countParams.push(user.id);
-    } else {
-      const cond = `merchant_id = ?`;
-      query += cond;
-      countQuery += cond;
-      params.push(user.merchantId);
-      countParams.push(user.merchantId);
-    }
-
-    query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
-    params.push(parseInt(limit), parseInt(offset));
-
-    const rows = await db.query(query, params);
-    const totalRows = await db.query(countQuery, countParams);
-
-    res.json({ status: 1, data: rows, total: totalRows[0].count });
+    return sendSuccess(res, 'History fetched', { data: rows, total });
   } catch (err) {
+    logger.error(MODULE, 'GET_HISTORY_ERROR', { error: err.message });
     next(err);
   }
 }
 
+// ─── Templates ────────────────────────────────────────────────────────────────
+
 async function getTemplates(req, res, next) {
   try {
-    const user = req.selloUser;
-    let rows;
-    if (user.role === 'MASTERBRAND_ADMIN' || user.role === 'SUPER_ADMIN') {
-      rows = await db.query(`
-        SELECT * FROM (
-          SELECT *,
-            ROW_NUMBER() OVER (
-              PARTITION BY event_type
-              ORDER BY masterbrand_id DESC
-            ) as rank_val
-          FROM tb_notification_templates
-          WHERE masterbrand_id = ? OR (masterbrand_id IS NULL AND merchant_id IS NULL)
-        ) t WHERE rank_val = 1
-      `, [user.masterbrandId || 1]);
-    } else {
-      rows = await db.query(`
-        SELECT * FROM (
-          SELECT *,
-            ROW_NUMBER() OVER (
-              PARTITION BY event_type
-              ORDER BY 
-                CASE 
-                  WHEN merchant_id = ? THEN 0
-                  WHEN masterbrand_id = ? THEN 1
-                  ELSE 2
-                END ASC
-            ) as rank_val
-          FROM tb_notification_templates
-          WHERE merchant_id = ? OR (merchant_id IS NULL AND (masterbrand_id = ? OR masterbrand_id IS NULL))
-        ) t WHERE rank_val = 1
-      `, [user.merchantId, user.masterbrandId || 1, user.merchantId, user.masterbrandId || 1]);
-    }
-
-    res.json({ status: 1, data: rows });
+    const templates = await notificationService.getTemplates(req.selloUser);
+    return sendSuccess(res, 'Templates fetched', { data: templates });
   } catch (err) {
+    logger.error(MODULE, 'GET_TEMPLATES_ERROR', { error: err.message });
     next(err);
   }
 }
@@ -81,33 +36,25 @@ async function getTemplates(req, res, next) {
 async function createTemplate(req, res, next) {
   try {
     const { event_type, title_template, body_template } = req.body;
-    const user = req.selloUser;
-    
-    const masterbrand_id = user.role.includes('MASTERBRAND') ? user.masterbrandId : null;
-    const merchant_id = user.role.includes('MERCHANT') ? user.merchantId : null;
-
-    await db.query(
-      `INSERT INTO tb_notification_templates (masterbrand_id, merchant_id, event_type, title_template, body_template) VALUES (?, ?, ?, ?, ?)`,
-      [masterbrand_id, merchant_id, event_type, title_template, body_template]
-    );
-    res.json({ status: 1, message: 'Template created' });
+    await notificationService.createTemplate(req.selloUser, { event_type, title_template, body_template });
+    return sendSuccess(res, 'Template created', {}, 201);
   } catch (err) {
+    logger.error(MODULE, 'CREATE_TEMPLATE_ERROR', { error: err.message });
     next(err);
   }
 }
 
 async function updateTemplate(req, res, next) {
   try {
-    const { id } = req.params;
     const { title_template, body_template, is_active } = req.body;
-    await db.query(
-      `UPDATE tb_notification_templates SET title_template = ?, body_template = ?, is_active = ? WHERE id = ?`,
-      [title_template, body_template, is_active, id]
-    );
-    res.json({ status: 1, message: 'Template updated' });
+    await notificationService.updateTemplate(Number(req.params.id), { title_template, body_template, is_active });
+    return sendSuccess(res, 'Template updated');
   } catch (err) {
+    logger.error(MODULE, 'UPDATE_TEMPLATE_ERROR', { error: err.message });
     next(err);
   }
 }
+
+// ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = { getHistory, getTemplates, createTemplate, updateTemplate };

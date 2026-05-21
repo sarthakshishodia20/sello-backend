@@ -737,7 +737,11 @@ export class ProductsComponent implements OnInit {
   /** Internal: call backend Pexels search and populate aiImageOptions */
   private _fetchPexelsImages() {
     // Store large URLs separately for upload, show thumb in grid
-    this.api.get<any>('/products/search-images', { query: this.form.name }).subscribe({
+    const categoryId = this.form.category_id;
+    const category = this.categories().find(c => Number(c.id) === Number(categoryId));
+    const categoryName = category ? category.name : '';
+
+    this.api.get<any>('/products/search-images', { query: this.form.name, category: categoryName }).subscribe({
       next: (response) => {
         const images: { thumb: string; url: string }[] = response.data.images || [];
         // Show medium/thumb in grid for speed

@@ -1,47 +1,24 @@
-const webappService = require('../services/webappService');
+const webappService                           = require('../services/webappService');
 const { sendSuccess, sendError, sendNotFound } = require('../../../utilities/responseUtil');
-const logger = require('../../../utilities/loggingUtil');
+const { formatImageUrls }                      = require('../../../utilities/imageUtil');
+const logger                                   = require('../../../utilities/loggingUtil');
 
 const MODULE = 'WebappController';
 
-function formatImageUrls(req, dataOrArray) {
-  const host = `${req.protocol}://${req.get('host')}`;
-  const formatUrl = (url) => {
-    if (url && url.startsWith('/uploads/')) {
-      return `${host}${url}`;
-    }
-    return url;
-  };
-
-  const formatItem = (item) => {
-    if (!item) return item;
-    const formatted = { ...item };
-    if (formatted.image_url) formatted.image_url = formatUrl(formatted.image_url);
-    if (formatted.effective_image_url) formatted.effective_image_url = formatUrl(formatted.effective_image_url);
-    return formatted;
-  };
-
-  if (Array.isArray(dataOrArray)) {
-    return dataOrArray.map(formatItem);
-  }
-  return formatItem(dataOrArray);
-}
+// ─── Store Handlers ───────────────────────────────────────────────────────────
 
 async function getAllStores(req, res) {
   try {
     const { search, city, mode, limit = 12, offset = 0 } = req.query;
-    const stores = await webappService.getAllActiveStores(search, city, mode, limit, offset);
-    
-    // Fetch settings for the first available masterbrand (Sello default)
+    const stores   = await webappService.getAllActiveStores(search, city, mode, limit, offset);
     const settings = await webappService.getMasterbrandSettings();
-    
-    return sendSuccess(res, 'Stores fetched', { 
-      stores: formatImageUrls(req, stores), 
-      total: stores.length,
-      settings 
+
+    return sendSuccess(res, 'Stores fetched', {
+      stores:   formatImageUrls(req, stores),
+      total:    stores.length,
+      settings
     });
   } catch (err) {
-
     logger.error(MODULE, 'GET_ALL_STORES_ERROR', { error: err.message });
     return sendError(res, 'Failed to fetch stores', 500);
   }
@@ -58,15 +35,14 @@ async function getStoreBySlug(req, res) {
     }
 
     const categoryResult = await webappService.getCategoriesForStore(store.masterbrand_id);
-    const settings = await webappService.getMasterbrandSettings(store.masterbrand_id);
-    
+    const settings       = await webappService.getMasterbrandSettings(store.masterbrand_id);
+
     return sendSuccess(res, 'Store fetched', {
-      store: formatImageUrls(req, store),
-      categories: categoryResult.categories,
+      store:         formatImageUrls(req, store),
+      categories:    categoryResult.categories,
       category_tree: categoryResult.tree,
       settings
     });
-
   } catch (err) {
     logger.error(MODULE, 'GET_STORE_BY_SLUG_ERROR', { error: err.message });
     return sendError(res, 'Failed to fetch store', 500);
@@ -83,7 +59,7 @@ async function getCategoriesForStore(req, res) {
     const result = await webappService.getCategoriesForStore(store.masterbrand_id);
     return sendSuccess(res, 'Categories fetched', {
       categories: result.categories,
-      tree: result.tree
+      tree:       result.tree
     });
   } catch (err) {
     logger.error(MODULE, 'GET_CATEGORIES_ERROR', { error: err.message });
@@ -100,14 +76,14 @@ async function getProductsForStore(req, res) {
 
     const { products, total } = await webappService.getProductsForStore(store.id, {
       categoryId: req.query.category_id ? Number(req.query.category_id) : null,
-      search: req.query.search || '',
-      limit: req.query.limit ? Number(req.query.limit) : 12,
-      offset: req.query.offset ? Number(req.query.offset) : 0
+      search:     req.query.search || '',
+      limit:      req.query.limit  ? Number(req.query.limit)  : 12,
+      offset:     req.query.offset ? Number(req.query.offset) : 0
     });
 
-    return sendSuccess(res, 'Products fetched', { 
-      products: formatImageUrls(req, products), 
-      total 
+    return sendSuccess(res, 'Products fetched', {
+      products: formatImageUrls(req, products),
+      total
     });
   } catch (err) {
     logger.error(MODULE, 'GET_PRODUCTS_ERROR', { error: err.message });
@@ -115,11 +91,13 @@ async function getProductsForStore(req, res) {
   }
 }
 
+// ─── Wishlist Handlers ────────────────────────────────────────────────────────
+
 async function getWishlistItems(req, res) {
   try {
     const { storeIds = [], productIds = [] } = req.body;
     const result = await webappService.getWishlistItems(storeIds, productIds);
-    if (result.stores) result.stores = formatImageUrls(req, result.stores);
+    if (result.stores)   result.stores   = formatImageUrls(req, result.stores);
     if (result.products) result.products = formatImageUrls(req, result.products);
     return sendSuccess(res, 'Wishlist fetched', result);
   } catch (err) {
@@ -131,8 +109,8 @@ async function getWishlistItems(req, res) {
 async function toggleWishlist(req, res) {
   try {
     const { type, itemId } = req.body;
-    const customerId = req.selloUser.id;
-    const result = await webappService.toggleWishlist(customerId, type, itemId);
+    const customerId       = req.selloUser.id;
+    const result           = await webappService.toggleWishlist(customerId, type, itemId);
     return sendSuccess(res, result.added ? 'Added to wishlist' : 'Removed from wishlist', result);
   } catch (err) {
     logger.error(MODULE, 'TOGGLE_WISHLIST_ERROR', { error: err.message });
@@ -143,8 +121,8 @@ async function toggleWishlist(req, res) {
 async function getCustomerWishlist(req, res) {
   try {
     const customerId = req.selloUser.id;
-    const result = await webappService.getCustomerWishlist(customerId);
-    if (result.stores) result.stores = formatImageUrls(req, result.stores);
+    const result     = await webappService.getCustomerWishlist(customerId);
+    if (result.stores)   result.stores   = formatImageUrls(req, result.stores);
     if (result.products) result.products = formatImageUrls(req, result.products);
     return sendSuccess(res, 'Customer wishlist fetched', result);
   } catch (err) {
@@ -153,15 +131,14 @@ async function getCustomerWishlist(req, res) {
   }
 }
 
-module.exports = { 
-  getAllStores, 
-  getStoreBySlug, 
-  getCategoriesForStore, 
-  getProductsForStore, 
+// ─── Exports ──────────────────────────────────────────────────────────────────
+
+module.exports = {
+  getAllStores,
+  getStoreBySlug,
+  getCategoriesForStore,
+  getProductsForStore,
   getWishlistItems,
   toggleWishlist,
   getCustomerWishlist
 };
-
-
-

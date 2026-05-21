@@ -1,8 +1,11 @@
-const merchantService = require('../services/merchantService');
+const merchantService                          = require('../services/merchantService');
 const { sendSuccess, sendError, sendNotFound } = require('../../../utilities/responseUtil');
-const logger = require('../../../utilities/loggingUtil');
+const { trackError }                           = require('../../../utilities/errorTracker');
+const logger                                   = require('../../../utilities/loggingUtil');
 
 const MODULE = 'MerchantController';
+
+// ─── Merchant List / Overview ─────────────────────────────────────────────────
 
 /**
  * GET /api/merchants
@@ -10,19 +13,9 @@ const MODULE = 'MerchantController';
  */
 async function getAllMerchants(req, res) {
   try {
-    const limit = Number(req.query.limit || 10);
-    const page = Number(req.query.page || 1);
+    const limit  = Number(req.query.limit || 10);
+    const page   = Number(req.query.page  || 1);
     const offset = (page - 1) * limit;
-
-    /*
-    console.log('[MerchantController] Fetching with params:', {
-      masterbrandId: req.selloUser.masterbrandId,
-      search: req.query.search,
-      status: req.query.status,
-      limit,
-      offset
-    });
-    */
 
     const result = await merchantService.getAllMerchants(req.selloUser.masterbrandId, {
       search: req.query.search || '',
@@ -47,22 +40,21 @@ async function getOverview(req, res) {
     return sendSuccess(res, 'Overview fetched', { overview });
   } catch (err) {
     logger.error(MODULE, 'GET_OVERVIEW_ERROR', { error: err.message });
-    try {
-      const { trackError } = require('../../../utilities/errorTracker');
-      await trackError(err, req);
-    } catch (e) {}
+    await trackError(err, req);
     return sendError(res, 'Failed to fetch overview', 500);
   }
 }
 
+// ─── Merchant Profile ─────────────────────────────────────────────────────────
+
 /**
- * GET /api/merchants/profile
+ * GET /api/merchants/profile  |  GET /api/merchants/:id
  * Merchant self-profile or admin-scoped merchant lookup.
  */
 async function getMerchantProfile(req, res) {
   try {
     const merchantId = req.selloUser.merchantId || Number(req.params.id);
-    
+
     if (isNaN(merchantId)) {
       return sendError(res, 'Valid Merchant ID is required', 400);
     }
@@ -79,7 +71,6 @@ async function getMerchantProfile(req, res) {
     return sendError(res, 'Failed to fetch profile', 500);
   }
 }
-
 
 /**
  * PUT /api/merchants/profile
@@ -109,13 +100,25 @@ async function updateMerchantProfile(req, res) {
   }
 }
 
+// ─── Merchant CRUD (admin) ────────────────────────────────────────────────────
+
+async function createMerchant(req, res) {
+  try {
+    const result = await merchantService.createMerchant(req.selloUser.masterbrandId, req.body);
+    return sendSuccess(res, 'Merchant created successfully', result, 201);
+  } catch (err) {
+    logger.error(MODULE, 'CREATE_MERCHANT_ERROR', { error: err.message });
+    return sendError(res, 'Failed to create merchant', 500);
+  }
+}
+
 /**
  * PUT /api/merchants/:id/status
  * Masterbrand admin can activate/deactivate a merchant and its users.
  */
 async function toggleMerchantStatus(req, res) {
   try {
-    const merchantId = Number(req.params.id);
+    const merchantId  = Number(req.params.id);
     const { is_active } = req.body;
 
     await merchantService.toggleMerchantStatus(merchantId, req.selloUser.masterbrandId, is_active);
@@ -125,6 +128,19 @@ async function toggleMerchantStatus(req, res) {
     return sendError(res, 'Failed to update merchant status', 500);
   }
 }
+
+async function deleteMerchant(req, res) {
+  try {
+    const merchantId = Number(req.params.id);
+    await merchantService.deleteMerchant(merchantId, req.selloUser.masterbrandId);
+    return sendSuccess(res, 'Merchant deleted successfully');
+  } catch (err) {
+    logger.error(MODULE, 'DELETE_MERCHANT_ERROR', { error: err.message });
+    return sendError(res, err.message || 'Failed to delete merchant', 500);
+  }
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
 
 /**
  * GET /api/merchants/notifications
@@ -148,9 +164,9 @@ async function getNotifications(req, res) {
  */
 async function snoozeNotification(req, res) {
   try {
-    const hours = Number(req.body.hours || 1);
+    const hours      = Number(req.body.hours || 1);
     const snoozeUntil = new Date(Date.now() + hours * 60 * 60 * 1000);
-    const updated = await merchantService.snoozeNotification(
+    const updated    = await merchantService.snoozeNotification(
       req.selloUser,
       Number(req.params.id),
       snoozeUntil
@@ -181,26 +197,7 @@ async function markNotificationRead(req, res) {
   }
 }
 
-async function createMerchant(req, res) {
-  try {
-    const result = await merchantService.createMerchant(req.selloUser.masterbrandId, req.body);
-    return sendSuccess(res, 'Merchant created successfully', result, 201);
-  } catch (err) {
-    logger.error(MODULE, 'CREATE_MERCHANT_ERROR', { error: err.message });
-    return sendError(res, 'Failed to create merchant', 500);
-  }
-}
-
-async function deleteMerchant(req, res) {
-  try {
-    const merchantId = Number(req.params.id);
-    await merchantService.deleteMerchant(merchantId, req.selloUser.masterbrandId);
-    return sendSuccess(res, 'Merchant deleted successfully');
-  } catch (err) {
-    logger.error(MODULE, 'DELETE_MERCHANT_ERROR', { error: err.message });
-    return sendError(res, err.message || 'Failed to delete merchant', 500);
-  }
-}
+// ─── Settings ─────────────────────────────────────────────────────────────────
 
 async function getSettings(req, res) {
   try {
@@ -222,17 +219,19 @@ async function updateSettings(req, res) {
   }
 }
 
+// ─── Exports ──────────────────────────────────────────────────────────────────
+
 module.exports = {
   getAllMerchants,
   getOverview,
   getMerchantProfile,
   updateMerchantProfile,
-  toggleMerchantStatus,
   createMerchant,
+  toggleMerchantStatus,
+  deleteMerchant,
   getNotifications,
   snoozeNotification,
   markNotificationRead,
-  deleteMerchant,
   getSettings,
   updateSettings
 };
