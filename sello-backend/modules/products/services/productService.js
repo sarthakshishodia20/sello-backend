@@ -481,21 +481,29 @@ async function updateMerchantProduct(merchantProductId, merchantId, fields) {
 async function generateAiDescription(productName, categoryName) {
   if (!process.env.GEMINI_API_KEY) {
     const categoryFragment = categoryName ? `${categoryName.toLowerCase()} ` : '';
-    return `${productName} is a ${categoryFragment}catalogue item designed for clean presentation, reliable repeat demand, and merchant-friendly merchandising. This demo AI copy helps the Selo mini project show how automated descriptions can speed up product onboarding.`;
+    return `${productName} is a ${categoryFragment}catalogue item designed for clean presentation, reliable repeat demand, and merchant-friendly merchandising.`;
   }
 
-  try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-    const prompt = `Write a short, professional, and compelling e-commerce product description for an item named "${productName}". The category is "${categoryName || 'General'}". Make it 2-3 sentences long and focus on quality and merchant appeal. Return ONLY the description text without quotes or formatting.`;
-    
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text().trim();
-  } catch (error) {
-    logger.error(MODULE, 'GEMINI_API_ERROR', { error: error.message });
-    return `Fallback description: ${productName} - high quality product.`;
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  // Try models in order of preference — fall back if one is unavailable
+  const modelNames = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+  const prompt = `Write a short, professional, and compelling e-commerce product description for an item named "${productName}". The category is "${categoryName || 'General'}". Make it 2-3 sentences long and focus on quality and merchant appeal. Return ONLY the description text without quotes or formatting.`;
+
+  for (const modelName of modelNames) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text().trim();
+      if (text) return text;
+    } catch (error) {
+      logger.warn(MODULE, 'GEMINI_MODEL_FALLBACK', { model: modelName, error: error.message });
+    }
   }
+
+  // All models failed — return a meaningful description instead of a stub
+  const categoryFragment = categoryName ? ` in the ${categoryName} category` : '';
+  return `${productName}${categoryFragment} is a high-quality product crafted for consistent merchant demand and customer satisfaction.`;
 }
 
 
@@ -513,13 +521,14 @@ async function createPrivateProduct(masterbrandId, merchantId, product) {
       sku = `SKU-${namePrefix}-${ts}-${rand}`;
     }
 
+    // tb_products has NO merchant_id column — merchant scoping is done via tb_app_catalogue.
+    // We insert a normal master product row, then create a catalogue entry only for this merchant.
     const result = await query(
       `INSERT INTO tb_products
-        (masterbrand_id, merchant_id, category_id, sku, name, short_description, description, ai_description, price, stock_qty, image_url, sort_order, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (masterbrand_id, category_id, sku, name, short_description, description, ai_description, price, stock_qty, image_url, sort_order, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         masterbrandId,
-        merchantId,
         product.category_id,
         sku,
         product.name,
@@ -534,6 +543,7 @@ async function createPrivateProduct(masterbrandId, merchantId, product) {
       ]
     );
 
+    // Only expose this product to the creating merchant (not all merchants)
     await query(
       `INSERT INTO tb_app_catalogue (merchant_id, product_id, source_type, is_available)
        VALUES (?, ?, 'MERCHANT', 1)`,

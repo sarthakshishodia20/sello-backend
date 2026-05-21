@@ -149,6 +149,7 @@
         *ngFor="let p of products()"
         class="product-row"
         cdkDrag
+        [cdkDragStartDelay]="200"
         [class.selected]="selectedProduct() && (viewMode() === 'master' ? selectedProduct()?.id === p.id : selectedProduct()?.catalogue_id === p.catalogue_id)"
         [class.disabled-item]="!(viewMode() === 'master' ? p.is_active : p.effective_is_active)"
         (click)="selectProduct(p); selectProductMobile(p)"

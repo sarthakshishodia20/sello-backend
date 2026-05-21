@@ -312,6 +312,8 @@
   padding: 12px; 
   flex: 1;
   min-height: 0;
+  /* Prevent CDK drag-drop from intercepting touch scroll events on mobile */
+  touch-action: pan-y;
 }
 
 /* Infinite scroll bottom loader */

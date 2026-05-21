@@ -874,7 +874,19 @@ body.dark-mode .yelo-logout-btn-icon:hover {
   .help-hero-banner { padding: 28px 24px 20px; }
   .help-hero-banner h4 { font-size: 1.2rem; }
 
-  .ext-panel { width: calc(100vw - 32px); right: -8px; max-height: calc(100vh - 120px) !important; overflow-y: auto !important; }
+  /* Extensions panel: always stay within viewport on mobile */
+  .ext-panel {
+    position: fixed !important;
+    top: 70px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    border-radius: 16px !important;
+    z-index: 9999 !important;
+  }
   .ext-grid-wrap { grid-template-columns: 1fr 1fr !important; }
   .ext-toggle-btn { padding: 8px 10px; }
 
