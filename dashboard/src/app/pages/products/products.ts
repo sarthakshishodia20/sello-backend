@@ -714,7 +714,7 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-  /** Generate 4 AI images from Pollinations.ai using product name */
+  /** Search Pexels for 4 professional product images */
   generateAiImages() {
     if (!this.form.name) {
       this.messageService.add({ severity: 'warn', summary: 'Name required', detail: 'Please enter a product name first.' });
@@ -723,61 +723,45 @@ export class ProductsComponent implements OnInit {
     this.selectedAiImageIndex.set(null);
     this.aiImagePickerLoading.set(true);
     this.aiImagePickerVisible.set(true);
-
-    const prompt = encodeURIComponent(
-      `${this.form.name} food product professional photography white background high quality`
-    );
-    const seeds = [42, 137, 256, 891];
-    const urls = seeds.map(
-      s => `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${s}&nologo=true&enhance=true`
-    );
-
-    this.aiImageOptions.set(urls);
-
-    // Wait for all 4 images to attempt loading then stop spinner
-    let loaded = 0;
-    urls.forEach(url => {
-      const img = new Image();
-      img.onload = img.onerror = () => {
-        loaded++;
-        if (loaded === urls.length) this.aiImagePickerLoading.set(false);
-      };
-      img.src = url;
-    });
+    this._fetchPexelsImages();
   }
 
-  /** Regenerate with new random seeds */
+  /** Regenerate — fetch a fresh set from Pexels */
   regenerateAiImages() {
     if (!this.form.name) return;
     this.selectedAiImageIndex.set(null);
     this.aiImagePickerLoading.set(true);
+    this._fetchPexelsImages();
+  }
 
-    const prompt = encodeURIComponent(
-      `${this.form.name} food product professional photography white background high quality`
-    );
-    const seeds = Array.from({ length: 4 }, () => Math.floor(Math.random() * 9999));
-    const urls = seeds.map(
-      s => `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${s}&nologo=true&enhance=true`
-    );
-
-    this.aiImageOptions.set(urls);
-
-    let loaded = 0;
-    urls.forEach(url => {
-      const img = new Image();
-      img.onload = img.onerror = () => {
-        loaded++;
-        if (loaded === urls.length) this.aiImagePickerLoading.set(false);
-      };
-      img.src = url;
+  /** Internal: call backend Pexels search and populate aiImageOptions */
+  private _fetchPexelsImages() {
+    // Store large URLs separately for upload, show thumb in grid
+    this.api.get<any>('/products/search-images', { query: this.form.name }).subscribe({
+      next: (response) => {
+        const images: { thumb: string; url: string }[] = response.data.images || [];
+        // Show medium/thumb in grid for speed
+        this.aiImageOptions.set(images.map(i => i.thumb));
+        // Store full-res URLs for upload
+        this._pexelsFullUrls = images.map(i => i.url);
+        this.aiImagePickerLoading.set(false);
+      },
+      error: () => {
+        this.aiImagePickerLoading.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Search failed', detail: 'Could not fetch images. Try again.' });
+      }
     });
   }
+
+  // Holds full-res Pexels URLs (parallel array to aiImageOptions)
+  private _pexelsFullUrls: string[] = [];
 
   /** Download selected AI image and upload to backend, then set as product image */
   async applyAiImage() {
     const idx = this.selectedAiImageIndex();
     if (idx === null) return;
-    const url = this.aiImageOptions()[idx];
+    // Use full-res URL for upload, not the grid thumbnail
+    const url = this._pexelsFullUrls[idx] || this.aiImageOptions()[idx];
     this.aiImageApplying.set(true);
     try {
       const resp = await fetch(url);

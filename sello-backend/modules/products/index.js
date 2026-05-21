@@ -29,6 +29,7 @@ router.get('/category-snooze', merchantOnly, controller.getCategorySnoozeStatus)
 
 
 router.post('/generate-description', validator.validateGenerateDescription, controller.generateDescription);
+router.get('/search-images', allowRoles('SUPER_ADMIN', 'MASTERBRAND_ADMIN', 'MERCHANT_ADMIN'), controller.searchImages);
 router.post('/swap', allowRoles('MASTERBRAND_ADMIN', 'MERCHANT_ADMIN'), controller.swapProducts);
 
 module.exports = router;

@@ -376,6 +376,46 @@ async function generateDescription(req, res) {
   }
 }
 
+/**
+ * GET /api/products/search-images?query=sandwich
+ * Searches Pexels for 4 professional product images.
+ */
+async function searchImages(req, res) {
+  try {
+    const query = req.query.query || '';
+    if (!query) return sendError(res, 'query parameter is required', 400);
+
+    const apiKey = process.env.PEXELS_API_KEY;
+    if (!apiKey) return sendError(res, 'Image search not configured', 500);
+
+    const searchQuery = encodeURIComponent(`${query} food`);
+    const url = `https://api.pexels.com/v1/search?query=${searchQuery}&per_page=4&orientation=square`;
+
+    const response = await fetch(url, {
+      headers: { Authorization: apiKey }
+    });
+
+    if (!response.ok) {
+      logger.error(MODULE, 'PEXELS_API_ERROR', { status: response.status });
+      return sendError(res, 'Image search failed', 500);
+    }
+
+    const data = await response.json();
+    const images = (data.photos || []).map(photo => ({
+      id: photo.id,
+      url: photo.src.large,          // ~1200px — good quality
+      thumb: photo.src.medium,       // ~350px — for grid preview
+      photographer: photo.photographer,
+      alt: photo.alt || query
+    }));
+
+    return sendSuccess(res, 'Images fetched', { images });
+  } catch (err) {
+    logger.error(MODULE, 'SEARCH_IMAGES_ERROR', { error: err.message });
+    return sendError(res, 'Failed to search images', 500);
+  }
+}
+
 
 /**
  * POST /api/products/swap
@@ -404,6 +444,7 @@ module.exports = {
   updateMerchantProduct,
   createMerchantProduct,
   generateDescription,
+  searchImages,
   relinkProduct,
   swapProducts,
   duplicateProduct,
