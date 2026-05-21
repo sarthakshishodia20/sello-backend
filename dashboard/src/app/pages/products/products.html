@@ -281,10 +281,56 @@
       </div>
     </div>
 
+    <!-- Rich empty state with tips -->
     <div class="detail-empty" *ngIf="!selectedProduct()">
-      <div class="empty-center-box">
-        <i class="pi pi-box"></i>
-        <p>Select a product to view details</p>
+      <div class="detail-empty-inner">
+        <div class="empty-top">
+          <i class="pi pi-box"></i>
+          <p class="empty-title">Select a product to view details</p>
+          <p class="empty-sub">Click any product from the list to inspect, edit, or manage it.</p>
+        </div>
+
+        <div class="empty-tips-grid">
+          <div class="empty-tip-card">
+            <div class="tip-icon" style="background: rgba(99,102,241,0.1); color: #6366f1;">
+              <i class="pi pi-sparkles"></i>
+            </div>
+            <div class="tip-text">
+              <strong>AI Description</strong>
+              <span>Auto-generate product copy with Gemini AI</span>
+            </div>
+          </div>
+
+          <div class="empty-tip-card">
+            <div class="tip-icon" style="background: rgba(59,130,246,0.1); color: #3b82f6;">
+              <i class="pi pi-image"></i>
+            </div>
+            <div class="tip-text">
+              <strong>AI Image Search</strong>
+              <span>Find professional product photos instantly</span>
+            </div>
+          </div>
+
+          <div class="empty-tip-card">
+            <div class="tip-icon" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
+              <i class="pi pi-arrows-v"></i>
+            </div>
+            <div class="tip-text">
+              <strong>Drag &amp; Sort</strong>
+              <span>Reorder your catalogue by dragging rows</span>
+            </div>
+          </div>
+
+          <div class="empty-tip-card">
+            <div class="tip-icon" style="background: rgba(20,184,166,0.1); color: #14b8a6;">
+              <i class="pi pi-bell-slash"></i>
+            </div>
+            <div class="tip-text">
+              <strong>Snooze Items</strong>
+              <span>Temporarily hide products without deleting</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
