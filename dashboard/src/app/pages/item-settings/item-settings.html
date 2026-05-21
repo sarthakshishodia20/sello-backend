@@ -1,0 +1,117 @@
+<div class="content-container animate-fade">
+  <!-- ══ Page Header Card ══ -->
+  <div class="page-header-card">
+    <div class="header-title-box">
+      <div class="icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+        <i class="pi pi-star-fill animate-pulse"></i>
+      </div>
+      <div>
+        <h1>Item Settings</h1>
+        <p>Curate your shop's premium Top Selling items shown in the storefront slider.</p>
+      </div>
+    </div>
+
+    <!-- Actions & Filter -->
+    <div class="header-actions">
+      <!-- Search Box -->
+      <div class="search-box-pill">
+        <i class="pi pi-search"></i>
+        <input type="text" placeholder="Search item..." (input)="onSearch($event)">
+      </div>
+
+      <!-- Action Buttons -->
+      <button 
+        class="action-confirm-btn animate-fade" 
+        [disabled]="selectedProducts().length === 0 || saving()"
+        (click)="toggleTopSellingStatus(true)"
+        style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff;"
+        pTooltip="Add selected items to Top Selling slider"
+      >
+        <i class="pi pi-star-fill mr-1"></i> Add to Top Selling
+      </button>
+
+      <button 
+        class="action-confirm-btn animate-fade" 
+        [disabled]="selectedProducts().length === 0 || saving()"
+        (click)="toggleTopSellingStatus(false)"
+        style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid rgba(239, 68, 68, 0.35); color: #ef4444;"
+        pTooltip="Remove selected items from Top Selling slider"
+      >
+        <i class="pi pi-times mr-1"></i> Remove Selected
+      </button>
+
+      <button class="btn-action-icon" (click)="loadProducts()" pTooltip="Refresh" [disabled]="loading()">
+        <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Products Settings Table with Page Pagination ══ -->
+  <section class="table-section">
+    <p-table 
+      [value]="getFilteredProducts()" 
+      [loading]="loading()"
+      [paginator]="true" 
+      [rows]="10"
+      [(selection)]="selectedProducts"
+      [tableStyle]="{ 'min-width': '1000px' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 4rem">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th style="width: 80px">Image</th>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Curated Status</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-product let-i="rowIndex">
+        <tr>
+          <td>
+            <p-tableCheckbox [value]="product"></p-tableCheckbox>
+          </td>
+          <td>
+            <div class="prod-img-box">
+              <img *ngIf="product.image_url" [src]="product.image_url" class="tbl-prod-img" [alt]="product.name" />
+              <div *ngIf="!product.image_url" class="tbl-prod-placeholder"><i class="pi pi-image"></i></div>
+            </div>
+          </td>
+          <td>
+            <div class="prod-identity">
+              <strong>{{ product.name }}</strong>
+              <span class="prod-desc-sub">{{ product.short_description || 'No description available' }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="prod-cat-badge">{{ product.category_name || 'Uncategorized' }}</span>
+          </td>
+          <td>
+            <strong class="prod-price-text">₹{{ product.price | number:'1.0-0' }}</strong>
+          </td>
+          <td>
+            <p-tag 
+              [value]="product.is_top_selling ? 'Curated ⭐' : 'Regular Item'" 
+              [severity]="product.is_top_selling ? 'warn' : 'secondary'"
+              styleClass="curated-badge"
+            ></p-tag>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="empty-cell">
+            <div class="empty-state">
+              <i class="pi pi-star-fill" style="color: var(--text-dim); font-size: 2.5rem; opacity: 0.35;"></i>
+              <p>No products found for curation.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>

@@ -64,6 +64,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/availability/availability').then((m) => m.AvailabilityComponent)
       },
       {
+        path: 'item-settings',
+        loadComponent: () => import('./pages/item-settings/item-settings').then((m) => m.ItemSettingsComponent)
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./pages/profile/profile').then((m) => m.ProfileComponent)
       }

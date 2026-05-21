@@ -296,6 +296,10 @@ export class DashboardShellComponent {
       items.push({ label: 'Availability', key: 'availability', icon: 'pi pi-calendar', route: '/availability' });
     }
 
+    if (this.settingsService.settings().topSellingEnabled) {
+      items.push({ label: 'Item Settings', key: 'item-settings', icon: 'pi pi-star-fill', route: '/item-settings' });
+    }
+
     items.push(
       { label: 'Settings', key: 'settings', icon: 'pi pi-cog', route: '/settings' },
       { label: this.langService.translate('nav.profile'), key: 'profile', icon: 'pi pi-user', route: '/profile' }
