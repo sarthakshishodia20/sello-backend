@@ -33,8 +33,13 @@ function formatImageUrls(
   const host = `${req.protocol}://${req.get('host')}`;
 
   const formatUrl = (url) => {
-    if (url && url.startsWith('/uploads/')) {
-      return `${host}${url}`;
+    if (url) {
+      if (url.startsWith('/uploads/')) {
+        return `${host}${url}`;
+      }
+      if (url.startsWith('uploads/')) {
+        return `${host}/${url}`;
+      }
     }
     return url;
   };
