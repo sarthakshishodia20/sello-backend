@@ -181,7 +181,10 @@ async function getProductsForStore(merchantId, { categoryId = null, search = '',
       COALESCE(mp.stock_qty, p.stock_qty) AS stock_qty,
       COALESCE(mp.image_url, p.image_url) AS image_url,
       ac.is_out_of_stock,
-      ac.snooze_until
+      ac.snooze_until,
+      COALESCE(ac.discount_percent, 0) AS discount_percent,
+      COALESCE(ac.gst_percent, 0) AS gst_percent,
+      COALESCE(ac.delivery_charge, 0) AS delivery_charge
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
     LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
@@ -285,7 +288,10 @@ async function getTopSellingProductsForStore(merchantId) {
       COALESCE(mp.stock_qty, p.stock_qty) AS stock_qty,
       COALESCE(mp.image_url, p.image_url) AS image_url,
       ac.is_out_of_stock,
-      ac.snooze_until
+      ac.snooze_until,
+      COALESCE(ac.discount_percent, 0) AS discount_percent,
+      COALESCE(ac.gst_percent, 0) AS gst_percent,
+      COALESCE(ac.delivery_charge, 0) AS delivery_charge
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
     LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
