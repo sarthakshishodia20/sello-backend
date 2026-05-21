@@ -38,6 +38,24 @@
       </button>
     </div>
 
+    <!-- Top Selling Trigger Button next to Snooze -->
+    <div
+      *ngIf="viewMode() === 'merchant'"
+      class="snooze-trigger-wrap"
+      pTooltip="Manage your featured top-selling products shown in the slider view of your storefront."
+      tooltipPosition="bottom"
+      [showDelay]="400"
+    >
+      <button
+        class="snooze-trigger-btn top-selling-btn"
+        (click)="openTopSellingManager()"
+        style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff;"
+      >
+        <i class="pi pi-star-fill"></i>
+        <span>Top Selling</span>
+      </button>
+    </div>
+
     <div class="view-mode-badge" [class.master-mode]="viewMode() === 'master'">
       <i class="pi" [class.pi-globe]="viewMode() === 'master'" [class.pi-shop]="viewMode() !== 'master'"></i>
       <span>{{ viewMode() === 'master' ? 'Master Brand' : 'Merchant Custom' }}</span>
@@ -897,6 +915,114 @@
     <div class="sc-btns">
       <button type="button" class="sc-btn-cancel" (click)="snoozeConfirmVisible.set(false)">No</button>
       <button type="button" class="sc-btn-confirm" (click)="executeSnoozeAction()">Yes</button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ═══ Top Selling Manager Dialog ═══ -->
+<p-dialog
+  [(visible)]="topSellingModalVisible"
+  [modal]="true"
+  [style]="{ width: 'min(95vw, 850px)' }"
+  [showHeader]="false"
+  styleClass="snooze-manager-dialog"
+  [draggable]="false"
+  [resizable]="false"
+  appendTo="body"
+>
+  <div class="snooze-modal-inner">
+    <button class="snooze-modal-close" (click)="topSellingModalVisible.set(false)">
+      <i class="pi pi-times"></i>
+    </button>
+
+    <div class="snooze-modal-top-bar" style="border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+      <div class="snooze-tab-buttons">
+        <button class="tab-btn" [class.active]="topSellingTab() === 'add'" (click)="switchTopSellingTab('add')">
+          <i class="pi pi-star"></i>
+          <span>Curate Top Selling</span>
+        </button>
+        <button class="tab-btn" [class.active]="topSellingTab() === 'remove'" (click)="switchTopSellingTab('remove')">
+          <i class="pi pi-star-fill"></i>
+          <span>Current Featured (Slider)</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="snooze-grid-layout">
+      <!-- Left side: List / Search -->
+      <div class="snooze-layout-left">
+        <div class="snooze-pane-search">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            placeholder="Search items..."
+            [ngModel]="topSellingSearchQuery"
+            (ngModelChange)="onTopSellingSearch($event)"
+          />
+        </div>
+
+        <div *ngIf="loading() && topSellingOffset === 0 && topSellingFilteredItems().length === 0" class="column-skeleton-loader" style="padding: 0; gap: 8px; width: 100%;">
+          <div class="skeleton-item" *ngFor="let i of [1,2,3,4]">
+            <div class="skeleton-bar" style="width: 70%; height: 16px; border-radius: 8px;"></div>
+            <div class="skeleton-circle" style="width: 20px; height: 20px; border-radius: 50%;"></div>
+          </div>
+        </div>
+
+        <div class="scrollable-checklist" (scroll)="onTopSellingScroll($event)" *ngIf="topSellingFilteredItems().length > 0">
+          <div
+            *ngFor="let item of topSellingFilteredItems()"
+            class="checklist-row"
+            (click)="toggleTopSellingItemSelection(item)"
+          >
+            <div class="row-checkbox">
+              <i class="pi" [class.pi-check-square]="isTopSellingItemSelected(item.id)" [class.pi-square]="!isTopSellingItemSelected(item.id)"></i>
+            </div>
+            <div class="row-name">
+              <span>{{ item.name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-list-placeholder" *ngIf="topSellingFilteredItems().length === 0 && !loading()">
+          <i class="pi pi-inbox"></i>
+          <p>No products found matching your search</p>
+        </div>
+      </div>
+
+      <!-- Right side: Selection preview -->
+      <div class="snooze-layout-right">
+        <span class="pane-sec-title">Selected Items ({{ topSellingSelectedItems.size }})</span>
+
+        <div class="scrollable-selection-preview" *ngIf="topSellingSelectedItems.size > 0">
+          <div class="preview-row animate-fade" *ngFor="let item of getSelectedTopSellingItemsList()">
+            <div class="preview-left">
+              <span class="preview-badge" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
+                Product
+              </span>
+              <span class="preview-name">{{ item.name }}</span>
+            </div>
+            <button class="preview-remove" (click)="removeTopSellingItemSelection(item.id)">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="empty-list-placeholder" *ngIf="topSellingSelectedItems.size === 0">
+          <i class="pi pi-star" style="font-size: 2.5rem; opacity: 0.2;"></i>
+          <p>Select products from the list to curate</p>
+        </div>
+
+        <div class="preview-footer-action">
+          <button
+            class="action-confirm-btn"
+            [disabled]="topSellingSelectedItems.size === 0"
+            (click)="executeTopSellingAction()"
+            style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff;"
+          >
+            {{ topSellingTab() === 'add' ? 'Add to Top Selling' : 'Remove Selected' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </p-dialog>

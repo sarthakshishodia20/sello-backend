@@ -219,6 +219,19 @@ async function updateSettings(req, res) {
   }
 }
 
+async function toggleMerchantSponsored(req, res) {
+  try {
+    const merchantId = Number(req.params.id);
+    const { is_sponsored } = req.body;
+
+    await merchantService.toggleMerchantSponsored(merchantId, req.selloUser.masterbrandId, is_sponsored);
+    return sendSuccess(res, `Merchant ${is_sponsored ? 'sponsored status enabled' : 'sponsored status disabled'} successfully`);
+  } catch (err) {
+    logger.error(MODULE, 'TOGGLE_SPONSORED_ERROR', { error: err.message });
+    return sendError(res, 'Failed to update merchant sponsored status', 500);
+  }
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -228,6 +241,7 @@ module.exports = {
   updateMerchantProfile,
   createMerchant,
   toggleMerchantStatus,
+  toggleMerchantSponsored,
   deleteMerchant,
   getNotifications,
   snoozeNotification,

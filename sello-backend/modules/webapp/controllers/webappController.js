@@ -131,6 +131,23 @@ async function getCustomerWishlist(req, res) {
   }
 }
 
+async function getTopSellingProducts(req, res) {
+  try {
+    const store = await webappService.getStoreBySlug(req.params.slug);
+    if (!store) {
+      return sendNotFound(res, 'Store not found');
+    }
+
+    const products = await webappService.getTopSellingProductsForStore(store.id);
+    return sendSuccess(res, 'Top selling products fetched', {
+      products: formatImageUrls(req, products)
+    });
+  } catch (err) {
+    logger.error(MODULE, 'GET_TOP_SELLING_PRODUCTS_ERROR', { error: err.message });
+    return sendError(res, 'Failed to fetch top selling products', 500);
+  }
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -138,6 +155,7 @@ module.exports = {
   getStoreBySlug,
   getCategoriesForStore,
   getProductsForStore,
+  getTopSellingProducts,
   getWishlistItems,
   toggleWishlist,
   getCustomerWishlist

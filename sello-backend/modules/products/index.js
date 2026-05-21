@@ -25,6 +25,7 @@ router.put('/merchant/:id', merchantOnly, validator.validateUpdateMerchantProduc
 router.put('/inherited/:catalogueId/stock-status', merchantOnly, controller.updateStockStatus);
 router.post('/snooze', merchantOnly, controller.snoozeCatalogItems);
 router.post('/unsnooze', merchantOnly, controller.unsnoozeCatalogItems);
+router.post('/top-selling', merchantOnly, controller.toggleTopSellingProducts);
 router.get('/category-snooze', merchantOnly, controller.getCategorySnoozeStatus);
 
 

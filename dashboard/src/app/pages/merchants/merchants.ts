@@ -206,6 +206,25 @@ export class MerchantsComponent implements OnInit {
     });
   }
 
+  toggleSponsored(merchant: any) {
+    const newState = merchant.is_sponsored;
+    this.api.put(`/merchants/${merchant.merchant_id}/sponsored`, { is_sponsored: newState }).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Merchant updated',
+          detail: `Sponsored status updated for ${merchant.merchant_name}.`
+        });
+      },
+      error: () => {
+        // Rollback on error
+        merchant.is_sponsored = !newState;
+        this.merchants.set([...this.merchants()]);
+        this.messageService.add({ severity: 'error', summary: 'Failed', detail: 'Could not update merchant sponsored status.' });
+      }
+    });
+  }
+
   onPageChange(event: any) {
     this.offset = event.first;
     this.limit = event.rows;

@@ -350,6 +350,24 @@ async function unsnoozeCatalogItems(req, res) {
   }
 }
 
+async function toggleTopSellingProducts(req, res) {
+  try {
+    const merchantId = req.selloUser.merchantId;
+    if (!merchantId) return sendError(res, 'Only merchant users can update top selling status');
+
+    const { catalogueIds, is_top_selling } = req.body;
+    if (!catalogueIds || !catalogueIds.length) {
+      return sendError(res, 'catalogueIds (array) is required', 400);
+    }
+
+    await productService.updateTopSellingStatus(merchantId, catalogueIds, is_top_selling);
+    return sendSuccess(res, 'Products top selling status updated successfully');
+  } catch (err) {
+    logger.error(MODULE, 'TOGGLE_TOP_SELLING_ERROR', { error: err.message });
+    return sendError(res, err.message || 'Failed to update top selling status', 500);
+  }
+}
+
 /**
  * GET /api/products/category-snooze
  */
@@ -510,6 +528,7 @@ module.exports = {
   updateStockStatus,
   snoozeCatalogItems,
   unsnoozeCatalogItems,
+  toggleTopSellingProducts,
   getCategorySnoozeStatus,
   // AI / images / misc
   uploadImage,

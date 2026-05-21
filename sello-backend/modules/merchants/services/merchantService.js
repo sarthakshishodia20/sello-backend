@@ -44,6 +44,7 @@ async function getAllMerchants(masterbrandId, { search = '', status = 'all', lim
       m.address,
       m.theme_color,
       m.is_active,
+      m.is_sponsored,
       m.settings,
       m.created_at,
       owner.id AS owner_user_id,
@@ -172,6 +173,14 @@ async function toggleMerchantStatus(merchantId, masterbrandId, isActive) {
   });
 
   logger.info(MODULE, 'MERCHANT_STATUS_UPDATED', { merchantId, isActive });
+}
+
+async function toggleMerchantSponsored(merchantId, masterbrandId, isSponsored) {
+  await db.query(
+    'UPDATE tb_merchants SET is_sponsored = ? WHERE id = ? AND masterbrand_id = ?',
+    [Number(Boolean(isSponsored)), merchantId, masterbrandId]
+  );
+  logger.info(MODULE, 'MERCHANT_SPONSORED_UPDATED', { merchantId, isSponsored });
 }
 
 /**
@@ -529,6 +538,7 @@ module.exports = {
   getMerchantById,
   updateMerchantProfile,
   toggleMerchantStatus,
+  toggleMerchantSponsored,
   createMerchant,
   getOverview,
   getNotifications,

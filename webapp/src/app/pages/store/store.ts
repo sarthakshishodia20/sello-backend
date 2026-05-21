@@ -39,6 +39,7 @@ export class StoreComponent implements OnInit {
 
   store = signal<any | null>(null);
   products = signal<any[]>([]);
+  topSellingProducts = signal<any[]>([]);
   totalProducts = signal(0);
   categories = signal<any[]>([]);
   categoryTree = signal<any[]>([]);
@@ -142,6 +143,13 @@ export class StoreComponent implements OnInit {
         this.categories.set(response.data.categories || []);
         this.categoryTree.set(response.data.category_tree || []);
         this.loadProducts();
+
+        this.api.getTopSellingProducts(slug).subscribe({
+          next: (tsRes) => {
+            this.topSellingProducts.set(tsRes.data.products || []);
+          },
+          error: () => {}
+        });
       },
       error: () => {
         this.loading.set(false);

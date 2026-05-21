@@ -26,6 +26,10 @@ export class ApiService {
     return this.http.get(url);
   }
 
+  getTopSellingProducts(slug: string): Observable<any> {
+    return this.http.get(`${this.base}/webapp/stores/${slug}/top-selling`);
+  }
+
   placeOrder(payload: any): Observable<any> {
     return this.http.post(`${this.base}/orders/place`, payload);
   }

@@ -51,6 +51,7 @@ async function getAllActiveStores(search = '', city = '', mode = 'ALL', limit = 
       m.image_url,
       m.theme_color,
       m.is_active,
+      m.is_sponsored,
       m.delivery_time,
       m.delivery_mode,
       m.city_name,
@@ -64,7 +65,7 @@ async function getAllActiveStores(search = '', city = '', mode = 'ALL', limit = 
       GROUP BY merchant_id
     ) cat ON cat.merchant_id = m.id
     ${whereSql}
-    ORDER BY m.name ASC
+    ORDER BY m.is_sponsored DESC, COALESCE(cat.total_products, 0) DESC, m.name ASC
     LIMIT ? OFFSET ?
   `, params);
 }
@@ -265,11 +266,46 @@ async function getCustomerWishlist(customerId) {
   return getWishlistItems(storeIds, productIds);
 }
 
+async function getTopSellingProductsForStore(merchantId) {
+  const params = [merchantId];
+  const products = await db.query(`
+    SELECT
+      ac.id AS catalogue_id,
+      ac.product_id AS source_product_id,
+      ac.override_product_id AS merchant_product_id,
+      ac.source_type,
+      COALESCE(mp.category_id, p.category_id) AS category_id,
+      c.name AS category_name,
+      COALESCE(mp.sku, p.sku) AS sku,
+      COALESCE(mp.name, p.name) AS name,
+      COALESCE(mp.short_description, p.short_description) AS short_description,
+      COALESCE(mp.description, p.description) AS description,
+      COALESCE(mp.ai_description, p.ai_description) AS ai_description,
+      COALESCE(mp.price, p.price) AS price,
+      COALESCE(mp.stock_qty, p.stock_qty) AS stock_qty,
+      COALESCE(mp.image_url, p.image_url) AS image_url,
+      ac.is_out_of_stock,
+      ac.snooze_until
+    FROM tb_app_catalogue ac
+    JOIN tb_products p ON p.id = ac.product_id
+    LEFT JOIN tb_merchant_products mp ON mp.id = ac.override_product_id
+    LEFT JOIN tb_categories c ON c.id = COALESCE(mp.category_id, p.category_id)
+    WHERE ac.merchant_id = ?
+      AND ac.is_available = 1
+      AND ac.is_top_selling = 1
+      AND COALESCE(mp.is_active, p.is_active) = 1
+    ORDER BY p.sort_order ASC, ac.id ASC
+  `, params);
+
+  return products;
+}
+
 module.exports = {
   getAllActiveStores,
   getStoreBySlug,
   getCategoriesForStore,
   getProductsForStore,
+  getTopSellingProductsForStore,
   getMasterbrandSettings,
   getWishlistItems,
   toggleWishlist,

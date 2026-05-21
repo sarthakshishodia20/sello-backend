@@ -50,6 +50,46 @@ function initialize() {
       } else {
         console.log('[Sello DB] ✅ Table tb_errors verified successfully.');
       }
+
+      // Check and add is_sponsored column to tb_merchants
+      connection.query(`SHOW COLUMNS FROM tb_merchants LIKE 'is_sponsored'`, (colErr, results) => {
+        if (!colErr && results.length === 0) {
+          connection.query(`ALTER TABLE tb_merchants ADD COLUMN is_sponsored TINYINT(1) DEFAULT 0`, (alterErr) => {
+            if (alterErr) {
+              console.error('[Sello DB] ❌ Failed to add is_sponsored column to tb_merchants:', alterErr.message);
+            } else {
+              console.log('[Sello DB] ✅ Column is_sponsored added to tb_merchants successfully.');
+            }
+          });
+        }
+      });
+
+      // Check and add is_top_selling column to tb_products
+      connection.query(`SHOW COLUMNS FROM tb_products LIKE 'is_top_selling'`, (colErr2, results2) => {
+        if (!colErr2 && results2.length === 0) {
+          connection.query(`ALTER TABLE tb_products ADD COLUMN is_top_selling TINYINT(1) DEFAULT 0`, (alterErr2) => {
+            if (alterErr2) {
+              console.error('[Sello DB] ❌ Failed to add is_top_selling column to tb_products:', alterErr2.message);
+            } else {
+              console.log('[Sello DB] ✅ Column is_top_selling added to tb_products successfully.');
+            }
+          });
+        }
+      });
+
+      // Check and add is_top_selling column to tb_app_catalogue
+      connection.query(`SHOW COLUMNS FROM tb_app_catalogue LIKE 'is_top_selling'`, (colErr3, results3) => {
+        if (!colErr3 && results3.length === 0) {
+          connection.query(`ALTER TABLE tb_app_catalogue ADD COLUMN is_top_selling TINYINT(1) DEFAULT 0`, (alterErr3) => {
+            if (alterErr3) {
+              console.error('[Sello DB] ❌ Failed to add is_top_selling column to tb_app_catalogue:', alterErr3.message);
+            } else {
+              console.log('[Sello DB] ✅ Column is_top_selling added to tb_app_catalogue successfully.');
+            }
+          });
+        }
+      });
+
       connection.release();
     });
   });

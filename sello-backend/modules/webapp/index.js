@@ -7,6 +7,7 @@ router.get('/stores',                        controller.getAllStores);
 router.get('/stores/:slug',                  controller.getStoreBySlug);
 router.get('/stores/:slug/categories',       controller.getCategoriesForStore);
 router.get('/stores/:slug/products',         controller.getProductsForStore);
+router.get('/stores/:slug/top-selling',      controller.getTopSellingProducts);
 router.post('/wishlist/bulk',                controller.getWishlistItems);
 
 // Authenticated customer wishlist

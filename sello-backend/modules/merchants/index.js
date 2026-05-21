@@ -17,6 +17,7 @@ router.put('/settings', adminOnly, controller.updateSettings);
 router.get('/:id', adminOnly, controller.getMerchantProfile);
 router.post('/', adminOnly, controller.createMerchant);
 router.put('/:id/status', adminOnly, controller.toggleMerchantStatus);
+router.put('/:id/sponsored', adminOnly, controller.toggleMerchantSponsored);
 router.delete('/:id', adminOnly, controller.deleteMerchant);
 
 

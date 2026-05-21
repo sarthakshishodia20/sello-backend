@@ -810,3 +810,20 @@ body.dark-mode .delivery-info-box {
 :host-context(body.dark-mode) .p-info p {
   color: var(--text-muted) !important;
 }
+
+/* ── Sponsored Toggle Switch ── */
+input:checked + .slider.sponsor {
+  background-color: #f59e0b; /* Gold/Amber */
+}
+
+body.dark-mode input:checked + .slider.sponsor {
+  background-color: var(--accent-yellow) !important;
+}
+
+.status-label.sponsor.active {
+  color: #f59e0b !important;
+}
+
+body.dark-mode .status-label.sponsor.active {
+  color: var(--accent-yellow) !important;
+}

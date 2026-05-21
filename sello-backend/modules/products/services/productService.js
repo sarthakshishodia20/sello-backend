@@ -303,6 +303,7 @@ async function getInheritedProducts(merchantId, { categoryId = null, search = ''
       COALESCE(mp.is_active, p.is_active) AS effective_is_active,
       ac.is_out_of_stock,
       ac.snooze_until,
+      ac.is_top_selling,
       c.name AS category_name
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
@@ -647,6 +648,7 @@ module.exports = {
   getSearchSuggestions,
   snoozeItems,
   unsnoozeItems,
+  updateTopSellingStatus,
   getCategorySnoozeStatus
 };
 /**
@@ -712,6 +714,15 @@ async function unsnoozeItems(merchantId, { type, ids }) {
     );
     logger.info(MODULE, 'CATEGORIES_UNSNOOZED', { merchantId, ids });
   }
+}
+
+async function updateTopSellingStatus(merchantId, catalogueIds, isTopSelling) {
+  if (!catalogueIds || catalogueIds.length === 0) return;
+  await db.query(
+    'UPDATE tb_app_catalogue SET is_top_selling = ? WHERE merchant_id = ? AND id IN (?)',
+    [Number(Boolean(isTopSelling)), merchantId, catalogueIds]
+  );
+  logger.info(MODULE, 'PRODUCTS_TOP_SELLING_UPDATED', { merchantId, catalogueIds, isTopSelling });
 }
 
 async function getCategorySnoozeStatus(merchantId) {

@@ -72,6 +72,47 @@
         <span class="prod-count">{{ products().length }} of {{ totalProducts() }} items</span>
       </div>
 
+      <!-- ═══ Swiggy-Style Top Selling Slider ═══ -->
+      <div class="top-selling-section animate-fade" *ngIf="topSellingProducts().length > 0 && !productsLoading()">
+        <div class="section-title-wrap">
+          <i class="pi pi-star-fill"></i>
+          <h2>Top Selling Products</h2>
+        </div>
+        <div class="top-selling-slider-container">
+          <div class="top-selling-slider">
+            <div class="ts-card" *ngFor="let tp of topSellingProducts()">
+              <div class="ts-img-container" (click)="openLightbox(tp.image_url)">
+                <img *ngIf="tp.image_url" [src]="tp.image_url" class="ts-img" [alt]="tp.name" />
+                <div *ngIf="!tp.image_url" class="ts-img-placeholder"><i class="pi pi-image"></i></div>
+                <div class="ts-oos-overlay" *ngIf="!canAddToCart(tp)">
+                  <span>{{ isSnoozed(tp) ? 'Snoozed' : 'Out of Stock' }}</span>
+                </div>
+              </div>
+              <div class="ts-card-body">
+                <h3 class="ts-name" [title]="tp.name">{{ tp.name }}</h3>
+                <p class="ts-desc">{{ tp.short_description || 'Curated recommendation.' }}</p>
+                <div class="ts-footer">
+                  <span class="ts-price">₹{{ tp.price | number:'1.0-0' }}</span>
+                  <div class="ts-action">
+                    <div class="ts-qty-ctrl" *ngIf="cart.getItemQty(tp.catalogue_id) > 0">
+                      <button (click)="cart.updateQty(tp.catalogue_id, -1)"><i class="pi pi-minus"></i></button>
+                      <span>{{ cart.getItemQty(tp.catalogue_id) }}</span>
+                      <button (click)="cart.updateQty(tp.catalogue_id, 1)" [disabled]="!canAddToCart(tp)"><i class="pi pi-plus"></i></button>
+                    </div>
+                    <button
+                      class="ts-add-btn"
+                      *ngIf="cart.getItemQty(tp.catalogue_id) === 0"
+                      [disabled]="!canAddToCart(tp)"
+                      (click)="addToCart(tp)"
+                    >ADD</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Loader -->
       <div class="prod-loading" *ngIf="productsLoading()">
         <div class="prod-skeleton" *ngFor="let i of [1,2,3,4]"></div>
