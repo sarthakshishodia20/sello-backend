@@ -436,6 +436,8 @@
                 <li><strong>Floating Icons:</strong> Toggle live support bubbles on storefront.</li>
                 <li><strong>Notification Sounds:</strong> Enable order alert tones for merchant dashboards.</li>
                 <li><strong>Marketplace Availability:</strong> Let merchants set weekly opening hours — stores auto-activate/deactivate based on the schedule.</li>
+                <li><strong>Top Selling Slider:</strong> Unlocks "Item Settings" for merchants to curate featured products in the storefront slider.</li>
+                <li><strong>Order Settings:</strong> Unlocks Discount, GST & Delivery Charge management tables for merchants.</li>
               </ul>
             </div>
           </div>
@@ -868,6 +870,149 @@
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Section 9: Top Selling & Item Settings -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon" style="background: rgba(245,158,11,0.15); color: #f59e0b;"><i class="pi pi-star-fill"></i></div>
+        <h5>Top Selling & Item Settings</h5>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 20px 0; line-height: 1.5;">
+          A dedicated merchant workspace to curate which products appear in the storefront's featured "Top Selling" slider — fully backend-driven with search, pagination, and AI voice search.
+        </p>
+        <div class="help-two-col">
+          <div class="help-item-row">
+            <div class="dot orange"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                How to Enable
+                <span class="badge-role master">Master Admin</span>
+              </strong>
+              <p>Open the <strong>Extensions</strong> panel (sliders icon in top navbar) and toggle <em>Top Selling Products Slider</em> to ON. Immediately unlocks the <strong>Item Settings</strong> page in each merchant's sidebar.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot blue"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Add to Top Selling
+                <span class="badge-role merchant">Merchant Only</span>
+              </strong>
+              <p>Go to <strong>Item Settings</strong>. Search or browse products from the paginated table. Select one or more products via checkboxes and click <em>Add to Top Selling</em>. These products will appear in the storefront slider immediately.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot green"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Remove from Top Selling
+                <span class="badge-role merchant">Merchant Only</span>
+              </strong>
+              <p>Select products that are already marked as top-selling and click <em>Remove Selected</em>. Their featured badge is cleared and they stop appearing in the slider immediately.</p>
+            </div>
+          </div>
+          <div class="help-item-row">
+            <div class="dot pink"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Backend Search & Voice AI
+                <span class="badge-role merchant">Merchant Only</span>
+                <span class="badge-role master">AI Required</span>
+              </strong>
+              <p>The search bar in Item Settings hits the backend on every keystroke (400ms debounce), returning live suggestions from the merchant's catalogue. Voice AI (microphone button) allows hands-free product search using the browser's Speech API — enabled when the <em>AI & Voice Assistant</em> extension is ON.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 10: Order Settings -->
+      <div class="help-card mt-20">
+        <div class="card-header-icon" style="background: rgba(99,102,241,0.12); color: #6366f1;"><i class="pi pi-sliders-h"></i></div>
+        <h5>Order Settings — Discount, GST & Delivery</h5>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 20px 0; line-height: 1.5;">
+          A powerful merchant-level pricing control panel to bulk-configure product-level discounts, GST rates, and delivery charges — all stored per catalogue item and displayed in the customer storefront.
+        </p>
+        <div class="help-two-col">
+
+          <!-- Enable -->
+          <div class="help-item-row">
+            <div class="dot indigo"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Step 1 — Enable via Extension
+                <span class="badge-role master">Master Admin</span>
+              </strong>
+              <p>Open Extensions and toggle <em>Order Settings (Discount, GST, Delivery)</em> to ON. This reveals the <strong>Order Settings</strong> page in every Merchant Admin's sidebar under "Item Settings".</p>
+            </div>
+          </div>
+
+          <!-- Discount -->
+          <div class="help-item-row">
+            <div class="dot green"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Discount Management
+                <span class="badge-role merchant">Merchant Only</span>
+              </strong>
+              <p><strong>What it does:</strong> Lets merchants set a percentage discount on individual or bulk-selected products in their catalogue.</p>
+              <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.78rem; color: #64748b; list-style-type: disc; display: flex; flex-direction: column; gap: 4px;">
+                <li>Select products using checkboxes (supports multi-select + header-select-all).</li>
+                <li>Click <em>Apply Discount</em> → a confirmation popup appears with a % input field.</li>
+                <li>Enter the discount (e.g. 10%) and confirm. Changes are saved instantly to the product's catalogue entry.</li>
+                <li>Set discount to 0% to remove the discount from any product.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- GST -->
+          <div class="help-item-row">
+            <div class="dot orange"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                GST Management
+                <span class="badge-role merchant">Merchant Only</span>
+              </strong>
+              <p><strong>What it does:</strong> Stores a GST percentage against selected products in the merchant's catalogue. Useful for businesses that need to show GST-inclusive pricing to customers.</p>
+              <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.78rem; color: #64748b; list-style-type: disc; display: flex; flex-direction: column; gap: 4px;">
+                <li>Select one or more products and click <em>Apply GST</em>.</li>
+                <li>A dialog asks for the GST % (e.g. 18 for 18%). Confirm to save.</li>
+                <li>The <em>GST column</em> in the table updates immediately to show the new rate.</li>
+                <li>Set to 0% to mark a product as GST-free (e.g. essential goods).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Delivery -->
+          <div class="help-item-row">
+            <div class="dot blue"></div>
+            <div>
+              <strong style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                Delivery Charge
+                <span class="badge-role merchant">Merchant Only</span>
+              </strong>
+              <p><strong>What it does:</strong> Assigns a per-product delivery fee (₹) to any products in the merchant's catalogue. Useful when different products have different shipping costs.</p>
+              <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.78rem; color: #64748b; list-style-type: disc; display: flex; flex-direction: column; gap: 4px;">
+                <li>Select products and click <em>Set Charge</em> → enter ₹ amount in the popup.</li>
+                <li>Saved as <em>delivery_charge</em> on the catalogue entry per product.</li>
+                <li>Set to ₹0 to mark a product as free delivery.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Common UX -->
+          <div class="help-item-row">
+            <div class="dot pink"></div>
+            <div>
+              <strong>Common Features Across All 3 Sections</strong>
+              <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.78rem; color: #64748b; list-style-type: disc; display: flex; flex-direction: column; gap: 4px;">
+                <li><strong>Show selector (3 / 10 / 25 / 100):</strong> Controls how many rows appear in each table. Default is 3, so all three sections are visible at once on screen. Switch to 25 or 100 for bulk editing sessions.</li>
+                <li><strong>Backend search with suggestions:</strong> Typing in the search bar debounces 400ms and fetches from the backend. Suggestions dropdown appears after 2 characters.</li>
+                <li><strong>Paginator:</strong> Each table has independent pagination — sections are fully isolated from each other.</li>
+                <li><strong>Refresh button:</strong> Reload the current table data without affecting other sections.</li>
+              </ul>
+            </div>
+          </div>
+
         </div>
       </div>
 

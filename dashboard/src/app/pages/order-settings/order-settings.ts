@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api';
@@ -16,23 +16,7 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-type SectionType = 'discount' | 'gst' | 'delivery';
-
-interface SectionState {
-  products: any[];
-  total: number;
-  loading: boolean;
-  search: string;
-  offset: number;
-  searchSubject: Subject<string>;
-  selectedProducts: any[];
-  confirmVisible: boolean;
-  confirmValue: number;
-  saving: boolean;
-  suggestions: string[];
-  showSuggestions: boolean;
-  suggestionSubject: Subject<string>;
-}
+type ActiveDialog = 'discount' | 'gst' | 'delivery' | null;
 
 @Component({
   selector: 'app-order-settings',
@@ -60,36 +44,26 @@ export class OrderSettingsComponent implements OnInit, OnDestroy {
 
   readonly LIMIT = 20;
 
-  // ── Discount Section ──
-  discount: SectionState = this.createState();
-  // ── GST Section ──
-  gst: SectionState = this.createState();
-  // ── Delivery Section ──
-  delivery: SectionState = this.createState();
+  // ── Table State ──
+  products = signal<any[]>([]);
+  total = signal(0);
+  loading = signal(false);
+  search = '';
+  offset = 0;
+  selectedProducts = signal<any[]>([]);
 
-  private createState(): SectionState {
-    return {
-      products: [],
-      total: 0,
-      loading: false,
-      search: '',
-      offset: 0,
-      searchSubject: new Subject<string>(),
-      selectedProducts: [],
-      confirmVisible: false,
-      confirmValue: 0,
-      saving: false,
-      suggestions: [],
-      showSuggestions: false,
-      suggestionSubject: new Subject<string>()
-    };
-  }
+  // ── Search ──
+  suggestions = signal<string[]>([]);
+  showSuggestions = signal(false);
+  private searchSubject = new Subject<string>();
+  private suggestionSubject = new Subject<string>();
 
-  private clickListener = () => {
-    this.discount.showSuggestions = false;
-    this.gst.showSuggestions = false;
-    this.delivery.showSuggestions = false;
-  };
+  // ── Dialog ──
+  activeDialog = signal<ActiveDialog>(null);
+  confirmValue = signal(0);
+  saving = signal(false);
+
+  private clickListener = () => this.showSuggestions.set(false);
 
   ngOnInit() {
     if (!this.settingsService.settings().orderSettingsEnabled) {
@@ -98,173 +72,152 @@ export class OrderSettingsComponent implements OnInit, OnDestroy {
     }
 
     document.addEventListener('click', this.clickListener);
-    this.initSection('discount');
-    this.initSection('gst');
-    this.initSection('delivery');
+    this.loadProducts();
+
+    this.searchSubject.pipe(debounceTime(400), distinctUntilChanged()).subscribe(val => {
+      this.search = val;
+      this.offset = 0;
+      this.loadProducts();
+    });
+
+    this.suggestionSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe(val => {
+      if (!val || val.length < 2) {
+        this.suggestions.set([]);
+        this.showSuggestions.set(false);
+        return;
+      }
+      this.fetchSuggestions(val);
+    });
   }
 
   ngOnDestroy() {
     document.removeEventListener('click', this.clickListener);
-    this.discount.searchSubject.complete();
-    this.discount.suggestionSubject.complete();
-    this.gst.searchSubject.complete();
-    this.gst.suggestionSubject.complete();
-    this.delivery.searchSubject.complete();
-    this.delivery.suggestionSubject.complete();
+    this.searchSubject.complete();
+    this.suggestionSubject.complete();
   }
 
-  private initSection(section: SectionType) {
-    const s = this[section];
-    this.loadProducts(section);
+  loadProducts(event?: any) {
+    this.loading.set(true);
+    if (event) this.offset = event.first || 0;
 
-    s.searchSubject.pipe(debounceTime(400), distinctUntilChanged()).subscribe(value => {
-      s.search = value;
-      s.offset = 0;
-      this.loadProducts(section);
-    });
-
-    s.suggestionSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe(value => {
-      if (!value || value.length < 2) {
-        s.suggestions = [];
-        s.showSuggestions = false;
-        return;
-      }
-      this.fetchSuggestions(section, value);
-    });
-  }
-
-  loadProducts(section: SectionType, event?: any) {
-    const s = this[section];
-    s.loading = true;
-
-    // Handle lazy load events (paginator)
-    if (event) {
-      s.offset = event.first || 0;
-    }
-
-    const params: any = { limit: this.LIMIT, offset: s.offset };
-    if (s.search) params.search = s.search;
+    const params: any = { limit: this.LIMIT, offset: this.offset };
+    if (this.search) params.search = this.search;
 
     this.api.get<any>('/products/inherited', params).subscribe({
-      next: (response) => {
-        s.products = response.data.products || [];
-        s.total = response.data.total || 0;
-        s.loading = false;
+      next: (res) => {
+        this.products.set(res.data.products || []);
+        this.total.set(res.data.total || 0);
+        this.loading.set(false);
       },
       error: () => {
-        s.loading = false;
+        this.loading.set(false);
         this.messageService.add({ severity: 'error', summary: 'Load Failed', detail: 'Failed to fetch products.' });
       }
     });
   }
 
-  onSearch(section: SectionType, event: any) {
+  onSearch(event: any) {
     const val = event.target?.value || '';
-    const s = this[section];
-    s.search = val;
-    s.searchSubject.next(val);
-    s.suggestionSubject.next(val);
+    this.search = val;
+    this.searchSubject.next(val);
+    this.suggestionSubject.next(val);
   }
 
-  fetchSuggestions(section: SectionType, query: string) {
-    const s = this[section];
+  fetchSuggestions(query: string) {
     this.api.get<any>('/products/suggestions', { search: query }).subscribe({
-      next: (response) => {
-        s.suggestions = response.data.suggestions || [];
-        s.showSuggestions = s.suggestions.length > 0;
+      next: (res) => {
+        this.suggestions.set(res.data.suggestions || []);
+        this.showSuggestions.set(this.suggestions().length > 0);
       },
-      error: () => { s.suggestions = []; }
+      error: () => this.suggestions.set([])
     });
   }
 
-  selectSuggestion(section: SectionType, val: string) {
-    const s = this[section];
-    s.search = val;
-    s.showSuggestions = false;
-    s.searchSubject.next(val);
+  selectSuggestion(val: string) {
+    this.search = val;
+    this.showSuggestions.set(false);
+    this.searchSubject.next(val);
   }
 
-  openConfirm(section: SectionType) {
-    const s = this[section];
-    if (s.selectedProducts.length === 0) {
+  // ── Dialog: open ──
+  openDialog(type: ActiveDialog) {
+    if (this.selectedProducts().length === 0) {
       this.messageService.add({ severity: 'warn', summary: 'No Selection', detail: 'Please select at least one product.' });
       return;
     }
-    s.confirmValue = 0;
-    s.confirmVisible = true;
+    this.confirmValue.set(0);
+    this.activeDialog.set(type);
   }
 
-  applyBulkUpdate(section: SectionType) {
-    const s = this[section];
-    const catalogueIds = s.selectedProducts.map((p: any) => p.catalogue_id);
-    s.saving = true;
+  closeDialog() {
+    this.activeDialog.set(null);
+  }
+
+  // ── Apply bulk update ──
+  applyBulkUpdate() {
+    const type = this.activeDialog();
+    if (!type) return;
+
+    const catalogueIds = this.selectedProducts().map((p: any) => p.catalogue_id);
+    this.saving.set(true);
 
     let endpoint = '';
     let body: any = { catalogueIds };
+    let label = '';
+    let unit = '';
 
-    if (section === 'discount') {
+    if (type === 'discount') {
       endpoint = '/products/bulk/discount';
-      body.discountPercent = s.confirmValue;
-    } else if (section === 'gst') {
+      body.discountPercent = this.confirmValue();
+      label = 'Discount';
+      unit = `${this.confirmValue()}%`;
+    } else if (type === 'gst') {
       endpoint = '/products/bulk/gst';
-      body.gstPercent = s.confirmValue;
+      body.gstPercent = this.confirmValue();
+      label = 'GST';
+      unit = `${this.confirmValue()}%`;
     } else {
       endpoint = '/products/bulk/delivery';
-      body.deliveryCharge = s.confirmValue;
+      body.deliveryCharge = this.confirmValue();
+      label = 'Delivery Charge';
+      unit = `₹${this.confirmValue()}`;
     }
 
     this.api.post(endpoint, body).subscribe({
-      next: (res: any) => {
-        s.saving = false;
-        s.confirmVisible = false;
-        s.selectedProducts = [];
-        const label = section === 'discount' ? 'Discount' : section === 'gst' ? 'GST' : 'Delivery Charge';
-        const unit = section === 'delivery' ? `₹${s.confirmValue}` : `${s.confirmValue}%`;
-        this.messageService.add({ severity: 'success', summary: `${label} Updated`, detail: `${unit} applied to ${catalogueIds.length} product(s).` });
-        this.loadProducts(section);
+      next: () => {
+        this.saving.set(false);
+        this.activeDialog.set(null);
+        this.selectedProducts.set([]);
+        this.messageService.add({
+          severity: 'success',
+          summary: `${label} Updated`,
+          detail: `${unit} applied to ${catalogueIds.length} product(s).`
+        });
+        this.loadProducts();
       },
       error: () => {
-        s.saving = false;
+        this.saving.set(false);
         this.messageService.add({ severity: 'error', summary: 'Update Failed', detail: 'Failed to apply changes.' });
       }
     });
   }
 
-  // ── Display helpers ──
-
-  getSectionLabel(section: SectionType): string {
-    return { discount: 'Discount Management', gst: 'GST Management', delivery: 'Delivery Charge' }[section];
+  // ── Final Price computation ──
+  // Final = base_price × (1 - discount%/100) × (1 + gst%/100) + delivery_charge
+  getFinalPrice(product: any): number {
+    const base = parseFloat(product.effective_price) || 0;
+    const disc = parseFloat(product.discount_percent) || 0;
+    const gst = parseFloat(product.gst_percent) || 0;
+    const delivery = parseFloat(product.delivery_charge) || 0;
+    return (base * (1 - disc / 100) * (1 + gst / 100)) + delivery;
   }
 
-  getSectionDesc(section: SectionType): string {
-    return {
-      discount: 'Set bulk discount percentage for selected products.',
-      gst: 'Apply GST percentage to selected catalogue products.',
-      delivery: 'Configure delivery charge (₹) per product.'
-    }[section];
-  }
-
-  getSectionIcon(section: SectionType): string {
-    return { discount: 'pi pi-percentage', gst: 'pi pi-receipt', delivery: 'pi pi-truck' }[section];
-  }
-
-  getConfirmLabel(section: SectionType): string {
-    return { discount: 'Discount (%)', gst: 'GST (%)', delivery: 'Delivery Charge (₹)' }[section];
-  }
-
-  getApplyBtnLabel(section: SectionType): string {
-    return { discount: 'Apply Discount', gst: 'Apply GST', delivery: 'Apply Charge' }[section];
-  }
-
-  getBadgeValue(product: any, section: SectionType): string {
-    if (section === 'discount') return product.discount_percent > 0 ? `${product.discount_percent}% OFF` : 'No Discount';
-    if (section === 'gst') return product.gst_percent > 0 ? `GST ${product.gst_percent}%` : 'No GST';
-    return product.delivery_charge > 0 ? `₹${product.delivery_charge}` : 'Free Delivery';
-  }
-
-  getBadgeSeverity(product: any, section: SectionType): 'success' | 'warn' | 'info' | 'secondary' {
-    if (section === 'discount') return product.discount_percent > 0 ? 'success' : 'secondary';
-    if (section === 'gst') return product.gst_percent > 0 ? 'warn' : 'secondary';
-    return product.delivery_charge > 0 ? 'info' : 'secondary';
+  // ── Helper: dialog metadata ──
+  get dialogConfig() {
+    const type = this.activeDialog();
+    if (type === 'discount') return { title: 'Apply Discount', icon: 'pi-percentage', label: 'Discount (%)', suffix: ' %', prefix: '', max: 100, color: '#16a34a', confirmClass: 'os-confirm-discount', btnLabel: 'Apply Discount' };
+    if (type === 'gst')      return { title: 'Apply GST', icon: 'pi-receipt', label: 'GST (%)', suffix: ' %', prefix: '', max: 100, color: '#d97706', confirmClass: 'os-confirm-gst', btnLabel: 'Apply GST' };
+    if (type === 'delivery') return { title: 'Set Delivery Charge', icon: 'pi-truck', label: 'Delivery Charge (₹)', suffix: '', prefix: '₹ ', max: 99999, color: '#6366f1', confirmClass: 'os-confirm-delivery', btnLabel: 'Set Delivery Charge' };
+    return null;
   }
 }
