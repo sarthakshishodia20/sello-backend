@@ -95,6 +95,13 @@ export class ProductsComponent implements OnInit {
   catAiLoading = signal(false);
   aiImageLoading = signal(false);
   imageUploading = signal(false);
+
+  // AI Image Picker
+  aiImagePickerVisible = signal(false);
+  aiImageOptions = signal<string[]>([]);
+  aiImagePickerLoading = signal(false);
+  selectedAiImageIndex = signal<number | null>(null);
+  aiImageApplying = signal(false);
   showRawUrlInput = signal(false);
   dialogVisible = signal(false);
   catDialogVisible = signal(false);
@@ -122,6 +129,9 @@ export class ProductsComponent implements OnInit {
   selectedCategoryId = signal<number | null>(null);
   selectedProduct = signal<any | null>(null);
   merchantEditContext = signal<any | null>(null);
+
+  // Mobile 3-pane navigation: 'cat' | 'product' | 'detail'
+  mobilePane = signal<'cat' | 'product' | 'detail'>('cat');
 
   form: any = {};
   catForm: any = { id: null, name: '', description: '', ai_description: '', parent_id: null };
@@ -217,6 +227,18 @@ export class ProductsComponent implements OnInit {
     this.offset = 0;
     this.hasMore.set(true);
     this.loadProducts();
+    // On mobile: advance to product pane
+    this.mobilePane.set('product');
+  }
+
+  selectProductMobile(product: any) {
+    this.selectedProduct.set(product);
+    this.mobilePane.set('detail');
+  }
+
+  mobilePaneBack() {
+    if (this.mobilePane() === 'detail') this.mobilePane.set('product');
+    else if (this.mobilePane() === 'product') this.mobilePane.set('cat');
   }
 
   openCatCreate() {
@@ -692,7 +714,100 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  /** Generate 4 AI images from Pollinations.ai using product name */
+  generateAiImages() {
+    if (!this.form.name) {
+      this.messageService.add({ severity: 'warn', summary: 'Name required', detail: 'Please enter a product name first.' });
+      return;
+    }
+    this.selectedAiImageIndex.set(null);
+    this.aiImagePickerLoading.set(true);
+    this.aiImagePickerVisible.set(true);
 
+    const prompt = encodeURIComponent(
+      `${this.form.name} food product professional photography white background high quality`
+    );
+    const seeds = [42, 137, 256, 891];
+    const urls = seeds.map(
+      s => `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${s}&nologo=true&enhance=true`
+    );
+
+    this.aiImageOptions.set(urls);
+
+    // Wait for all 4 images to attempt loading then stop spinner
+    let loaded = 0;
+    urls.forEach(url => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        loaded++;
+        if (loaded === urls.length) this.aiImagePickerLoading.set(false);
+      };
+      img.src = url;
+    });
+  }
+
+  /** Regenerate with new random seeds */
+  regenerateAiImages() {
+    if (!this.form.name) return;
+    this.selectedAiImageIndex.set(null);
+    this.aiImagePickerLoading.set(true);
+
+    const prompt = encodeURIComponent(
+      `${this.form.name} food product professional photography white background high quality`
+    );
+    const seeds = Array.from({ length: 4 }, () => Math.floor(Math.random() * 9999));
+    const urls = seeds.map(
+      s => `https://image.pollinations.ai/prompt/${prompt}?width=512&height=512&seed=${s}&nologo=true&enhance=true`
+    );
+
+    this.aiImageOptions.set(urls);
+
+    let loaded = 0;
+    urls.forEach(url => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        loaded++;
+        if (loaded === urls.length) this.aiImagePickerLoading.set(false);
+      };
+      img.src = url;
+    });
+  }
+
+  /** Download selected AI image and upload to backend, then set as product image */
+  async applyAiImage() {
+    const idx = this.selectedAiImageIndex();
+    if (idx === null) return;
+    const url = this.aiImageOptions()[idx];
+    this.aiImageApplying.set(true);
+    try {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const ext = blob.type.split('/')[1] || 'jpg';
+      const file = new File([blob], `ai-image.${ext}`, { type: blob.type });
+      const formData = new FormData();
+      formData.append('image', file);
+
+      this.api.post<any>('/products/upload', formData, true).subscribe({
+        next: (res) => {
+          this.form.image_url = res.data.imageUrl;
+          this.aiImageApplying.set(false);
+          this.aiImagePickerVisible.set(false);
+          this.messageService.add({ severity: 'success', summary: 'Image Applied', detail: 'AI image set successfully!' });
+        },
+        error: () => {
+          // Fallback: use direct URL
+          this.form.image_url = url;
+          this.aiImageApplying.set(false);
+          this.aiImagePickerVisible.set(false);
+          this.messageService.add({ severity: 'warn', summary: 'Using direct URL', detail: 'Image saved as external URL.' });
+        }
+      });
+    } catch {
+      this.form.image_url = url;
+      this.aiImageApplying.set(false);
+      this.aiImagePickerVisible.set(false);
+    }
+  }
 
   async save() {
     this.saving.set(true);

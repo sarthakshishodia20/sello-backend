@@ -53,7 +53,7 @@
 <div class="catalogue-shell">
 
   <!-- ═══ PANE 1: Categories ═══ -->
-  <aside class="cat-pane">
+  <aside class="cat-pane" [class.mobile-active]="mobilePane() === 'cat'">
     <div class="pane-header">
       <span class="pane-title">Category ({{ categories().length }})</span>
       <button *ngIf="viewMode() === 'master'" class="icon-btn-plain" (click)="openCatCreate()" title="Add category">
@@ -93,8 +93,12 @@
   </aside>
 
   <!-- ═══ PANE 2: Product List ═══ -->
-  <section class="product-pane">
+  <section class="product-pane" [class.mobile-active]="mobilePane() === 'product'">
     <div class="pane-header">
+      <!-- Mobile back button -->
+      <button class="mobile-back-btn" (click)="mobilePaneBack()">
+        <i class="pi pi-chevron-left"></i>
+      </button>
       <span class="pane-title">Product ({{ totalRecords() }})</span>
       <div class="header-actions" style="display: flex; align-items: center; gap: 8px;">
         <button *ngIf="viewMode() === 'master'" class="icon-btn-plain" (click)="openMasterCreate()" title="Add product"><i class="pi pi-plus"></i></button>
@@ -147,7 +151,7 @@
         cdkDrag
         [class.selected]="selectedProduct() && (viewMode() === 'master' ? selectedProduct()?.id === p.id : selectedProduct()?.catalogue_id === p.catalogue_id)"
         [class.disabled-item]="!(viewMode() === 'master' ? p.is_active : p.effective_is_active)"
-        (click)="selectProduct(p)"
+        (click)="selectProduct(p); selectProductMobile(p)"
       >
         <span class="product-row-name">{{ p.effective_name ?? p.name }}</span>
         
@@ -186,11 +190,15 @@
 </section>
 
   <!-- ═══ PANE 3: Product Detail ═══ -->
-  <section class="detail-pane">
+  <section class="detail-pane" [class.mobile-active]="mobilePane() === 'detail'">
     <div class="detail-content scrollable" *ngIf="selectedProduct() as p">
       <div class="detail-header">
+        <!-- Mobile back button -->
+        <button class="mobile-back-btn" (click)="mobilePaneBack(); selectedProduct.set(null)">
+          <i class="pi pi-chevron-left"></i>
+        </button>
         <span class="detail-title">Product Details <span class="red-dot"></span></span>
-        <button class="icon-btn-plain" (click)="selectedProduct.set(null)">
+        <button class="icon-btn-plain" (click)="selectedProduct.set(null); mobilePane.set('product')">
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -352,6 +360,21 @@
         <textarea pInputTextarea [(ngModel)]="form.ai_description" rows="4" class="ai-textarea" placeholder="AI-generated description..."></textarea>
       </div>
 
+      <!-- AI Image Generator Button -->
+      <div class="ai-image-trigger-row">
+        <div class="ai-image-trigger-left">
+          <div class="ai-img-icon-wrap"><i class="pi pi-image"></i></div>
+          <div>
+            <div class="ai-img-label">AI Product Image</div>
+            <div class="ai-img-sub">Generate 4 AI images from product name</div>
+          </div>
+        </div>
+        <button class="ai-regen-btn ai-img-trigger-btn" (click)="generateAiImages()" [disabled]="aiImagePickerLoading()">
+          <i class="pi" [class.pi-sparkles]="!aiImagePickerLoading()" [class.pi-spin]="aiImagePickerLoading()" [class.pi-spinner]="aiImagePickerLoading()"></i>
+          {{ aiImagePickerLoading() ? 'Generating...' : 'Generate Images' }}
+        </button>
+      </div>
+
       <div class="dialog-field" style="margin-top: 16px;">
         <label>Product Image</label>
         
@@ -429,6 +452,77 @@
     </div>
   </ng-template>
 </p-drawer>
+
+<!-- ═══ AI Image Picker Modal ═══ -->
+<p-dialog
+  [(visible)]="aiImagePickerVisible"
+  [modal]="true"
+  [style]="{ width: 'min(96vw, 680px)' }"
+  [showHeader]="false"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="ai-image-picker-dialog"
+  appendTo="body"
+>
+  <div class="aip-wrapper">
+
+    <!-- Header -->
+    <div class="aip-header">
+      <div class="aip-title-group">
+        <div class="aip-icon-wrap"><i class="pi pi-sparkles"></i></div>
+        <div>
+          <div class="aip-title">AI Image Generator</div>
+          <div class="aip-subtitle">{{ form.name || 'Product' }} &mdash; Select one image</div>
+        </div>
+      </div>
+      <button class="aip-close-btn" (click)="aiImagePickerVisible.set(false)">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Image Grid -->
+    <div class="aip-grid">
+      <ng-container *ngFor="let imgUrl of aiImageOptions(); let i = index">
+
+        <!-- Shimmer while loading -->
+        <div class="aip-card" *ngIf="aiImagePickerLoading()">
+          <div class="aip-shimmer"></div>
+        </div>
+
+        <!-- Loaded image -->
+        <div
+          class="aip-card"
+          *ngIf="!aiImagePickerLoading()"
+          [class.aip-selected]="selectedAiImageIndex() === i"
+          (click)="selectedAiImageIndex.set(i)"
+        >
+          <img [src]="imgUrl" alt="AI option {{ i + 1 }}" class="aip-img" loading="lazy" />
+          <div class="aip-check" *ngIf="selectedAiImageIndex() === i">
+            <i class="pi pi-check"></i>
+          </div>
+          <div class="aip-card-badge">Option {{ i + 1 }}</div>
+        </div>
+
+      </ng-container>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="aip-footer">
+      <button class="aip-regen-btn" (click)="regenerateAiImages()" [disabled]="aiImagePickerLoading() || aiImageApplying()">
+        <i class="pi pi-refresh"></i> Regenerate
+      </button>
+      <button
+        class="aip-apply-btn"
+        [disabled]="selectedAiImageIndex() === null || aiImageApplying()"
+        (click)="applyAiImage()"
+      >
+        <i class="pi" [class.pi-check]="!aiImageApplying()" [class.pi-spin]="aiImageApplying()" [class.pi-spinner]="aiImageApplying()"></i>
+        {{ aiImageApplying() ? 'Saving...' : 'Use this Image' }}
+      </button>
+    </div>
+
+  </div>
+</p-dialog>
 
 <!-- ═══ Category Dialog ═══ -->
 <p-dialog
