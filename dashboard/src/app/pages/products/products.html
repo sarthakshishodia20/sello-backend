@@ -454,12 +454,14 @@
   [(visible)]="aiImagePickerVisible"
   [header]="'Find Image — ' + (form.name || 'Product')"
   [modal]="true"
-  [style]="{ width: 'min(96vw, 600px)' }"
+  [style]="{ width: 'min(96vw, 560px)' }"
   [draggable]="false"
   [resizable]="false"
   styleClass="yelo-product-dialog"
   appendTo="body"
 >
+
+  <p class="aip-hint" *ngIf="!aiImagePickerLoading()">Tap an image to instantly set it as the product photo.</p>
 
   <!-- Image Grid -->
   <div class="aip-grid">
@@ -473,33 +475,17 @@
       <div
         *ngFor="let imgUrl of aiImageOptions(); let i = index"
         class="aip-card"
-        [class.aip-selected]="selectedAiImageIndex() === i"
-        (click)="selectedAiImageIndex.set(i)"
+        [class.aip-applying]="aiImageApplying() && selectedAiImageIndex() === i"
+        (click)="selectAndApplyImage(i)"
       >
         <img [src]="imgUrl" alt="Option {{ i + 1 }}" class="aip-img" loading="lazy" />
-        <div class="aip-check" *ngIf="selectedAiImageIndex() === i">
-          <i class="pi pi-check"></i>
+        <!-- Applying spinner overlay -->
+        <div class="aip-applying-overlay" *ngIf="aiImageApplying() && selectedAiImageIndex() === i">
+          <i class="pi pi-spinner pi-spin"></i>
         </div>
       </div>
     </ng-container>
   </div>
-
-  <!-- Footer -->
-  <ng-template pTemplate="footer">
-    <div class="drawer-footer-actions">
-      <button class="yelo-btn-secondary" (click)="regenerateAiImages()" [disabled]="aiImagePickerLoading() || aiImageApplying()">
-        <i class="pi pi-refresh"></i> Regenerate
-      </button>
-      <button
-        class="yelo-btn-primary"
-        [disabled]="selectedAiImageIndex() === null || aiImageApplying()"
-        (click)="applyAiImage()"
-      >
-        <i class="pi" [class.pi-check]="!aiImageApplying()" [class.pi-spin]="aiImageApplying()" [class.pi-spinner]="aiImageApplying()"></i>
-        {{ aiImageApplying() ? 'Saving...' : 'Use this Image' }}
-      </button>
-    </div>
-  </ng-template>
 
 </p-dialog>
 

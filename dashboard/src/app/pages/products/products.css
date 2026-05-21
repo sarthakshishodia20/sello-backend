@@ -672,34 +672,35 @@ body.dark-mode .cat-row:hover {
 
 /* ── AI Image Trigger Row ── */
 /* ── AI Image Picker ── */
+.aip-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: -4px 0 12px;
+  line-height: 1.4;
+}
+
 .aip-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  padding: 8px 0 16px;
+  gap: 12px;
+  padding: 0 0 4px;
 }
 
 .aip-card {
   position: relative;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 1;
   cursor: pointer;
-  border: 2px solid var(--border);
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid var(--border);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
   background: var(--surface-100);
 }
 
-.aip-card:hover {
-  border-color: #a855f7;
+.aip-card:hover:not(.aip-applying) {
+  border-color: var(--accent-yellow);
   transform: scale(1.02);
-  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.18);
-}
-
-.aip-card.aip-selected {
-  border-color: #a855f7;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18), 0 6px 20px rgba(168, 85, 247, 0.2);
-  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
 .aip-img {
@@ -709,29 +710,20 @@ body.dark-mode .cat-row:hover {
   display: block;
 }
 
-.aip-check {
+/* Applying overlay — spins on top of clicked card */
+.aip-applying-overlay {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #a855f7;
-  color: #fff;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 900;
-  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.5);
-  animation: popIn 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #fff;
+  font-size: 22px;
+  border-radius: 12px;
 }
 
-@keyframes popIn {
-  from { transform: scale(0.5); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
-}
-
+/* Shimmer loading card */
 .aip-shimmer {
   width: 100%;
   height: 100%;
@@ -751,9 +743,8 @@ body.dark-mode .cat-row:hover {
 }
 
 @media screen and (max-width: 600px) {
-  .aip-grid { gap: 10px; }
+  .aip-grid { gap: 8px; }
 }
-
 
 
 .label-row {

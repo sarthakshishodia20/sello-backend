@@ -756,7 +756,14 @@ export class ProductsComponent implements OnInit {
   // Holds full-res Pexels URLs (parallel array to aiImageOptions)
   private _pexelsFullUrls: string[] = [];
 
-  /** Download selected AI image and upload to backend, then set as product image */
+  /** Called when user taps an image card — guards concurrent calls */
+  selectAndApplyImage(idx: number) {
+    if (this.aiImageApplying()) return;
+    this.selectedAiImageIndex.set(idx);
+    this.applyAiImage();
+  }
+
+  /** Download selected Pexels image and upload to backend */
   async applyAiImage() {
     const idx = this.selectedAiImageIndex();
     if (idx === null) return;
