@@ -1,13 +1,304 @@
 /* ═══════════════════════════════════════════════════════
-   Order Settings Page — inherits item-settings design tokens
+   Order Settings Page — Full CSS (copied from item-settings
+   + order-settings specific overrides)
    ═══════════════════════════════════════════════════════ */
 
-/* ── Page Icon override ──────────────────────────────── */
+/* ── Layout ──────────────────────────────────────────── */
 
-.os-icon-wrap {
+.content-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+}
+
+/* ── Product Image Box ───────────────────────────────── */
+
+.prod-img-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.tbl-prod-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Product Identity ────────────────────────────────── */
+
+.prod-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prod-identity strong {
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.prod-desc-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 350px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Category Badge ──────────────────────────────────── */
+
+.prod-cat-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--accent-yellow, #fbbf24);
+  background: rgba(250, 204, 21, 0.1);
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  border: 1px solid rgba(250, 204, 21, 0.2);
+  letter-spacing: 0.03em;
+}
+
+/* ── Price ───────────────────────────────────────────── */
+
+.prod-price-text {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+/* ── Action Buttons ──────────────────────────────────── */
+
+.action-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.65rem 1.3rem;
+  border-radius: 12px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 42px;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.action-confirm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Order Settings specific button colors ─────────────── */
+
+.os-btn-discount {
+  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25) !important;
+}
+
+.os-btn-discount:not(:disabled):hover {
+  background: linear-gradient(135deg, #15803d, #14532d) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35) !important;
+}
+
+.os-btn-gst {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+}
+
+.os-btn-gst:not(:disabled):hover {
+  background: linear-gradient(135deg, #b45309, #92400e) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(217, 119, 6, 0.35) !important;
+}
+
+.os-btn-delivery {
+  background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25) !important;
+}
+
+.os-btn-delivery:not(:disabled):hover {
+  background: linear-gradient(135deg, #4f46e5, #4338ca) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35) !important;
+}
+
+/* ── Action button group ─────────────────────────────── */
+
+.action-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Refresh icon button ─────────────────────────────── */
+
+.btn-action-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--white, #fff);
+  border: 1px solid var(--border);
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-action-icon:hover:not(:disabled) {
+  background: var(--primary-light, #eff6ff);
+  border-color: var(--primary, #2563eb);
+}
+
+.btn-action-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+
+.empty-cell {
+  padding: 5rem 0 !important;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.empty-state p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* ── Curated badge ───────────────────────────────────── */
+
+.curated-badge {
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  padding: 0.3rem 0.65rem !important;
+  border-radius: 8px !important;
+}
+
+/* ── Search Bar ──────────────────────────────────────── */
+
+.product-search-bar {
+  position: relative;
+  width: 250px;
+}
+
+.product-search-bar .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 0.9rem;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.product-search-input {
+  width: 100% !important;
+  padding: 10px 40px 10px 38px !important;
+  border-radius: 100px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--primary-light, #eff6ff) !important;
+  color: var(--text-dark) !important;
+  font-size: 0.9rem !important;
+  height: 42px !important;
+  transition: all 0.2s !important;
+}
+
+.product-search-input:focus {
+  background: var(--white, #fff) !important;
+  border-color: var(--primary, #2563eb) !important;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05) !important;
+  outline: none !important;
+}
+
+/* ── Search Suggestions ──────────────────────────────── */
+
+.search-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--white, #fff);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 9999;
+  overflow: hidden;
+  animation: fadeSlideDown 0.15s ease;
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+
+.suggestion-item:last-child { border-bottom: none; }
+
+.suggestion-item:hover {
+  background: var(--primary-light, #eff6ff);
+}
+
+.suggestion-icon {
+  font-size: 11px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+/* ── Page Icon ───────────────────────────────────────── */
+
+.header-title-box .icon-wrap {
   background: rgba(99, 102, 241, 0.1) !important;
-  border-color: rgba(99, 102, 241, 0.2) !important;
   color: #6366f1 !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
 }
 
 /* ── Column Header Pills ─────────────────────────────── */
@@ -16,7 +307,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -49,58 +340,13 @@
   border: 1px solid rgba(14, 165, 233, 0.2);
 }
 
-/* ── Action Buttons ──────────────────────────────────── */
-
-.os-btn-discount {
-  background: linear-gradient(135deg, #16a34a, #15803d) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3) !important;
-}
-
-.os-btn-discount:not(:disabled):hover {
-  background: linear-gradient(135deg, #15803d, #14532d) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35) !important;
-}
-
-.os-btn-gst {
-  background: linear-gradient(135deg, #d97706, #b45309) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3) !important;
-}
-
-.os-btn-gst:not(:disabled):hover {
-  background: linear-gradient(135deg, #b45309, #92400e) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35) !important;
-}
-
-.os-btn-delivery {
-  background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
-  color: #fff !important;
-  border: none !important;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
-}
-
-.os-btn-delivery:not(:disabled):hover {
-  background: linear-gradient(135deg, #4f46e5, #4338ca) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
-}
-
-/* ── Final Price cell ────────────────────────────────── */
+/* ── Final Price Cell ────────────────────────────────── */
 
 .os-final-price {
   font-size: 0.96rem;
   font-weight: 800;
   color: #0ea5e9;
   letter-spacing: -0.3px;
-}
-
-:host-context(body.dark-mode) .os-final-price {
-  color: #38bdf8 !important;
 }
 
 /* ── Confirm Dialog ──────────────────────────────────── */
@@ -122,8 +368,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  border: 1.5px solid currentColor;
-  opacity: 0.9;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
 }
 
 .os-confirm-desc {
@@ -178,7 +423,7 @@
   padding: 0 1.1rem;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--bg-card);
+  background: var(--bg-card, #fff);
   color: var(--text-dark);
   font-size: 0.83rem;
   font-weight: 700;
@@ -187,7 +432,7 @@
 }
 
 .os-cancel-btn:hover {
-  background: var(--surface-100, #f1f5f9);
+  background: var(--primary-light, #eff6ff);
 }
 
 .os-confirm-btn {
@@ -215,7 +460,86 @@
   transform: translateY(-1px);
 }
 
-/* ── Dark Mode ───────────────────────────────────────── */
+/* ── Responsive ──────────────────────────────────────── */
+
+@media screen and (max-width: 991px) {
+  .content-container {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 16px;
+  }
+
+  .product-search-bar {
+    width: 100% !important;
+  }
+
+  .action-btn-group {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .action-confirm-btn {
+    flex: 1;
+    min-width: 110px;
+    justify-content: center;
+  }
+}
+
+/* ══ Dark Mode ════════════════════════════════════════ */
+
+:host-context(body.dark-mode) .product-search-input {
+  background: #18181b !important;
+  color: #fafafa !important;
+  border-color: #27272a !important;
+}
+
+:host-context(body.dark-mode) .product-search-bar .search-icon {
+  color: #a1a1aa !important;
+}
+
+:host-context(body.dark-mode) .search-suggestions {
+  background: #18181b !important;
+  border-color: #27272a !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+:host-context(body.dark-mode) .suggestion-item {
+  color: #e4e4e7 !important;
+  border-bottom-color: #27272a !important;
+}
+
+:host-context(body.dark-mode) .suggestion-item:hover {
+  background: #27272a !important;
+}
+
+:host-context(body.dark-mode) .suggestion-icon {
+  color: #a1a1aa !important;
+}
+
+:host-context(body.dark-mode) .btn-action-icon {
+  background: #27272a !important;
+  color: #fafafa !important;
+  border-color: #3f3f46 !important;
+}
+
+:host-context(body.dark-mode) .btn-action-icon:hover:not(:disabled) {
+  background: #3f3f46 !important;
+}
+
+:host-context(body.dark-mode) .header-title-box .icon-wrap {
+  background: rgba(99, 102, 241, 0.12) !important;
+  color: #818cf8 !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+}
 
 :host-context(body.dark-mode) .col-discount {
   background: rgba(34, 197, 94, 0.08) !important;
@@ -237,6 +561,10 @@
   border-color: rgba(14, 165, 233, 0.15) !important;
 }
 
+:host-context(body.dark-mode) .os-final-price {
+  color: #38bdf8 !important;
+}
+
 :host-context(body.dark-mode) .os-confirm-desc {
   color: #94a3b8 !important;
 }
@@ -246,16 +574,24 @@
 }
 
 :host-context(body.dark-mode) .os-cancel-btn {
-  background: #1e2738 !important;
-  border-color: #2d3a4e !important;
-  color: #94a3b8 !important;
+  background: #27272a !important;
+  border-color: #3f3f46 !important;
+  color: #a1a1aa !important;
 }
 
 :host-context(body.dark-mode) .os-cancel-btn:hover {
-  background: #253045 !important;
+  background: #3f3f46 !important;
 }
 
-:host-context(body.dark-mode) .os-icon-wrap {
-  background: rgba(99, 102, 241, 0.12) !important;
-  border-color: rgba(99, 102, 241, 0.2) !important;
+:host-context(body.dark-mode) .prod-img-box {
+  border-color: #27272a !important;
+  background: #18181b !important;
+}
+
+:host-context(body.dark-mode) .prod-identity strong {
+  color: #e4e4e7 !important;
+}
+
+:host-context(body.dark-mode) .prod-price-text {
+  color: #e4e4e7 !important;
 }
