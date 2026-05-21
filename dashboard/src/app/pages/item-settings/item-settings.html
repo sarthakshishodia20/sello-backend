@@ -2,7 +2,7 @@
   <!-- ══ Page Header Card ══ -->
   <div class="page-header-card">
     <div class="header-title-box">
-      <div class="icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+      <div class="icon-wrap">
         <i class="pi pi-star-fill animate-pulse"></i>
       </div>
       <div>
@@ -19,30 +19,30 @@
         <input type="text" placeholder="Search item..." (input)="onSearch($event)">
       </div>
 
-      <!-- Action Buttons -->
-      <button 
-        class="action-confirm-btn animate-fade" 
-        [disabled]="selectedProducts().length === 0 || saving()"
-        (click)="toggleTopSellingStatus(true)"
-        style="background: #fbbf24; color: #000; font-weight: 700; border: none; font-family: 'Outfit', sans-serif;"
-        pTooltip="Add selected items to Top Selling slider"
-      >
-        <i class="pi pi-star-fill mr-1"></i> Add to Top Selling
-      </button>
+      <!-- Action Buttons Wrapper -->
+      <div class="action-btn-group">
+        <button 
+          class="action-confirm-btn yellow-btn animate-fade" 
+          [disabled]="selectedProducts().length === 0 || saving()"
+          (click)="toggleTopSellingStatus(true)"
+          pTooltip="Add selected items to Top Selling slider"
+        >
+          <i class="pi pi-star-fill"></i> Add to Top Selling
+        </button>
 
-      <button 
-        class="action-confirm-btn animate-fade" 
-        [disabled]="selectedProducts().length === 0 || saving()"
-        (click)="toggleTopSellingStatus(false)"
-        style="background: #fbbf24; color: #000; font-weight: 700; border: none; font-family: 'Outfit', sans-serif; opacity: 0.9;"
-        pTooltip="Remove selected items from Top Selling slider"
-      >
-        <i class="pi pi-times mr-1"></i> Remove Selected
-      </button>
+        <button 
+          class="action-confirm-btn yellow-btn animate-fade" 
+          [disabled]="selectedProducts().length === 0 || saving()"
+          (click)="toggleTopSellingStatus(false)"
+          pTooltip="Remove selected items from Top Selling slider"
+        >
+          <i class="pi pi-times"></i> Remove Selected
+        </button>
 
-      <button class="btn-action-icon" (click)="loadProducts()" pTooltip="Refresh" [disabled]="loading()">
-        <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
-      </button>
+        <button class="btn-action-icon" (click)="loadProducts()" pTooltip="Refresh" [disabled]="loading()">
+          <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+        </button>
+      </div>
     </div>
   </div>
 
