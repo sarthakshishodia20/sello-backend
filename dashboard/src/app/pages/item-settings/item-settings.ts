@@ -53,7 +53,7 @@ export class ItemSettingsComponent implements OnInit {
 
   loadProducts() {
     this.loading.set(true);
-    this.api.get<any>('/products/inherited', { limit: 100, offset: 0 }).subscribe({
+    this.api.get<any>('/products/inherited', { limit: 20, offset: 0 }).subscribe({
       next: (response) => {
         this.products.set(response.data.products || []);
         this.loading.set(false);
