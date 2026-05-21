@@ -93,24 +93,41 @@
 }
 
 .action-confirm-btn.yellow-btn {
+  background: #4338ca !important; /* Premium Blue for Light Mode */
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.action-confirm-btn.yellow-btn:hover:not(:disabled) {
+  background: #4338ca !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+}
+
+.action-confirm-btn.yellow-btn:disabled {
+  background: #93c5fd !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: none !important;
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Dark Mode overrides for confirm buttons */
+:host-context(body.dark-mode) .action-confirm-btn.yellow-btn {
   background: #fbbf24 !important;
   color: #000000 !important;
   box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
 }
 
-.action-confirm-btn.yellow-btn:hover:not(:disabled) {
+:host-context(body.dark-mode) .action-confirm-btn.yellow-btn:hover:not(:disabled) {
   background: #f59e0b !important;
-  transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(251, 191, 36, 0.4);
 }
 
-.action-confirm-btn.yellow-btn:disabled {
+:host-context(body.dark-mode) .action-confirm-btn.yellow-btn:disabled {
   background: #fef08a !important;
   color: rgba(0, 0, 0, 0.35) !important;
-  box-shadow: none !important;
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
 }
 
 /* Page header icon adjustments */

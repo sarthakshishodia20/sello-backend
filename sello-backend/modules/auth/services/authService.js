@@ -40,6 +40,7 @@ async function getUserProfile(userId) {
       u.email,
       u.role,
       u.phone,
+      u.theme_preference AS themePreference,
       u.masterbrand_id AS masterbrandId,
       u.merchant_id AS merchantId,
       u.is_active AS isActive,
@@ -70,6 +71,7 @@ async function buildTokenForUser(user) {
     email: profile.email,
     role: profile.role,
     phone: profile.phone,
+    themePreference: profile.themePreference,
     masterbrandId: profile.masterbrandId,
     masterbrandName: profile.masterbrandName,
     merchantId: profile.merchantId,
@@ -231,6 +233,13 @@ async function updateUserProfile(userId, { name, email, phone }) {
   );
 }
 
+async function updateThemePreference(userId, themePreference) {
+  return db.query(
+    'UPDATE tb_users SET theme_preference = ? WHERE id = ?',
+    [themePreference, userId]
+  );
+}
+
 async function getCustomers(user, { search = '', date = '' } = {}) {
   const params = [];
   let whereSql = "WHERE role = 'CUSTOMER'";
@@ -289,6 +298,7 @@ module.exports = {
   createMerchantAccount,
   createAdminAccount,
   updateUserProfile,
+  updateThemePreference,
   createCustomerAccount,
   getCustomers,
   updateCustomer,

@@ -15,6 +15,7 @@ router.get('/masterbrands',     controller.getMasterbrands);
 // Protected routes
 router.get('/profile', authenticate, controller.getProfile);
 router.put('/profile', authenticate, controller.updateProfile);
+router.put('/profile/theme', authenticate, controller.updateThemePreference);
 router.get('/customers',    authenticate, controller.getCustomers);
 router.put('/customers/:id', authenticate, controller.updateCustomer);
 router.delete('/customers/:id', authenticate, controller.deleteCustomer);

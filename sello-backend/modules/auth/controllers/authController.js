@@ -164,6 +164,20 @@ async function updateProfile(req, res) {
   }
 }
 
+async function updateThemePreference(req, res) {
+  try {
+    const { theme } = req.body;
+    if (!['light', 'dark'].includes(theme)) {
+      return sendError(res, 'Invalid theme preference', 400);
+    }
+    await authService.updateThemePreference(req.selloUser.id, theme);
+    return sendSuccess(res, 'Theme preference updated successfully');
+  } catch (err) {
+    logger.error(MODULE, 'UPDATE_THEME_ERROR', { error: err.message });
+    return sendError(res, 'Failed to update theme preference', 500);
+  }
+}
+
 async function customerLogin(req, res) {
   try {
     return await loginByRole(req, res, ['CUSTOMER'], 'CUSTOMER_LOGIN_SUCCESS');
@@ -233,7 +247,7 @@ async function getMasterbrands(req, res) {
 
 module.exports = { 
   adminLogin, merchantLogin, merchantSignup, adminSignup, 
-  getProfile, updateProfile, 
+  getProfile, updateProfile, updateThemePreference,
   customerLogin, customerSignup, getCustomers, updateCustomer, deleteCustomer,
   getMasterbrands
 };

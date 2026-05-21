@@ -367,12 +367,13 @@ async function toggleTopSellingProducts(req, res) {
     const merchantId = req.selloUser.merchantId;
     if (!merchantId) return sendError(res, 'Only merchant users can update top selling status');
 
-    const { catalogueIds, is_top_selling } = req.body;
+    const { catalogueIds, is_top_selling, isTopSelling } = req.body;
     if (!catalogueIds || !catalogueIds.length) {
       return sendError(res, 'catalogueIds (array) is required', 400);
     }
 
-    await productService.updateTopSellingStatus(merchantId, catalogueIds, is_top_selling);
+    const activeStatus = is_top_selling !== undefined ? is_top_selling : isTopSelling;
+    await productService.updateTopSellingStatus(merchantId, catalogueIds, activeStatus);
     return sendSuccess(res, 'Products top selling status updated successfully');
   } catch (err) {
     logger.error(MODULE, 'TOGGLE_TOP_SELLING_ERROR', { error: err.message });

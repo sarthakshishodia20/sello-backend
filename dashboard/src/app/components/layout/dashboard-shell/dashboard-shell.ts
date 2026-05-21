@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, HostListener } from '@angular/core';
+import { Component, inject, signal, computed, HostListener, effect } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -159,14 +159,28 @@ export class DashboardShellComponent {
   }
 
   toggleDarkMode() {
-    this.isDarkMode.set(!this.isDarkMode());
-    if (this.isDarkMode()) {
+    const nextMode = !this.isDarkMode();
+    this.isDarkMode.set(nextMode);
+    
+    const themeStr = nextMode ? 'dark' : 'light';
+    localStorage.setItem('theme', themeStr);
+    if (nextMode) {
       document.body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
     } else {
       document.body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
     }
+
+    this.api.put('/auth/profile/theme', { theme: themeStr }).subscribe({
+      next: () => {
+        const currUser = this.auth.user();
+        if (currUser) {
+          currUser.themePreference = themeStr;
+          this.auth.user.set({ ...currUser });
+          localStorage.setItem('sello_user', JSON.stringify(currUser));
+        }
+      },
+      error: (err) => console.error('Failed to sync theme preference to database:', err)
+    });
   }
 
   changeLang(lang: string) {
@@ -200,6 +214,23 @@ export class DashboardShellComponent {
     if (this.isDarkMode()) {
       document.body.classList.add('dark-mode');
     }
+
+    effect(() => {
+      const userProfile = this.auth.user();
+      if (userProfile && userProfile.themePreference) {
+        const dbTheme = userProfile.themePreference;
+        const currentLocalTheme = localStorage.getItem('theme');
+        if (dbTheme !== currentLocalTheme) {
+          localStorage.setItem('theme', dbTheme);
+          this.isDarkMode.set(dbTheme === 'dark');
+          if (dbTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+          } else {
+            document.body.classList.remove('dark-mode');
+          }
+        }
+      }
+    });
     
     this.settingsService.loadSettings();
 

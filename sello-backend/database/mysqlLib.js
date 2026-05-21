@@ -90,6 +90,19 @@ function initialize() {
         }
       });
 
+      // Check and add theme_preference column to tb_users
+      connection.query(`SHOW COLUMNS FROM tb_users LIKE 'theme_preference'`, (colErr4, results4) => {
+        if (!colErr4 && results4.length === 0) {
+          connection.query(`ALTER TABLE tb_users ADD COLUMN theme_preference VARCHAR(20) DEFAULT 'light'`, (alterErr4) => {
+            if (alterErr4) {
+              console.error('[Sello DB] ❌ Failed to add theme_preference column to tb_users:', alterErr4.message);
+            } else {
+              console.log('[Sello DB] ✅ Column theme_preference added to tb_users successfully.');
+            }
+          });
+        }
+      });
+
       connection.release();
     });
   });
