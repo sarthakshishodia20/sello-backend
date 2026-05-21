@@ -42,7 +42,7 @@ export class OrderSettingsComponent implements OnInit, OnDestroy {
   settingsService = inject(MerchantSettingsService);
   router = inject(Router);
 
-  readonly LIMIT = 20;
+  readonly LIMIT = 10;
 
   // ── Table State ──
   products = signal<any[]>([]);
