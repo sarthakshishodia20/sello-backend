@@ -27,6 +27,9 @@ router.post('/snooze', merchantOnly, controller.snoozeCatalogItems);
 router.post('/unsnooze', merchantOnly, controller.unsnoozeCatalogItems);
 router.post('/top-selling', merchantOnly, controller.toggleTopSellingProducts);
 router.get('/category-snooze', merchantOnly, controller.getCategorySnoozeStatus);
+router.post('/bulk/discount', merchantOnly, controller.bulkUpdateDiscount);
+router.post('/bulk/gst', merchantOnly, controller.bulkUpdateGst);
+router.post('/bulk/delivery', merchantOnly, controller.bulkUpdateDeliveryCharge);
 
 
 router.post('/generate-description', validator.validateGenerateDescription, controller.generateDescription);

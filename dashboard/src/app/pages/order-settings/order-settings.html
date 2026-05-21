@@ -1,0 +1,405 @@
+<div class="os-page animate-fade">
+
+  <!-- ══ Page Title Header ══ -->
+  <div class="os-page-header">
+    <div class="os-page-title">
+      <div class="os-page-icon">
+        <i class="pi pi-sliders-h"></i>
+      </div>
+      <div>
+        <h1>Order Settings</h1>
+        <p>Configure Discount, GST and Delivery Charge for your catalogue products.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION 1: DISCOUNT                        -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="os-section">
+    <div class="os-section-header">
+      <div class="os-section-title-row">
+        <div class="os-section-icon discount-icon"><i class="pi pi-percentage"></i></div>
+        <div>
+          <h2>Discount Management</h2>
+          <p>Set bulk discount percentage for selected products.</p>
+        </div>
+      </div>
+
+      <div class="os-header-actions">
+        <!-- Search Bar -->
+        <div class="os-search-bar" (click)="$event.stopPropagation()">
+          <i class="pi pi-search os-search-icon"></i>
+          <input
+            type="text"
+            placeholder="Search products..."
+            [value]="discount.search"
+            (input)="onSearch('discount', $event)"
+            class="os-search-input" />
+          <div class="os-suggestions" *ngIf="discount.showSuggestions && discount.suggestions.length > 0" (click)="$event.stopPropagation()">
+            <div class="os-suggestion-item" *ngFor="let s of discount.suggestions" (click)="selectSuggestion('discount', s)">
+              <i class="pi pi-search os-suggestion-icon"></i>
+              <span>{{ s }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="os-btn-group">
+          <button
+            class="os-action-btn os-btn-primary"
+            [disabled]="discount.selectedProducts.length === 0 || discount.saving"
+            (click)="openConfirm('discount')"
+            pTooltip="Apply discount to selected products">
+            <i class="pi pi-percentage"></i> Apply Discount
+          </button>
+          <button class="os-icon-btn" (click)="loadProducts('discount')" pTooltip="Refresh" [disabled]="discount.loading">
+            <i class="pi pi-refresh" [class.pi-spin]="discount.loading"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-table-wrap">
+      <p-table
+        [value]="discount.products"
+        [loading]="discount.loading"
+        [paginator]="true"
+        [rows]="20"
+        [totalRecords]="discount.total"
+        [lazy]="true"
+        (onLazyLoad)="loadProducts('discount', $event)"
+        [(selection)]="discount.selectedProducts"
+        [tableStyle]="{ 'min-width': '900px' }"
+        styleClass="p-datatable-sm">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3.5rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+            <th style="width: 70px">Image</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Base Price</th>
+            <th style="min-width: 130px">Discount</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-product>
+          <tr>
+            <td><p-tableCheckbox [value]="product"></p-tableCheckbox></td>
+            <td>
+              <div class="os-img-box">
+                <img
+                  [src]="product.effective_image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+                  class="os-prod-img"
+                  [alt]="product.effective_name"
+                  (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" />
+              </div>
+            </td>
+            <td>
+              <div class="os-prod-identity">
+                <strong>{{ product.effective_name }}</strong>
+                <span class="os-prod-sub">{{ product.effective_short_description || 'No description' }}</span>
+              </div>
+            </td>
+            <td><span class="os-cat-badge">{{ product.category_name || 'Uncategorized' }}</span></td>
+            <td><strong class="os-price">₹{{ product.effective_price | number:'1.0-0' }}</strong></td>
+            <td>
+              <p-tag [value]="getBadgeValue(product, 'discount')" [severity]="getBadgeSeverity(product, 'discount')" styleClass="os-badge"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="6"><div class="os-empty"><i class="pi pi-percentage"></i><p>No products found.</p></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION 2: GST                             -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="os-section">
+    <div class="os-section-header">
+      <div class="os-section-title-row">
+        <div class="os-section-icon gst-icon"><i class="pi pi-receipt"></i></div>
+        <div>
+          <h2>GST Management</h2>
+          <p>Apply GST percentage to selected catalogue products.</p>
+        </div>
+      </div>
+
+      <div class="os-header-actions">
+        <div class="os-search-bar" (click)="$event.stopPropagation()">
+          <i class="pi pi-search os-search-icon"></i>
+          <input
+            type="text"
+            placeholder="Search products..."
+            [value]="gst.search"
+            (input)="onSearch('gst', $event)"
+            class="os-search-input" />
+          <div class="os-suggestions" *ngIf="gst.showSuggestions && gst.suggestions.length > 0" (click)="$event.stopPropagation()">
+            <div class="os-suggestion-item" *ngFor="let s of gst.suggestions" (click)="selectSuggestion('gst', s)">
+              <i class="pi pi-search os-suggestion-icon"></i>
+              <span>{{ s }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="os-btn-group">
+          <button
+            class="os-action-btn os-btn-gst"
+            [disabled]="gst.selectedProducts.length === 0 || gst.saving"
+            (click)="openConfirm('gst')"
+            pTooltip="Apply GST to selected products">
+            <i class="pi pi-receipt"></i> Apply GST
+          </button>
+          <button class="os-icon-btn" (click)="loadProducts('gst')" pTooltip="Refresh" [disabled]="gst.loading">
+            <i class="pi pi-refresh" [class.pi-spin]="gst.loading"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-table-wrap">
+      <p-table
+        [value]="gst.products"
+        [loading]="gst.loading"
+        [paginator]="true"
+        [rows]="20"
+        [totalRecords]="gst.total"
+        [lazy]="true"
+        (onLazyLoad)="loadProducts('gst', $event)"
+        [(selection)]="gst.selectedProducts"
+        [tableStyle]="{ 'min-width': '900px' }"
+        styleClass="p-datatable-sm">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3.5rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+            <th style="width: 70px">Image</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th style="min-width: 130px">GST</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-product>
+          <tr>
+            <td><p-tableCheckbox [value]="product"></p-tableCheckbox></td>
+            <td>
+              <div class="os-img-box">
+                <img
+                  [src]="product.effective_image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+                  class="os-prod-img"
+                  [alt]="product.effective_name"
+                  (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" />
+              </div>
+            </td>
+            <td>
+              <div class="os-prod-identity">
+                <strong>{{ product.effective_name }}</strong>
+                <span class="os-prod-sub">{{ product.effective_short_description || 'No description' }}</span>
+              </div>
+            </td>
+            <td><span class="os-cat-badge">{{ product.category_name || 'Uncategorized' }}</span></td>
+            <td><strong class="os-price">₹{{ product.effective_price | number:'1.0-0' }}</strong></td>
+            <td>
+              <p-tag [value]="getBadgeValue(product, 'gst')" [severity]="getBadgeSeverity(product, 'gst')" styleClass="os-badge"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="6"><div class="os-empty"><i class="pi pi-receipt"></i><p>No products found.</p></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION 3: DELIVERY CHARGE                 -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="os-section">
+    <div class="os-section-header">
+      <div class="os-section-title-row">
+        <div class="os-section-icon delivery-icon"><i class="pi pi-truck"></i></div>
+        <div>
+          <h2>Delivery Charge</h2>
+          <p>Configure delivery charge (₹) per product for your catalogue.</p>
+        </div>
+      </div>
+
+      <div class="os-header-actions">
+        <div class="os-search-bar" (click)="$event.stopPropagation()">
+          <i class="pi pi-search os-search-icon"></i>
+          <input
+            type="text"
+            placeholder="Search products..."
+            [value]="delivery.search"
+            (input)="onSearch('delivery', $event)"
+            class="os-search-input" />
+          <div class="os-suggestions" *ngIf="delivery.showSuggestions && delivery.suggestions.length > 0" (click)="$event.stopPropagation()">
+            <div class="os-suggestion-item" *ngFor="let s of delivery.suggestions" (click)="selectSuggestion('delivery', s)">
+              <i class="pi pi-search os-suggestion-icon"></i>
+              <span>{{ s }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="os-btn-group">
+          <button
+            class="os-action-btn os-btn-delivery"
+            [disabled]="delivery.selectedProducts.length === 0 || delivery.saving"
+            (click)="openConfirm('delivery')"
+            pTooltip="Set delivery charge for selected products">
+            <i class="pi pi-truck"></i> Set Charge
+          </button>
+          <button class="os-icon-btn" (click)="loadProducts('delivery')" pTooltip="Refresh" [disabled]="delivery.loading">
+            <i class="pi pi-refresh" [class.pi-spin]="delivery.loading"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="os-table-wrap">
+      <p-table
+        [value]="delivery.products"
+        [loading]="delivery.loading"
+        [paginator]="true"
+        [rows]="20"
+        [totalRecords]="delivery.total"
+        [lazy]="true"
+        (onLazyLoad)="loadProducts('delivery', $event)"
+        [(selection)]="delivery.selectedProducts"
+        [tableStyle]="{ 'min-width': '900px' }"
+        styleClass="p-datatable-sm">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3.5rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+            <th style="width: 70px">Image</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th style="min-width: 140px">Delivery Charge</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-product>
+          <tr>
+            <td><p-tableCheckbox [value]="product"></p-tableCheckbox></td>
+            <td>
+              <div class="os-img-box">
+                <img
+                  [src]="product.effective_image_url || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='"
+                  class="os-prod-img"
+                  [alt]="product.effective_name"
+                  (error)="$any($event.target).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iIzFhMWYzNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkeT0iLjE1ZW0iIGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI1MCIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlMuPC90ZXh0Pjwvc3ZnPg=='" />
+              </div>
+            </td>
+            <td>
+              <div class="os-prod-identity">
+                <strong>{{ product.effective_name }}</strong>
+                <span class="os-prod-sub">{{ product.effective_short_description || 'No description' }}</span>
+              </div>
+            </td>
+            <td><span class="os-cat-badge">{{ product.category_name || 'Uncategorized' }}</span></td>
+            <td><strong class="os-price">₹{{ product.effective_price | number:'1.0-0' }}</strong></td>
+            <td>
+              <p-tag [value]="getBadgeValue(product, 'delivery')" [severity]="getBadgeSeverity(product, 'delivery')" styleClass="os-badge"></p-tag>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="6"><div class="os-empty"><i class="pi pi-truck"></i><p>No products found.</p></div></td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </section>
+
+</div>
+
+<!-- ══ Confirm Dialog: Discount ══ -->
+<p-dialog
+  [(visible)]="discount.confirmVisible"
+  [header]="'Apply Discount to ' + discount.selectedProducts.length + ' product(s)'"
+  [modal]="true"
+  [style]="{width: '420px'}"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="os-confirm-dialog">
+  <div class="os-confirm-body">
+    <div class="os-confirm-icon discount-icon-lg"><i class="pi pi-percentage"></i></div>
+    <p class="os-confirm-desc">Enter the discount percentage to apply to <strong>{{ discount.selectedProducts.length }}</strong> selected product(s).</p>
+    <div class="os-input-group">
+      <label>Discount Percentage (%)</label>
+      <p-inputNumber [(ngModel)]="discount.confirmValue" [min]="0" [max]="100" [maxFractionDigits]="2" suffix=" %" inputId="discountVal" styleClass="os-num-input"></p-inputNumber>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="os-dialog-footer">
+      <button class="os-cancel-btn" (click)="discount.confirmVisible = false"><i class="pi pi-times"></i> Cancel</button>
+      <button class="os-confirm-btn os-confirm-discount" [disabled]="discount.saving" (click)="applyBulkUpdate('discount')">
+        <i class="pi pi-check"></i> {{ discount.saving ? 'Applying...' : 'Apply Discount' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ══ Confirm Dialog: GST ══ -->
+<p-dialog
+  [(visible)]="gst.confirmVisible"
+  [header]="'Apply GST to ' + gst.selectedProducts.length + ' product(s)'"
+  [modal]="true"
+  [style]="{width: '420px'}"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="os-confirm-dialog">
+  <div class="os-confirm-body">
+    <div class="os-confirm-icon gst-icon-lg"><i class="pi pi-receipt"></i></div>
+    <p class="os-confirm-desc">Enter the GST percentage for <strong>{{ gst.selectedProducts.length }}</strong> selected product(s).</p>
+    <div class="os-input-group">
+      <label>GST Percentage (%)</label>
+      <p-inputNumber [(ngModel)]="gst.confirmValue" [min]="0" [max]="100" [maxFractionDigits]="2" suffix=" %" inputId="gstVal" styleClass="os-num-input"></p-inputNumber>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="os-dialog-footer">
+      <button class="os-cancel-btn" (click)="gst.confirmVisible = false"><i class="pi pi-times"></i> Cancel</button>
+      <button class="os-confirm-btn os-confirm-gst" [disabled]="gst.saving" (click)="applyBulkUpdate('gst')">
+        <i class="pi pi-check"></i> {{ gst.saving ? 'Applying...' : 'Apply GST' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- ══ Confirm Dialog: Delivery ══ -->
+<p-dialog
+  [(visible)]="delivery.confirmVisible"
+  [header]="'Set Delivery Charge for ' + delivery.selectedProducts.length + ' product(s)'"
+  [modal]="true"
+  [style]="{width: '420px'}"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="os-confirm-dialog">
+  <div class="os-confirm-body">
+    <div class="os-confirm-icon delivery-icon-lg"><i class="pi pi-truck"></i></div>
+    <p class="os-confirm-desc">Enter the delivery charge (₹) for <strong>{{ delivery.selectedProducts.length }}</strong> selected product(s).</p>
+    <div class="os-input-group">
+      <label>Delivery Charge (₹)</label>
+      <p-inputNumber [(ngModel)]="delivery.confirmValue" [min]="0" [maxFractionDigits]="2" prefix="₹ " inputId="deliveryVal" styleClass="os-num-input"></p-inputNumber>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div class="os-dialog-footer">
+      <button class="os-cancel-btn" (click)="delivery.confirmVisible = false"><i class="pi pi-times"></i> Cancel</button>
+      <button class="os-confirm-btn os-confirm-delivery" [disabled]="delivery.saving" (click)="applyBulkUpdate('delivery')">
+        <i class="pi pi-check"></i> {{ delivery.saving ? 'Applying...' : 'Set Delivery Charge' }}
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>

@@ -397,6 +397,83 @@ async function getCategorySnoozeStatus(req, res) {
   }
 }
 
+// ─── Order Settings: Bulk Update Controllers ──────────────────────────────────
+
+/**
+ * POST /api/products/bulk/discount
+ * Bulk set discount_percent on selected catalogue items for the merchant.
+ */
+async function bulkUpdateDiscount(req, res) {
+  try {
+    const merchantId = req.selloUser.merchantId;
+    if (!merchantId) return sendError(res, 'Only merchant users can update discount settings', 403);
+
+    const { catalogueIds, discountPercent } = req.body;
+    if (!catalogueIds || !catalogueIds.length) {
+      return sendError(res, 'catalogueIds (array) is required', 400);
+    }
+    if (discountPercent === undefined || discountPercent === null || isNaN(Number(discountPercent))) {
+      return sendError(res, 'discountPercent is required and must be a number', 400);
+    }
+    const pct = Math.max(0, Math.min(100, Number(discountPercent)));
+    await productService.bulkUpdateDiscount(merchantId, catalogueIds, pct);
+    return sendSuccess(res, `Discount of ${pct}% applied to ${catalogueIds.length} product(s)`);
+  } catch (err) {
+    logger.error(MODULE, 'BULK_UPDATE_DISCOUNT_ERROR', { error: err.message });
+    return sendError(res, 'Failed to update discount', 500);
+  }
+}
+
+/**
+ * POST /api/products/bulk/gst
+ * Bulk set gst_percent on selected catalogue items for the merchant.
+ */
+async function bulkUpdateGst(req, res) {
+  try {
+    const merchantId = req.selloUser.merchantId;
+    if (!merchantId) return sendError(res, 'Only merchant users can update GST settings', 403);
+
+    const { catalogueIds, gstPercent } = req.body;
+    if (!catalogueIds || !catalogueIds.length) {
+      return sendError(res, 'catalogueIds (array) is required', 400);
+    }
+    if (gstPercent === undefined || gstPercent === null || isNaN(Number(gstPercent))) {
+      return sendError(res, 'gstPercent is required and must be a number', 400);
+    }
+    const pct = Math.max(0, Math.min(100, Number(gstPercent)));
+    await productService.bulkUpdateGst(merchantId, catalogueIds, pct);
+    return sendSuccess(res, `GST of ${pct}% applied to ${catalogueIds.length} product(s)`);
+  } catch (err) {
+    logger.error(MODULE, 'BULK_UPDATE_GST_ERROR', { error: err.message });
+    return sendError(res, 'Failed to update GST', 500);
+  }
+}
+
+/**
+ * POST /api/products/bulk/delivery
+ * Bulk set delivery_charge on selected catalogue items for the merchant.
+ */
+async function bulkUpdateDeliveryCharge(req, res) {
+  try {
+    const merchantId = req.selloUser.merchantId;
+    if (!merchantId) return sendError(res, 'Only merchant users can update delivery charge settings', 403);
+
+    const { catalogueIds, deliveryCharge } = req.body;
+    if (!catalogueIds || !catalogueIds.length) {
+      return sendError(res, 'catalogueIds (array) is required', 400);
+    }
+    if (deliveryCharge === undefined || deliveryCharge === null || isNaN(Number(deliveryCharge))) {
+      return sendError(res, 'deliveryCharge is required and must be a number', 400);
+    }
+    const charge = Math.max(0, Number(deliveryCharge));
+    await productService.bulkUpdateDeliveryCharge(merchantId, catalogueIds, charge);
+    return sendSuccess(res, `Delivery charge of ₹${charge} applied to ${catalogueIds.length} product(s)`);
+  } catch (err) {
+    logger.error(MODULE, 'BULK_UPDATE_DELIVERY_ERROR', { error: err.message });
+    return sendError(res, 'Failed to update delivery charge', 500);
+  }
+}
+
 // ─── AI / Image / Misc Handlers ───────────────────────────────────────────────
 
 /**
@@ -569,6 +646,10 @@ module.exports = {
   unsnoozeCatalogItems,
   toggleTopSellingProducts,
   getCategorySnoozeStatus,
+  // Order Settings bulk operations
+  bulkUpdateDiscount,
+  bulkUpdateGst,
+  bulkUpdateDeliveryCharge,
   // AI / images / misc
   uploadImage,
   generateDescription,

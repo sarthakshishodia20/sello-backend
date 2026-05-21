@@ -103,6 +103,45 @@ function initialize() {
         }
       });
 
+      // Check and add discount_percent column to tb_app_catalogue
+      connection.query(`SHOW COLUMNS FROM tb_app_catalogue LIKE 'discount_percent'`, (colErr5, results5) => {
+        if (!colErr5 && results5.length === 0) {
+          connection.query(`ALTER TABLE tb_app_catalogue ADD COLUMN discount_percent DECIMAL(5,2) DEFAULT 0`, (alterErr5) => {
+            if (alterErr5) {
+              console.error('[Sello DB] ❌ Failed to add discount_percent column:', alterErr5.message);
+            } else {
+              console.log('[Sello DB] ✅ Column discount_percent added to tb_app_catalogue.');
+            }
+          });
+        }
+      });
+
+      // Check and add gst_percent column to tb_app_catalogue
+      connection.query(`SHOW COLUMNS FROM tb_app_catalogue LIKE 'gst_percent'`, (colErr6, results6) => {
+        if (!colErr6 && results6.length === 0) {
+          connection.query(`ALTER TABLE tb_app_catalogue ADD COLUMN gst_percent DECIMAL(5,2) DEFAULT 0`, (alterErr6) => {
+            if (alterErr6) {
+              console.error('[Sello DB] ❌ Failed to add gst_percent column:', alterErr6.message);
+            } else {
+              console.log('[Sello DB] ✅ Column gst_percent added to tb_app_catalogue.');
+            }
+          });
+        }
+      });
+
+      // Check and add delivery_charge column to tb_app_catalogue
+      connection.query(`SHOW COLUMNS FROM tb_app_catalogue LIKE 'delivery_charge'`, (colErr7, results7) => {
+        if (!colErr7 && results7.length === 0) {
+          connection.query(`ALTER TABLE tb_app_catalogue ADD COLUMN delivery_charge DECIMAL(10,2) DEFAULT 0`, (alterErr7) => {
+            if (alterErr7) {
+              console.error('[Sello DB] ❌ Failed to add delivery_charge column:', alterErr7.message);
+            } else {
+              console.log('[Sello DB] ✅ Column delivery_charge added to tb_app_catalogue.');
+            }
+          });
+        }
+      });
+
       connection.release();
     });
   });

@@ -127,6 +127,11 @@ export class DashboardShellComponent {
     this.showExtensionToast('Top Selling Products Slider', val);
   }
 
+  toggleExtOrderSettings(val: boolean) {
+    this.settingsService.updateSettings({ orderSettingsEnabled: val });
+    this.showExtensionToast('Order Settings (Discount, GST, Delivery)', val);
+  }
+
   private showExtensionToast(name: string, val: boolean) {
     if (val) {
       this.messageService.add({
@@ -329,6 +334,10 @@ export class DashboardShellComponent {
 
     if (this.settingsService.settings().topSellingEnabled) {
       items.push({ label: 'Item Settings', key: 'item-settings', icon: 'pi pi-star-fill', route: '/item-settings' });
+    }
+
+    if (this.settingsService.settings().orderSettingsEnabled) {
+      items.push({ label: 'Order Settings', key: 'order-settings', icon: 'pi pi-sliders-h', route: '/order-settings' });
     }
 
     items.push(

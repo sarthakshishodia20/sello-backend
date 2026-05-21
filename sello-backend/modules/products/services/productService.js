@@ -304,6 +304,9 @@ async function getInheritedProducts(merchantId, { categoryId = null, search = ''
       ac.is_out_of_stock,
       ac.snooze_until,
       ac.is_top_selling,
+      COALESCE(ac.discount_percent, 0) AS discount_percent,
+      COALESCE(ac.gst_percent, 0) AS gst_percent,
+      COALESCE(ac.delivery_charge, 0) AS delivery_charge,
       c.name AS category_name
     FROM tb_app_catalogue ac
     JOIN tb_products p ON p.id = ac.product_id
@@ -628,6 +631,38 @@ async function getSearchSuggestions(user, queryStr) {
   }
 }
 
+// ─── Order Settings: Bulk Update Functions ───────────────────────────────────
+
+async function bulkUpdateDiscount(merchantId, catalogueIds, discountPercent) {
+  if (!catalogueIds || catalogueIds.length === 0) return;
+  const placeholders = catalogueIds.map(() => '?').join(',');
+  await db.query(
+    `UPDATE tb_app_catalogue SET discount_percent = ? WHERE merchant_id = ? AND id IN (${placeholders})`,
+    [discountPercent, merchantId, ...catalogueIds]
+  );
+  logger.info(MODULE, 'BULK_DISCOUNT_UPDATED', { merchantId, count: catalogueIds.length, discountPercent });
+}
+
+async function bulkUpdateGst(merchantId, catalogueIds, gstPercent) {
+  if (!catalogueIds || catalogueIds.length === 0) return;
+  const placeholders = catalogueIds.map(() => '?').join(',');
+  await db.query(
+    `UPDATE tb_app_catalogue SET gst_percent = ? WHERE merchant_id = ? AND id IN (${placeholders})`,
+    [gstPercent, merchantId, ...catalogueIds]
+  );
+  logger.info(MODULE, 'BULK_GST_UPDATED', { merchantId, count: catalogueIds.length, gstPercent });
+}
+
+async function bulkUpdateDeliveryCharge(merchantId, catalogueIds, deliveryCharge) {
+  if (!catalogueIds || catalogueIds.length === 0) return;
+  const placeholders = catalogueIds.map(() => '?').join(',');
+  await db.query(
+    `UPDATE tb_app_catalogue SET delivery_charge = ? WHERE merchant_id = ? AND id IN (${placeholders})`,
+    [deliveryCharge, merchantId, ...catalogueIds]
+  );
+  logger.info(MODULE, 'BULK_DELIVERY_CHARGE_UPDATED', { merchantId, count: catalogueIds.length, deliveryCharge });
+}
+
 module.exports = {
   getMasterProducts,
   getMasterProductById,
@@ -649,7 +684,10 @@ module.exports = {
   snoozeItems,
   unsnoozeItems,
   updateTopSellingStatus,
-  getCategorySnoozeStatus
+  getCategorySnoozeStatus,
+  bulkUpdateDiscount,
+  bulkUpdateGst,
+  bulkUpdateDeliveryCharge
 };
 /**
  * Relink removes the merchant override and returns the catalogue item to follow masterbrand data.

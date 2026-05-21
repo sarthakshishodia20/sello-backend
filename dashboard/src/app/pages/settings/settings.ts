@@ -57,7 +57,7 @@ export class SettingsComponent implements OnInit {
     this.loading.set(true);
     this.api.get('/notifications/templates').subscribe({
       next: (res: any) => {
-        this.templates.set(res.data || []);
+        this.templates.set(res.data?.data || []);
         this.loading.set(false);
       },
       error: () => {
