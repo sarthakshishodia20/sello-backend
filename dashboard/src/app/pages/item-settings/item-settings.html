@@ -24,7 +24,7 @@
         class="action-confirm-btn animate-fade" 
         [disabled]="selectedProducts().length === 0 || saving()"
         (click)="toggleTopSellingStatus(true)"
-        style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff;"
+        style="background: #fbbf24; color: #000; font-weight: 700; border: none; font-family: 'Outfit', sans-serif;"
         pTooltip="Add selected items to Top Selling slider"
       >
         <i class="pi pi-star-fill mr-1"></i> Add to Top Selling
@@ -34,7 +34,7 @@
         class="action-confirm-btn animate-fade" 
         [disabled]="selectedProducts().length === 0 || saving()"
         (click)="toggleTopSellingStatus(false)"
-        style="background: rgba(239, 68, 68, 0.15); border: 1.5px solid rgba(239, 68, 68, 0.35); color: #ef4444;"
+        style="background: #fbbf24; color: #000; font-weight: 700; border: none; font-family: 'Outfit', sans-serif; opacity: 0.9;"
         pTooltip="Remove selected items from Top Selling slider"
       >
         <i class="pi pi-times mr-1"></i> Remove Selected
@@ -65,7 +65,7 @@
           <th>Product Name</th>
           <th>Category</th>
           <th>Price</th>
-          <th>Curated Status</th>
+          <th>Status</th>
         </tr>
       </ng-template>
 
@@ -76,25 +76,25 @@
           </td>
           <td>
             <div class="prod-img-box">
-              <img *ngIf="product.image_url" [src]="product.image_url" class="tbl-prod-img" [alt]="product.name" />
-              <div *ngIf="!product.image_url" class="tbl-prod-placeholder"><i class="pi pi-image"></i></div>
+              <img *ngIf="product.effective_image_url" [src]="product.effective_image_url" class="tbl-prod-img" [alt]="product.effective_name" />
+              <div *ngIf="!product.effective_image_url" class="tbl-prod-placeholder"><i class="pi pi-image"></i></div>
             </div>
           </td>
           <td>
             <div class="prod-identity">
-              <strong>{{ product.name }}</strong>
-              <span class="prod-desc-sub">{{ product.short_description || 'No description available' }}</span>
+              <strong>{{ product.effective_name }}</strong>
+              <span class="prod-desc-sub">{{ product.effective_short_description || 'No description available' }}</span>
             </div>
           </td>
           <td>
             <span class="prod-cat-badge">{{ product.category_name || 'Uncategorized' }}</span>
           </td>
           <td>
-            <strong class="prod-price-text">₹{{ product.price | number:'1.0-0' }}</strong>
+            <strong class="prod-price-text">₹{{ product.effective_price | number:'1.0-0' }}</strong>
           </td>
           <td>
             <p-tag 
-              [value]="product.is_top_selling ? 'Curated ⭐' : 'Regular Item'" 
+              [value]="product.is_top_selling ? 'Top Selling ⭐' : 'Regular Item'" 
               [severity]="product.is_top_selling ? 'warn' : 'secondary'"
               styleClass="curated-badge"
             ></p-tag>

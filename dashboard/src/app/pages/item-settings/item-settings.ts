@@ -77,8 +77,8 @@ export class ItemSettingsComponent implements OnInit {
     const q = this.search.toLowerCase().trim();
     if (!q) return this.products();
     return this.products().filter(p => 
-      p.name?.toLowerCase().includes(q) || 
-      p.short_description?.toLowerCase().includes(q) ||
+      p.effective_name?.toLowerCase().includes(q) || 
+      p.effective_short_description?.toLowerCase().includes(q) ||
       p.category_name?.toLowerCase().includes(q)
     );
   }
