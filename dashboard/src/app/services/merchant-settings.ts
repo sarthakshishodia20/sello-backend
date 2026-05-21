@@ -11,6 +11,7 @@ export interface MasterbrandSettings {
   availabilityEnabled: boolean;
   voiceAiEnabled: boolean;
   snoozeEnabled: boolean;
+  topSellingEnabled: boolean;
 }
 
 
@@ -29,7 +30,8 @@ export class MerchantSettingsService {
     soundNotificationEnabled: false,
     availabilityEnabled: false,
     voiceAiEnabled: false,
-    snoozeEnabled: false
+    snoozeEnabled: false,
+    topSellingEnabled: false
   });
 
   loadSettings() {
@@ -44,7 +46,8 @@ export class MerchantSettingsService {
             soundNotificationEnabled: res.data.settings.soundNotificationEnabled === true,
             availabilityEnabled: res.data.settings.availabilityEnabled === true,
             voiceAiEnabled: res.data.settings.voiceAiEnabled === true,
-            snoozeEnabled: res.data.settings.snoozeEnabled === true
+            snoozeEnabled: res.data.settings.snoozeEnabled === true,
+            topSellingEnabled: res.data.settings.topSellingEnabled === true
           });
         }
       }

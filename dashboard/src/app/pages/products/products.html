@@ -40,7 +40,7 @@
 
     <!-- Top Selling Trigger Button next to Snooze -->
     <div
-      *ngIf="viewMode() === 'merchant'"
+      *ngIf="viewMode() === 'merchant' && settingsService.settings().topSellingEnabled"
       class="snooze-trigger-wrap"
       pTooltip="Manage your featured top-selling products shown in the slider view of your storefront."
       tooltipPosition="bottom"

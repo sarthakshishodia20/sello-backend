@@ -192,6 +192,17 @@
               </div>
               <p-toggleswitch [ngModel]="settingsService.settings().snoozeEnabled" (ngModelChange)="toggleExtSnooze($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
             </div>
+
+            <div class="ext-item">
+              <div class="ext-item-icon" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
+                <i class="pi pi-star-fill"></i>
+              </div>
+              <div class="ext-item-info">
+                <label>Top Selling Slider</label>
+                <span>Allow merchants to curate top products in slider</span>
+              </div>
+              <p-toggleswitch [ngModel]="settingsService.settings().topSellingEnabled" (ngModelChange)="toggleExtTopSelling($event)" [disabled]="!auth.isAdmin()"></p-toggleswitch>
+            </div>
             </div><!-- /ext-grid-wrap -->
 
 

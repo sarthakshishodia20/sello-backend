@@ -122,6 +122,11 @@ export class DashboardShellComponent {
     this.showExtensionToast('Snooze & UnSnooze', val);
   }
 
+  toggleExtTopSelling(val: boolean) {
+    this.settingsService.updateSettings({ topSellingEnabled: val });
+    this.showExtensionToast('Top Selling Products Slider', val);
+  }
+
   private showExtensionToast(name: string, val: boolean) {
     if (val) {
       this.messageService.add({
