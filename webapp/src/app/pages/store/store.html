@@ -96,7 +96,7 @@
                 <h3 class="ts-name" [title]="tp.name">{{ tp.name }}</h3>
                 <p class="ts-desc">{{ tp.short_description || 'Curated recommendation.' }}</p>
                 <div class="ts-footer">
-                  <span class="ts-price">₹{{ tp.price | number:'1.0-0' }}</span>
+                  <span class="ts-price">₹{{ (tp.final_price ?? tp.price) | number:'1.0-0' }}</span>
                   <div class="ts-action">
                     <div class="ts-qty-ctrl" *ngIf="cart.getItemQty(tp.catalogue_id) > 0">
                       <button (click)="cart.updateQty(tp.catalogue_id, -1)"><i class="pi pi-minus"></i></button>
@@ -136,7 +136,7 @@
             </div>
             <h3 class="prod-name">{{ p.name }}</h3>
             <p class="prod-desc">{{ p.short_description || 'Premium quality product.' }}</p>
-            <div class="prod-price" style="margin-bottom: 8px;">₹{{ p.price | number:'1.0-0' }}</div>
+            <div class="prod-price" style="margin-bottom: 8px;">₹{{ (p.final_price ?? p.price) | number:'1.0-0' }}</div>
             <!-- Premium Snooze Banner -->
             <div class="snooze-banner" *ngIf="isSnoozed(p)" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(20, 184, 166, 0.1); border: 1px solid rgba(20, 184, 166, 0.2); color: #14b8a6; font-size: 11px; font-weight: 700; margin-top: 4px; animation: pulse-banner 2s infinite ease-in-out;">
               <i class="pi pi-clock"></i>

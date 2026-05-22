@@ -71,7 +71,7 @@ export class CartService {
           merchant_product_id: product.merchant_product_id,
           sku: product.sku,
           name: product.name,
-          price: Number(product.price),
+          price: Number(product.final_price ?? product.price),
           quantity: 1,
           image_url: product.image_url
         }
