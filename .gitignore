@@ -32,5 +32,11 @@ Thumbs.db
 **/list-models.js
 **/seed_notifications.js
 
+# Backend — private, not for public repo
+sello-backend/
+
+# Legacy frontend folder — not for public repo
+sello-frontend/
+
 # Ensure .gitignore itself is tracked (standard practice)
 !.gitignore
